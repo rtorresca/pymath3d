@@ -1,0 +1,1 @@
+Special euclidean 3d (SE(3)) math for python.

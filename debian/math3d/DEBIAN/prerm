@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+# Automatically added by dh_pycentral
+if which python >/dev/null 2>&1 && which pycentral >/dev/null 2>&1; then
+	pycentral pkgremove python-math3d
+else
+	flist=$(tempfile)
+	find /usr/share/pycentral/python-math3d -depth -mindepth 2 \
+	  \( -name '*.py' -printf 'p %P\n' -o -printf '%y %P\n' \) \
+	  > $flist 2>/dev/null || true
+	if [ -s $flist ]; then
+	    for d in /usr/lib/python[0-9].[0-9]; do
+		while read t n; do
+		    case "$t" in
+			p) rm -f $d/$n $d/${n}[co];;
+			d) rmdir --ignore-fail-on-non-empty $d/$n 2>/dev/null;;
+			*) rm -f $d/$n
+		    esac
+		done < $flist
+	    done
+	fi
+	rm -f $flist
+	dpkg -L python-math3d \
+            | awk '/\/usr\/share\/pycentral/ {next} /\.py$/ {print $0"c\n" $0"o"}' \
+	    | xargs rm -f >&2
+fi
+# End automatically added section
