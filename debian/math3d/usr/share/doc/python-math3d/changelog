@@ -1,3 +1,7 @@
+1.1-5:
+------
+Fixed some coercion rules for complying with Python 2.6.
+
 1.1-4:
 ------
 Revised constructor system. Now supports class method for querying whether
