@@ -1,3 +1,8 @@
+1.1-6:
+------
+Bugfix in build script that made the gzipped tar archive lack the interpolation module.
+Transform now use more efficient array as replacement for Orientation and Vector components.
+
 1.1-5:
 ------
 Fixed some coercion rules for complying with Python 2.6.

@@ -1,11 +1,13 @@
 #!/bin/bash
 rm -rf dist
+rm -rf *.deb *.tgz
 svn export debian/ dist/
 chmod -R u=rwX,go=rX dist
 chmod 755 dist/math3d/DEBIAN
 chmod 755 dist/math3d/DEBIAN/postinst
 chmod 755 dist/math3d/DEBIAN/prerm
 fakeroot dpkg -b dist/math3d .
+version=`dpkg-deb -f  python-math3d_*_all.deb Version`
 thisdir=`pwd`
 cd dist/math3d/usr/share/pycentral/python-math3d/site-packages/
-tar cvzf $thisdir/python-math3d.tgz math3d/*.py
+tar czf $thisdir/python-math3d_${version}.tgz math3d/
