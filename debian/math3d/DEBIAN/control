@@ -1,9 +1,9 @@
 Package: python-math3d
-Version: 1.1-6
+Version: 1.1-7
 Section: python
 Priority: optional
 Architecture: all
-Depends: python (>= 2.5) , python-central (>= 0.4.16),  python-numpy 
+Depends: python (>=2.6) , python-central (>= 0.4.16),  python-numpy 
 Conflicts: python (<= 2.4)
 installed-Size: 50
 Maintainer: Morten Lind <mlp@automatics.no-ip.org>

@@ -1,5 +1,9 @@
 1.1-6:
 ------
+Corrected print, raise, exception, types changes for compatibility with Python 3.x.
+
+1.1-6:
+------
 Bugfix in build script that made the gzipped tar archive lack the interpolation module.
 Transform now use more efficient array as replacement for Orientation and Vector components.
 
