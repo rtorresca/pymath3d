@@ -17,11 +17,3 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with PyMath3D.  If not, see <http://www.gnu.org/licenses/>.
 '''
-'''
-Module for top level imports in PyMath3D.
-'''
-
-from math3d.quaternion import isQuaternion, Quaternion
-from math3d.orientation import isOrientation, Orientation, newOrientFromXY, newOrientFromXZ, newOrientRotZ, newOrientRotY, newOrientRotX
-from math3d.vector import isVector, Vector
-from math3d.transform import isTransform, Transform, newTransFromXYP, newTransFromXZP

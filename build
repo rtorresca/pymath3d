@@ -10,4 +10,6 @@ fakeroot dpkg -b dist/math3d .
 version=`dpkg-deb -f  python-math3d_*_all.deb Version`
 thisdir=`pwd`
 cd dist/math3d/usr/share/pycentral/python-math3d/site-packages/
+cp $thisdir/COPYING math3d/
 tar czf $thisdir/python-math3d_${version}.tgz math3d/
+rm math3d/COPYING

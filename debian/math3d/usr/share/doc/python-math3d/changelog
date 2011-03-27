@@ -1,3 +1,8 @@
+1.2:
+----
+Headers with GPL.
+Minor changes.
+
 1.1-7:
 ------
 Corrected print, raise, exception, types changes for compatibility with Python 3.x.
