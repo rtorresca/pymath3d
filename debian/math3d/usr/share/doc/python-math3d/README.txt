@@ -1,1 +1,1 @@
-Special euclidean 3d (SE(3)) math for python.
+Special Euclidean 3D (SE(3)) mathematics for Python.
