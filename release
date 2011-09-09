@@ -1,5 +1,5 @@
 #!/bin/bash
 scp python-math3d* ml@lind.no-ip.org:/var/www/debian/binary
 ssh ml@lind.no-ip.org 'cd /var/www/debian/ && chown -R ml.www-data binary && dpkg-scanpackages binary /dev/null |gzip >binary/Packages.gz'
-version=`dpkg-deb -f  python-math3d_*_all.deb Version`
-svn copy svn+ssh://automatics.no-ip.org/data/svnreps/devel/pymath3d/trunk svn+ssh://automatics.no-ip.org/data/svnreps/devel/pymath3d/tags/release-${version} -m 'Release of version ${version}'
+#version=`dpkg-deb -f  python-math3d_*_all.deb Version`
+#svn copy svn+ssh://automatics.no-ip.org/data/svnreps/devel/pymath3d/trunk svn+ssh://automatics.no-ip.org/data/svnreps/devel/pymath3d/tags/release-${version} -m 'Release of version ${version}'
