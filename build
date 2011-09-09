@@ -6,7 +6,6 @@ mkdir -p dist/math3d/usr/share/doc
 bzr export dist/math3d/DEBIAN  DEBIAN
 bzr  export  dist/math3d/usr/share/doc/python-math3d debian-doc
 bzr  export  dist/math3d/usr/share/pycentral/python-math3d/site-packages/math3d math3d
-
 chmod -R u=rwX,go=rX dist
 chmod 755 dist/math3d/DEBIAN
 chmod 755 dist/math3d/DEBIAN/postinst
