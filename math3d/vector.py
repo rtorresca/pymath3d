@@ -23,7 +23,7 @@ Module implementing the Vector class.
 
 import numpy
 
-from math3d.utils import isNumTypes, isNumType, isSequence, isThreeSequence
+from math3d.utils import isNumTypes, isNumType, isSequence, isThreeSequence, _eps
 
 def isVector(v):
     if __debug__: print('Deprecation warning: "isVector(v)". '
@@ -139,7 +139,7 @@ class Vector(object):
 
     def __eq__(self,other):
         if type(other) == Vector:
-            return numpy.sum((self._data-other._data)**2) < utils._eps
+            return numpy.sum((self._data-other._data)**2) < _eps
         else:
             raise self.Error('Could not compare to non-Vector!')
 

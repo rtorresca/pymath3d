@@ -212,7 +212,7 @@ class Transform(object):
         
     def __eq__(self,other):
         if type(other) == Transform:
-            return np.sum((self._data-other._data)**2) < utils._eps
+            return np.sum((self._data-other._data)**2) < _eps
         else:
             raise self.Error('Could not compare to non-Transform!')
 
