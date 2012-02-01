@@ -36,44 +36,6 @@ class Transform(object):
         def __repr__(self):
             return self.message
 
-    # @classmethod
-    # def canCreateOn(cls, *args):
-    #     """ Query whether a transform, syntactically and by type, can
-    #     be constructed on the given arguments."""
-    #     if len(args) == 0:
-    #         return True
-    #     elif len(args) == 1:
-    #         arg = args[0]
-    #         if type(arg) == type(None):
-    #             return True
-    #         elif type(arg) == Transform:
-    #             return True
-    #         elif type(arg) == np.ndarray and arg.shape==(4,4):
-    #             return True
-    #         elif hasattr(arg,'pos') and hasattr(arg,'orient') and \
-    #              m3d.Orientation.canCreateOn(arg.orient) and \
-    #              m3d.Vector.canCreateOn(arg.pos):
-    #             return True
-    #         elif isSequence(arg):
-    #             return cls.canCreateOn(*arg)
-    #         else:
-    #             return False
-    #     elif len(args) == 2:
-    #         return \
-    #                m3d.Orientation.canCreateOn(args[0]) and \
-    #                m3d.Vector.canCreateOn(args[1]) \
-    #                or \
-    #                m3d.Orientation.canCreateOn(args[1]) and \
-    #                m3d.Vector.canCreateOn(args[0])
-    #     elif len(args) == 4:
-    #         return m3d.Orientation.canCreateOn(args[:3]) and \
-    #                m3d.Vector.canCreateOn(args[3])
-    #     elif len(args) == 12:
-    #         return m3d.Orientation.canCreateOn(args[:9]) and \
-    #                m3d.Vector.canCreateOn(args[9:])
-    #     else:
-    #         return False
-
     def __create_on_sequence(self, args):
         if len(args) == 1 and isSequence(args[0]):
             self.__createOnSequence(args[0])
@@ -96,6 +58,7 @@ class Transform(object):
         * A Transform.
         * A numpy array, list or tuple of shape (4,4) or (3,4) giving direct data; as [orient | pos].
         * A numpy array, list, or tuple of shape (6,) giving a pose vector; concatenated position and rotation vector.
+        * A numpy array
         * An ordered pair of Orientation and Vector.
         """
         if len(args) == 0: # or (len(args) == 1 and type(args[0]) == type(None)):
@@ -108,8 +71,8 @@ class Transform(object):
                 self._v = m3d.Vector(arg.pos)
                 self._o = m3d.Orientation(arg.orient)
             elif type(arg) == np.ndarray and arg.shape in ((4,4), (3,4)):
-                self._o = m3d.Orientation(arg[:3,:3].copy())
-                self._v = m3d.Vector(arg[:3,3].copy())
+                self._o = m3d.Orientation(arg[:3,:3])
+                self._v = m3d.Vector(arg[:3,3])
             elif type(arg) == np.ndarray and arg.shape==(6,):
                 # # Assume a pose vector of 3 position vector and 3 rotation vector components
                 self._v = m3d.Vector(arg[:3])

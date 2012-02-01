@@ -51,21 +51,21 @@ class Vector(object):
         is represented as a position vector. Otherwise it is
         represented as a real vector."""
         if len(args) == 3 and isNumTypes(args):
-            self._data=np.array(list(map(float, args)))
+            self._data=np.array(args, dtype=np.float32)
         elif len(args) == 2 and isNumTypes(args):
-            self._data = np.array(list(map(float,[args[0], args[1], 0])))
+            self._data = np.array((args[0], args[1], 0), dtype=np.float32)
         elif len(args) == 1:
             arg = args[0]
             if isThreeSequence(arg):
-                self._data = np.array(list(map(float, arg)))
+                self._data = np.array(arg, dtype=np.float32)
             elif isSequence(arg) and len(arg)  == 2:
-                self._data = np.array(list(map(float, [arg[0], arg[1], 0])))
+                self._data = np.array((arg[0], arg[1], 0), dtype=np.float32)
             elif type(arg) == Vector:
-                self._data = arg._data.copy()
+                self._data = arg._data.astype(np.float32)
             else:
                 raise self.Error('__init__ : could not create vector on argument : ' + str(args[0]))
         else:
-            self._data = np.array([0.0,0.0,0.0])
+            self._data = np.array([0.0,0.0,0.0], dtype=np.float32)
         self._isPosition = 1
         if 'position' in kwargs:
             if kwargs['position']: self._isPosition = 1

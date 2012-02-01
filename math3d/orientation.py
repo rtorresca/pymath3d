@@ -36,33 +36,6 @@ class Orientation(object):
         def __repr__(self):
             return self.message
 
-    @classmethod
-    def canCreateOn(cls, *args):
-        """UNSUPPORTED: Infer whether an Orientation can be constructed on the
-        given argument tuple. This is mostly syntactic, down to the
-        level of testing whether basic types are numeric. Testing
-        whether constraints among the individual basic values are
-        violated is not tested."""
-        raise self.Error('!!! Deprecation warning !!! : The Orientation.canCreateOn is deprecated'
-              + ' and its results should not be used.')
-        if len(args) == 1:
-            arg = args[0]
-            if type(arg) in [Orientation, m3d.Quaternion, m3d.Vector]:
-                return True
-            elif isSequence(arg):
-                return cls.canCreateOn(*arg)
-            else:
-                return False
-        elif len(args) == 3:
-            for arg in args:
-                if not m3d.Vector.canCreateOn(arg):
-                    return False
-                return True
-        elif len(args) == 9:
-            return isNumTypes(args)
-        else:
-            return False
-
     def __create_on_sequence(self, seq):
         if type(seq) in (list, tuple):
             seq = np.array(seq)
@@ -79,13 +52,13 @@ class Orientation(object):
             raise self.Error('Creating on a numpy array requires shape (3,), (9,) or (3,3)!')
             
     def __init__(self, *args):
-        """Create an orientation on
-        * another Orientation,
-        * a Quaternion,
-        * three Vectors interpreted as columns,
-        * one Vector, numpy array, list, or tuple of shape (3,) interpreted as a rotation vector,
-        * a numpy array, list, or tuple of shape (12,); using row major order,
-        * a numpy array, list, or tuple of shape (3,3)"""
+        """Create an orientation on either of the following arguments:
+        * An Orientation.
+        * A Quaternion.
+        * Three Vectors or numpy arrays of shape (3,) interpreted as columns of the matrix.
+        * One Vector, numpy array, list, or tuple of shape (3,) interpreted as a rotation vector.
+        * A numpy array, list, or tuple of shape (3,3) or (9,) for giving direct matrix data; using row major order.
+        """
         if len(args) == 1:
             arg=args[0]
             if type(arg) == Orientation:
@@ -101,12 +74,18 @@ class Orientation(object):
             else:
                 raise self.Error('Creating on type %s is not supported' % str(type(arg)))
         elif len(args) == 3:
-            if not np.all(np.array([type(a)==m3d.Vector for a in args])):
-                self.Error('Creating on three arguments requires three vectors!')
+            if np.all(np.array([type(a)==m3d.Vector for a in args])):
+                array_args = (a._data for a in args)
+            elif np.all(np.array([type(a)==np.ndarray for a in args])):
+                array_args = args
+            else:
+                raise self.Error('Creating on three arguments requires three vectors or three numpy arrays of shape (3,)!')
             # // Stack the vector data vertically and transpose to get them into columns.
-            self._data = np.transpose(np.vstack([v._data for v in args]))
+            self._data = np.transpose(np.vstack((va for va in array_args)))
         elif len(args) == 0:
             self._data = np.identity(3)
+        # // Always ensure that we use float32 (single precision floats) as fundamental type
+        self._data=self._data.astype(np.float32)
 
     def __copy__(self):
         """Copy method for creating a copy of this Orientation."""
@@ -151,7 +130,6 @@ class Orientation(object):
             return np.sum((self._data-other._data)**2) < _eps
         else:
             raise self.Error('Could not compare to non-Orientation!')
-
 
     def __setattr__(self, name, val):
         if name == '_data':
