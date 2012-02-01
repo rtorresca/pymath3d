@@ -1,32 +1,21 @@
 """
-Copyright (C) 2011 Morten Lind
-mailto: morten@lind.no-ip.org
-
-This file is part of PyMath3D (Math3D for Python).
-
-PyMath3D is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-PyMath3D is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with PyMath3D.  If not, see <http://www.gnu.org/licenses/>.
-"""
-"""
 Module implementing the Orientation class. The orientation is
 represented internally by an orthogonal 3x3 matrix.
 """
 
-from copy import copy
+__author__ = "Morten Lind"
+__copyright__ = "Morten Lind 2009-2012"
+__credits__ = ["Morten Lind"]
+__license__ = "GPL"
+__maintainer__ = "Morten Lind"
+__email__ = "morten@lind.no-ip.org"
+__status__ = "Production"
+
+import string
 
 import numpy as np
 
-import math3d
+import math3d as m3d
 from math3d.utils import isSequence, isNumTypes, _eps
 
 def isOrientation(o):
@@ -35,27 +24,30 @@ def isOrientation(o):
     return type(o) == Orientation
 
 class Orientation(object):
-    """ An Orientation is a member of SO(3) which can be used either
+    """An Orientation is a member of SO(3) which can be used either
     to perform a rotational transformation, or for keeping an
     orientation in 3D."""
     
     class Error(Exception):
-        """ Exception class."""
+        """Exception class."""
         def __init__(self, message):
-            self.message = message
+            self.message = 'Orientation Error: ' + message
+            Exception.__init__(self, self.message)
         def __repr__(self):
-            return self.__class__ + '.Error :' + self.message
+            return self.message
 
     @classmethod
     def canCreateOn(cls, *args):
-        """ Infer whether an Orientation can be constructed on the
+        """UNSUPPORTED: Infer whether an Orientation can be constructed on the
         given argument tuple. This is mostly syntactic, down to the
         level of testing whether basic types are numeric. Testing
         whether constraints among the individual basic values are
         violated is not tested."""
+        raise self.Error('!!! Deprecation warning !!! : The Orientation.canCreateOn is deprecated'
+              + ' and its results should not be used.')
         if len(args) == 1:
             arg = args[0]
-            if type(arg) in [Orientation, math3d.Quaternion, math3d.Vector]:
+            if type(arg) in [Orientation, m3d.Quaternion, m3d.Vector]:
                 return True
             elif isSequence(arg):
                 return cls.canCreateOn(*arg)
@@ -63,7 +55,7 @@ class Orientation(object):
                 return False
         elif len(args) == 3:
             for arg in args:
-                if not math3d.Vector.canCreateOn(arg):
+                if not m3d.Vector.canCreateOn(arg):
                     return False
                 return True
         elif len(args) == 9:
@@ -71,54 +63,48 @@ class Orientation(object):
         else:
             return False
 
-    def __createOnSequence(self, args):
-        """ Assuming args to be a sequence, try to create the data of
-        an orientation over it."""
-        crOK = True
-        if type(args) == np.ndarray:
-            if args.shape == (3,):
-                ## Construct on a rotation vector
-                self._data = np.identity(3)
-                self.fromRotationVector(args)
-            elif args.shape == (3,3):
-                ## Take over a copy of the matrix. Warning: No
-                ## constraint checks.
-                self._data = args.copy()
-            else:
-                crOK = False
-        elif type(args) in (list,tuple):
-            if len(args) == 3:
-                ## Assume three row vectors of the matrix. Dangerous, no checks.
-                self._data=np.array(args)
-            elif len(args) == 9:
-                ## Assume flat array of three row vectors. Dangerous, no checks.
-                oa=np.array(args)
-                oa.shape=[3,3]
-                self._data = oa
-            else:
-                crOK = False
+    def __create_on_sequence(self, seq):
+        if type(seq) in (list, tuple):
+            seq = np.array(seq)
+        if type(seq) != np.ndarray:
+            raise self.Error('Creating on a sequence requires numpy array, list or tuple')
+        if seq.shape in ((9,), (3,3)):
+            self._data = seq.copy()
+            # // Ensure the right shape.
+            self._data.shape = (3,3)
+        elif seq.shape == (3,):
+            self._data = np.identity(3)
+            self.fromRotationVector(seq)
         else:
-            raise Orientation.Error(
-                'Could not create Orientation data on "%s"' % str(args))
-                
+            raise self.Error('Creating on a numpy array requires shape (3,), (9,) or (3,3)!')
+            
     def __init__(self, *args):
-        """ Create an orientation on another Orientation, a
-        Quaternion, three Vectors, 12 numbers, or a 3x3 array. In case
-        of 12 numbers, they are perceived as row-major order."""
+        """Create an orientation on
+        * another Orientation,
+        * a Quaternion,
+        * three Vectors interpreted as columns,
+        * one Vector, numpy array, list, or tuple of shape (3,) interpreted as a rotation vector,
+        * a numpy array, list, or tuple of shape (12,); using row major order,
+        * a numpy array, list, or tuple of shape (3,3)"""
         if len(args) == 1:
             arg=args[0]
             if type(arg) == Orientation:
-                self._data = arg._data.copy()
-            elif type(arg) == math3d.Quaternion:
+                self._data = arg.data
+            elif type(arg) == m3d.Quaternion:
                 self._data = arg.toOrientation()._data
-            elif type(arg) == math3d.Vector:
+            elif type(arg) == m3d.Vector:
                 ## Interpret as a rotation vector
                 self._data = np.identity(3)
                 self.fromRotationVector(arg)
             elif isSequence(arg):
-                self.__createOnSequence(arg)
-        elif len(args) > 1:
-            self.__createOnSequence(args)
+                self.__create_on_sequence(arg)
+            else:
+                raise self.Error('Creating on type %s is not supported' % str(type(arg)))
+        elif len(args) == 3:
+            if not np.all(np.array([type(a)==m3d.Vector for a in args])):
+                self.Error('Creating on three arguments requires three vectors!')
+            # // Stack the vector data vertically and transpose to get them into columns.
+            self._data = np.transpose(np.vstack([v._data for v in args]))
         elif len(args) == 0:
             self._data = np.identity(3)
 
@@ -141,11 +127,11 @@ class Orientation(object):
     def __getattr__(self, name):
         if name == 'data':
             return self._data.copy()
-        elif name[:3] in ['vec', 'col'] and name[3] in 'XYZ':
-            idx = 'XYZ'.find(name[3])
+        elif name[:3] in ['vec', 'col'] and string.lower(name)[-1] in 'xyz':
+            idx = 'xyz'.find(string.lower(name)[-1])
             a = self._data[:,idx]
             if name[:3] == 'vec':
-                a = math3d.Vector(a)
+                a = m3d.Vector(a)
             return a
         else:
             raise AttributeError('Attribute "%s" not found in Orientation'%name)
@@ -171,17 +157,13 @@ class Orientation(object):
         if name == '_data':
             ## This is dangerous, since there is no consistency check.
             self.__dict__['_data']=val
-        elif name[:3] in ['vec', 'col'] and name[3] in 'XYZ':
+        elif name[:3] in ['vec', 'col'] and string.lower(name[-1]) in 'xyz':
             ## This is dangerous since there is no automatic
             ## re-normalization
-            if type(val) == math3d.Vector:
+            idx = 'xyz'.find(string.lower(name[-1]))
+            if type(val) == m3d.Vector:
                 val = val.data
-            if name[3] == 'X':
-                self._data[:3,0] = val
-            elif name[3] == 'Y':
-                self._data[:3,1] = val
-            elif name[3] == 'Z':
-                self._data[:3,2] = val
+            self._data[:3,idx] = val
         else:
             object.__setattr__(self, name, val)
         
@@ -196,7 +178,7 @@ class Orientation(object):
         self.colZ = cx.cross(cy).normalized()
         ## A last normalization check!
         #if self.colX.dist(self.colY.cross(self.colZ)) > _eps:
-        self.colX=self.colY.cross(self.colZ)
+        self.colX=self.vec_y.cross(self.vec_z)
         
     def fromXZ(self, cx, cz):
         """ Reset this orientation to the one that conforms with the
@@ -208,20 +190,20 @@ class Orientation(object):
         self.colY = cz.cross(cx).normalized()
         ## A last normalization check!
         #if self.colX.dist(self.colY.cross(self.colZ)) > _eps:
-        self.colX = self.colY.cross(self.colZ)
+        self.colX = self.vec_y.cross(self.vec_z)
 
 
     def toRotationVector(self):
         """ Return a rotation vector representing this
         orientation. This is essentially the logarithm of the rotation
         matrix."""
-        q = math3d.Quaternion(self)
+        q = m3d.Quaternion(self)
         return q.toRotationVector()
 
     def fromRotationVector(self, rotVec):
         """ Set this Orientation to represent the one given in
-        'rotVec'."""
-        if type(rotVec) == math3d.Vector:
+        a rotation vector in 'rotVec'. 'rotVec' must be a Vector or an numpy array of shape (3,)"""
+        if type(rotVec) == m3d.Vector:
             rotVec = rotVec.data
         angle = np.linalg.norm(rotVec)
         axis = rotVec/angle
@@ -230,13 +212,13 @@ class Orientation(object):
     def toAxisAngle(self):
         """ Return an (axis,angle) pair representing the equivalent
         orientation."""
-        q = math3d.Quaternion(self)
+        q = m3d.Quaternion(self)
         return q.toAxisAngle()
 
     def fromAxisAngle(self, axis, angle):
         """ Set this orientation to the equivalent to rotation of
         'angle' around 'axis'."""
-        if type(axis) == math3d.Vector:
+        if type(axis) == m3d.Vector:
             axis = axis.data
         ## Force normalization
         axis /= np.linalg.norm(axis)
@@ -261,21 +243,21 @@ class Orientation(object):
         ca = np.cos(angle)
         sa = np.sin(angle)
         self._data[:,:] = np.array([[1, 0, 0], [0, ca, -sa], [0, sa, ca]])
-        #self.fromAxisAngle(math3d.Vector.e0, angle)
+        #self.fromAxisAngle(m3d.Vector.e0, angle)
         
     def rotY(self, angle):
         """ Replace this orientation by that of a rotation around y."""
         ca=np.cos(angle)
         sa=np.sin(angle)
         self._data[:,:] = np.array([[ca, 0, sa], [0, 1, 0], [-sa, 0, ca]])
-        #self.fromAxisAngle(math3d.Vector.e1, angle)
+        #self.fromAxisAngle(m3d.Vector.e1, angle)
         
     def rotZ(self, angle):
         """ Replace this orientation by that of a rotation around z. """
         ca = np.cos(angle)
         sa = np.sin(angle)
         self._data[:,:] = np.array([[ca, -sa, 0], [sa, ca, 0], [0, 0, 1]])
-        #self.fromAxisAngle(math3d.Vector.e2,angle)
+        #self.fromAxisAngle(m3d.Vector.e2,angle)
 
     def rotateT(self, axis, angle):
         """ In-place rotation of this orientation angle radians in
@@ -295,34 +277,34 @@ class Orientation(object):
     def rotateXB(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         x axis in the base reference system. (Inefficient!)"""
-        self.rotateB(math3d.Vector.e0, angle)
+        self.rotateB(m3d.Vector.e0, angle)
     
     def rotateYB(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         y axis in the base reference system. (Inefficient!)"""
-        self.rotateB(math3d.Vector.e1, angle)
+        self.rotateB(m3d.Vector.e1, angle)
     
     def rotateZB(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         z axis in the base reference system. (Inefficient!)"""
-        self.rotateB(math3d.Vector.e2, angle)
+        self.rotateB(m3d.Vector.e2, angle)
     
     def rotateXT(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         x axis in the transformed reference system. (Inefficient!)"""
-        self.rotateT(math3d.Vector.e0, angle)
+        self.rotateT(m3d.Vector.e0, angle)
     rotateX = rotateXT
     
     def rotateYT(self,angle):
         """ In-place rotation of this oriantation by a rotation around
         y axis in the transformed reference system. (Inefficient!)"""
-        self.rotateT(math3d.Vector.e1,angle)
+        self.rotateT(m3d.Vector.e1,angle)
     rotateY = rotateYT
     
     def rotateZT(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         z axis in the transformed reference system. (Inefficient!)"""
-        self.rotateT(math3d.Vector.e2, angle)
+        self.rotateT(m3d.Vector.e2, angle)
     rotateZ = rotateZT
     
     def __repr__(self):
@@ -354,8 +336,8 @@ class Orientation(object):
     def __mul__(self, other):
         if type(other) == Orientation:
             return Orientation(np.dot(self._data, other._data))
-        elif type(other) == math3d.Vector:
-            return math3d.Vector(np.dot(self._data, other._data))
+        elif type(other) == m3d.Vector:
+            return m3d.Vector(np.dot(self._data, other._data))
         elif isSequence(other):
             return list(map(self.__mul__, other))
         
@@ -397,6 +379,6 @@ def newOrientRotY(angle):
 if __name__ == '__main__':
     o = Orientation()
     r = Orientation()
-    o.fromXY(math3d.Vector(1, 1, 0), math3d.Vector(-1, 1, 0))
+    o.fromXY(m3d.Vector(1, 1, 0), m3d.Vector(-1, 1, 0))
     r.rotZ(np.pi / 2)
     ro = r * o

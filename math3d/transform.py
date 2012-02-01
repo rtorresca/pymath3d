@@ -1,31 +1,19 @@
 """
-Copyright (C) 2011 Morten Lind
-mailto: morten@lind.no-ip.org
-
-This file is part of PyMath3D (Math3D for Python).
-
-PyMath3D is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-PyMath3D is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with PyMath3D.  If not, see <http://www.gnu.org/licenses/>.
-"""
-"""
 Module implementing a 3D homogenous Transform class. The transform is
 represented internally by associated orientation and a vector objects.
 """
 
+__author__ = "Morten Lind"
+__copyright__ = "Morten Lind 2009-2012"
+__credits__ = ["Morten Lind"]
+__license__ = "GPL"
+__maintainer__ = "Morten Lind"
+__email__ = "morten@lind.no-ip.org"
+__status__ = "Production"
+
 import numpy as np
 
-from math3d.orientation import Orientation
-from math3d.vector import Vector
+import math3d as m3d
 from math3d.utils import isSequence, _eps
 
 def isTransform(t):
@@ -43,104 +31,95 @@ class Transform(object):
     class Error(Exception):
         """ Exception class."""
         def __init__(self, message):
-            self.message = message
+            self.message = 'Transform Error : ' + message
+            Exception.__init__(self, self.message)
         def __repr__(self):
-            return self.__class__ + '.Error :' + self.message
+            return self.message
 
-    @classmethod
-    def canCreateOn(cls, *args):
-        """ Query whether a transform, syntactically and by type, can
-        be constructed on the given arguments."""
-        if len(args) == 0:
-            return True
-        elif len(args) == 1:
-            arg = args[0]
-            if type(arg) == type(None):
-                return True
-            elif type(arg) == Transform:
-                return True
-            elif type(arg) == np.ndarray and arg.shape==(4,4):
-                return True
-            elif hasattr(arg,'pos') and hasattr(arg,'orient') and \
-                 Orientation.canCreateOn(arg.orient) and \
-                 Vector.canCreateOn(arg.pos):
-                return True
-            elif isSequence(arg):
-                return cls.canCreateOn(*arg)
-            else:
-                return False
-        elif len(args) == 2:
-            return \
-                   Orientation.canCreateOn(args[0]) and \
-                   Vector.canCreateOn(args[1]) \
-                   or \
-                   Orientation.canCreateOn(args[1]) and \
-                   Vector.canCreateOn(args[0])
-        elif len(args) == 4:
-            return Orientation.canCreateOn(args[:3]) and \
-                   Vector.canCreateOn(args[3])
-        elif len(args) == 12:
-            return Orientation.canCreateOn(args[:9]) and \
-                   Vector.canCreateOn(args[9:])
-        else:
-            return False
+    # @classmethod
+    # def canCreateOn(cls, *args):
+    #     """ Query whether a transform, syntactically and by type, can
+    #     be constructed on the given arguments."""
+    #     if len(args) == 0:
+    #         return True
+    #     elif len(args) == 1:
+    #         arg = args[0]
+    #         if type(arg) == type(None):
+    #             return True
+    #         elif type(arg) == Transform:
+    #             return True
+    #         elif type(arg) == np.ndarray and arg.shape==(4,4):
+    #             return True
+    #         elif hasattr(arg,'pos') and hasattr(arg,'orient') and \
+    #              m3d.Orientation.canCreateOn(arg.orient) and \
+    #              m3d.Vector.canCreateOn(arg.pos):
+    #             return True
+    #         elif isSequence(arg):
+    #             return cls.canCreateOn(*arg)
+    #         else:
+    #             return False
+    #     elif len(args) == 2:
+    #         return \
+    #                m3d.Orientation.canCreateOn(args[0]) and \
+    #                m3d.Vector.canCreateOn(args[1]) \
+    #                or \
+    #                m3d.Orientation.canCreateOn(args[1]) and \
+    #                m3d.Vector.canCreateOn(args[0])
+    #     elif len(args) == 4:
+    #         return m3d.Orientation.canCreateOn(args[:3]) and \
+    #                m3d.Vector.canCreateOn(args[3])
+    #     elif len(args) == 12:
+    #         return m3d.Orientation.canCreateOn(args[:9]) and \
+    #                m3d.Vector.canCreateOn(args[9:])
+    #     else:
+    #         return False
 
-    def __createOnSequence(self, args):
+    def __create_on_sequence(self, args):
         if len(args) == 1 and isSequence(args[0]):
             self.__createOnSequence(args[0])
         elif len(args) == 2:
-            if Orientation.canCreateOn(args[0]) \
-                   and Vector.canCreateOn(args[1]):
-                self._o = Orientation(args[0])
-                self._v = Vector(args[1])
-            elif Orientation.canCreateOn(args[1]) \
-                   and Vector.canCreateOn(args[0]):
-                self._o = Orientation(args[1])
-                self._v = Vector(args[0])
-            else:
-                raise self.Error(
-                    "Could not create Transform on arguments : " + str(args))
+            self._o = m3d.Orientation(args[0])
+            self._v = m3d.Vector(args[1])
         elif len(args) == 4:
-            self._o = Orientation(args[:3])
-            self._v = Vector(args[3])
+            self._o = m3d.Orientation(args[:3])
+            self._v = m3d.Vector(args[3])
         elif len(args) == 12:
-            self._o = Orientation(args[:9])
-            self._v = Vector(args[9:])
-        elif len(args) == 0 or len(args) == 1 and \
-                 type(args[0]) == type(None):
-            self._v = Vector()
-            self._o = Orientation()
+            self._o = m3d.Orientation(args[:9])
+            self._v = m3d.Vector(args[9:])
         else:
             raise self.Error(
                 'Could not create Transform on arguments : "' + str(args) + '"')
         
     def __init__(self, *args):
-        if len(args) == 0 or len(args) == 1 and \
-               type(args[0]) == type(None):
-            self._v = Vector()
-            self._o = Orientation()
-        elif len(args) == 1 :
+        """A Transform is a homogeneous transform on SE(3), internally
+        represented by an Orientation and a Vector. A Transform can be constructed on:
+        * A Transform.
+        * A numpy array, list or tuple of shape (4,4) or (3,4) giving direct data; as [orient | pos].
+        * A numpy array, list, or tuple of shape (6,) giving a pose vector; concatenated position and rotation vector.
+        * An ordered pair of Orientation and Vector.
+        """
+        if len(args) == 0: # or (len(args) == 1 and type(args[0]) == type(None)):
+            self._v = m3d.Vector()
+            self._o = m3d.Orientation()
+        elif len(args) == 1:
             arg = args[0]
             if type(arg) == Transform or \
-                   hasattr(arg,'pos') and hasattr(arg,'orient') and \
-                   Orientation.canCreateOn(arg.orient) and \
-                   Vector.canCreateOn(arg.pos):
-                t = arg
-                self._v = t.pos.copy()
-                self._o = t.orient.copy()
-            elif type(arg) == np.ndarray and arg.shape==(4,4):
-                self._o = Orientation(arg[:3,:3].copy())
-                self._v = Vector(arg[:3,3].copy())
+                   hasattr(arg,'pos') and hasattr(arg,'orient'): # and Orientation.canCreateOn(arg.orient) and m3d.Vector.canCreateOn(arg.pos):
+                self._v = m3d.Vector(arg.pos)
+                self._o = m3d.Orientation(arg.orient)
+            elif type(arg) == np.ndarray and arg.shape in ((4,4), (3,4)):
+                self._o = m3d.Orientation(arg[:3,:3].copy())
+                self._v = m3d.Vector(arg[:3,3].copy())
             elif type(arg) == np.ndarray and arg.shape==(6,):
                 # # Assume a pose vector of 3 position vector and 3 rotation vector components
-                self._v = Vector(arg[:3])
-                self._o = Orientation(arg[3:])
+                self._v = m3d.Vector(arg[:3])
+                self._o = m3d.Orientation(arg[3:])
             else:
                 raise self.Error(
                     'Could not create Transform on arguments : "'
                     + str(args) + '"')
         elif len(args) >= 1:
-            self.__createOnSequence(args)
+            self.__create_on_sequence(args)
         else:
             raise self.Error(
                 'Could not create Transform on arguments : "' + str(args) + '"')
@@ -169,25 +148,25 @@ class Transform(object):
         if name == 'orient':
             if type(value) == np.ndarray:
                 self._data[:3,:3] = value
-            elif type(value) == Orientation:
+            elif type(value) == m3d.Orientation:
                 self._data[:3,:3] = value._data
         elif name == 'pos':
             if type(value) == np.ndarray:
                 self._data[:3,3] = value
-            elif type(value) == Vector:
+            elif type(value) == m3d.Vector:
                 self._data[:3,3] = value._data
         else:
             object.__setattr__(self, name, value)
             
     def __copy__(self):
-        """ Copy method for creating a (deep) copy of this Transform."""
+        """Copy method for creating a (deep) copy of this Transform."""
         return Transform(self)
     
     def __deepcopy__(self, memo):
         return self.__copy__()
 
     def copy(self, other=None):
-        """ Copy data from other to self. """
+        """Copy data from other to self. """
         if other is None:
             return Transform(self)
         else:
@@ -203,9 +182,9 @@ class Transform(object):
         print('!!!! Warning !!!!  : Coercion called on Transform!!!')
         if type(other) == Transform:
             return (self, other)
-        elif type(other) == Vector:
+        elif type(other) == m3d.Vector:
             return (self.pos, other)
-        elif type(other) == Orientation:
+        elif type(other) == m3d.Orientation:
             return (self.orient, other)
         else:
             return None
@@ -217,7 +196,7 @@ class Transform(object):
             raise self.Error('Could not compare to non-Transform!')
 
     def fromXYP(self, cx, cy, p):
-        """ Make this transform correspond to the orientation given by
+        """Make this transform correspond to the orientation given by
         the given 'cx' and 'cy' directions and translation given by
         'p'."""
         self._o.fromXY(cx, cy)
@@ -225,52 +204,52 @@ class Transform(object):
         self._setFromOV(self._o, self._v)
         
     def fromXZP(self, cx, cz, p):
-        """ Make this transform correspond to the orientation given by
+        """Make this transform correspond to the orientation given by
         the given 'cx' and 'cz' directions and translation given by 'p'."""
         self._o.fromXZ(cx, cz)
         self._v.pos = p
         self._setFromOV(self._o, self._v)
 
     def dist2(self, other):
-        """ Return the square of the metric distance, as unweighted
+        """Return the square of the metric distance, as unweighted
         combined linear and angular distance, to the 'other'
         transform. Note that the units and scale among linear and
         angular representations matters heavily."""
         return self._v.dist2(other._v) + self._o.angDist2(other._o)
     
     def dist(self, other):
-        """ Return the metric distance, as unweighted combined linear
+        """Return the metric distance, as unweighted combined linear
         and angular distance, to the 'other' transform. Note that the
         units and scale among linear and angular representations
         matters heavily."""
         return np.sqrt(self.dist2(other))
 
     def inverse(self):
-        """ Return an inverse of this Transform."""
+        """Return an inverse of this Transform."""
         #io = self._o.inverse()
         #iv = io * (-self._v)
         #return Transform(io, iv)
         return Transform(np.linalg.inv(self._data))
     
     def invert(self):
-        """ In-place invert this Transform."""
+        """In-place invert this Transform."""
         #self._o.invert()
         # self._v = self._o * (-self._v)
         self._data[:,:]=np.linalg.inv(self._data)
         
     def __mul__(self, other):
-        """ Multiplication of self with another Transform or operate
+        """Multiplication of self with another Transform or operate
         on a Vector given by 'other'."""
         if type(other) == Transform:
             #o = self._o * other._o
             #v = self._o * other._v + self._v
             #return Transform(o, v)
             return Transform(np.dot(self._data, other._data))
-        elif type(other) == Vector:
+        elif type(other) == m3d.Vector:
             #return self._o * other + other._isPosition * self._v
             v = np.ones(4)
             v[:3] = other._data
-            return Vector(np.dot(self._data, v)[:3])
+            return m3d.Vector(np.dot(self._data, v)[:3])
         elif type(other) == np.ndarray and other.shape == (3,):
             return np.dot(self._o._data, other)+self._v._data
         elif isSequence(other):
@@ -280,18 +259,18 @@ class Transform(object):
                              + str(type(other)) + '"')
         
     def toArray(self):
-        """ Return a tuple pair of an 3x3 orientation array and
+        """Return a tuple pair of an 3x3 orientation array and
         position as 3-array."""
         #return (self._o._data.copy(),self._v._data.copy())
         return (self._data[:3,:3], self._data[:3,3])
     
     def toList(self):
-        """ Return a list with orientation and position in list form."""
+        """Return a list with orientation and position in list form."""
         #return [self._o._data.tolist(),self._v._data.tolist()]
         return [self._data[:3,:3].tolist(), self._data[:3,3].tolist()]
     
 def newTransFromXYP(cx, cy, p):
-    """ Create a transform corresponding to the orientation given by
+    """Create a transform corresponding to the orientation given by
     the given 'cx' and 'cy' directions and translation given by 'p'."""
     t = Transform()
     t.fromXYP(cx, cy, p)
@@ -305,9 +284,9 @@ def newTransFromXZP(cx, cz, p):
     return t
 
 def _test():
-    cx = Vector(2, 3, 0)
-    cz = Vector.e2
-    p = Vector(1, 2, 3)
+    cx = m3d.Vector(2, 3, 0)
+    cz = m3d.Vector.e2
+    p = m3d.Vector(1, 2, 3)
     t = newTransFromXZP(cx, cz, p)
     print((t*cx))
     it = t.inverse()

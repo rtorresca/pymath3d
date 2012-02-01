@@ -1,46 +1,36 @@
 """
-Copyright (C) 2011 Morten Lind
-mailto: morten@lind.no-ip.org
-
-This file is part of PyMath3D (Math3D for Python).
-
-PyMath3D is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-PyMath3D is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with PyMath3D.  If not, see <http://www.gnu.org/licenses/>.
-"""
-"""
 Module implementing the Quaternion class.
 """
 
-import numpy
+__author__ = "Morten Lind"
+__copyright__ = "Morten Lind 2009-2012"
+__credits__ = ["Morten Lind"]
+__license__ = "GPL"
+__maintainer__ = "Morten Lind"
+__email__ = "morten@lind.no-ip.org"
+__status__ = "Production"
 
-import math3d
+import numpy as np
+
+import math3d as m3d
 from math3d.utils import isNumType, _eps
 
 def isQuaternion(q):
     return type(q) == Quaternion
 
 class Quaternion(object):
-    """ Quaternion class."""
+    """Quaternion class."""
     
     class Error(Exception):
-        """ Exception class."""
+        """Exception class."""
         def __init__(self, message):
-            self.message = message
+            self.message = 'Quaternion Error : ' + message
+            Exception.__init__(self, self.message)
         def __repr__(self):
-            return self.__class__ + '.Error :' + self.message
-    
+            return self.message
+
     def __init__(self, *args):
-        """ Create a quaternion. Args may be () for default
+        """Create a quaternion. Args may be () for default
         constructor; (Orientation) for createing a quaternion
         representing the given orientation; (Quaternion) for a copy
         constructor, (s,x,y,z) or (s,Vector) for the direct quaternion
@@ -50,14 +40,14 @@ class Quaternion(object):
         if len(args) == 0:
             ## Default constructor
             self._s = 1.0
-            self._v = math3d.Vector()
+            self._v = m3d.Vector()
         elif len(args) == 1:
             ## Try with orientation or quaternion
-            if type(args[0]) == math3d.Orientation:
-                self._v = math3d.Vector()
+            if type(args[0]) == m3d.Orientation:
+                self._v = m3d.Vector()
                 self.fromOrientation(args[0])
             ## Try with rotation vector
-            if type(args[0]) == math3d.Vector:
+            if type(args[0]) == m3d.Vector:
                 self.fromRotationVector(args[0])
 ## Copy constructor
             elif type(args[0]) == Quaternion:
@@ -65,22 +55,22 @@ class Quaternion(object):
                 self._v = args[0]._v.copy()
         elif len(args) == 2:
             ## Test for (axis, angle) and (s, v) determined by order
-            if isNumType(args[0]) and type(args[1]) == math3d.Vector:
+            if isNumType(args[0]) and type(args[1]) == m3d.Vector:
                 ## Interpret as s, v
                 self._s = args[0]
                 self._v = args[1].copy()
-            elif isNumType(args[1]) and type(args[0]) == math3d.Vector:
+            elif isNumType(args[1]) and type(args[0]) == m3d.Vector:
                 ## Interpret as axis-angle
                 axis = args[0].copy()
                 ang = args[1]
                 self.fromAxisAngle(axis, ang)
-        elif len(args) == 3 and numpy.all(numpy.isreal):
+        elif len(args) == 3 and np.all(np.isreal):
             ## Assume three components of a rotation vector
-            self.fromRotationVector(math3d.Vector(args))
-        elif len(args) == 4 and numpy.all(numpy.isreal):
+            self.fromRotationVector(m3d.Vector(args))
+        elif len(args) == 4 and np.all(np.isreal):
             ## Assume numbers for s, x, y, and z
             self._s = args[0]
-            self._v = math3d.Vector(args[1:])
+            self._v = m3d.Vector(args[1:])
 
     def __getattr__(self, name):
         if name == 's':
@@ -110,14 +100,14 @@ class Quaternion(object):
         return '[ %.5f , ( %.5f , %.5f , %.5f ) ]' % (self._s, self._v.x, self._v.y, self._v.z)
 
     def __copy__(self):
-        """ Copy method for creating a copy of this Quaternion."""
+        """Copy method for creating a copy of this Quaternion."""
         return Quaternion(self)
     
     def __deepcopy__(self, memo):
         return self.__copy__()
     
     def copy(self, other=None):
-        """ Set this quaternion to a copy of other, if not
+        """Set this quaternion to a copy of other, if not
         None. Otherwise, return a quaternion which is a copy of this
         quaternion."""
         if other is None:
@@ -127,10 +117,10 @@ class Quaternion(object):
             self._v = other._v.copy()
             
     def __mul__(self, other):
-        """ Multiplication is interpreted by either transforming
+        """Multiplication is interpreted by either transforming
         (rotating) a Vector, ordinary Quaternion multiplication, or
         multiplication by scalar."""
-        if type(other) == math3d.Vector:
+        if type(other) == m3d.Vector:
             ## Do a rotation of the vector
             return (self * Quaternion(0, other) * self.inverse())._v
         elif type(other) == Quaternion:
@@ -142,98 +132,98 @@ class Quaternion(object):
             return Quaternion(other * self._s, other * self._v)
 
     def __rmul__(self, rother):
-        """ Right-multiply by number. """
+        """Right-multiply by number. """
         if isNumType(rother):
             return Quaternion(rother * self._s, rother * self._v)
 
     def __imul__(self, other):
-        """ In-place multiply."""
+        """In-place multiply."""
         if isNumType(other):
             self._s *= other
             self._v *= other
         return self
             
     def __ipow__(self, x):
-        """ In-place exponentiation of this quaternion to the power of
+        """In-place exponentiation of this quaternion to the power of
         'x'."""
         if abs(1 - abs(self._s)) < 1e-7:
             self._s = 1
-            self._v = math3d.Vector(0, 0, 0)
+            self._v = m3d.Vector(0, 0, 0)
         else:
-            theta = numpy.arccos(self._s)
-            sintheta = numpy.sin(theta)
+            theta = np.arccos(self._s)
+            sintheta = np.sin(theta)
             logv = theta / sintheta * self._v
             alpha = x * logv.length()
             v = logv.normalized()
-            self._s = numpy.cos(alpha)
-            self._v = numpy.sin(alpha) * v
+            self._s = np.cos(alpha)
+            self._v = np.sin(alpha) * v
         return self
 
     def __pow__(self, x):
-        """ Return this quaternion to the power of 'x'."""
+        """Return this quaternion to the power of 'x'."""
         q = Quaternion(self)
         q **= x
         return q
 
     def __neg__(self):
-        """ Return the negative quaternion to self."""
+        """Return the negative quaternion to self."""
         q = Quaternion(self)
         q *= -1.0
         return q
 
     def angNorm(self):
-        """ Return the angular norm, i.e. the angular rotation, of
+        """Return the angular norm, i.e. the angular rotation, of
         this quaternion."""
-        return 2*numpy.arccos(self._s)
+        return 2*np.arccos(self._s)
 
     def angDist(self, other):
-        """ Compute the rotation angle distance to the 'other'
+        """Compute the rotation angle distance to the 'other'
         quaternion."""
         return (self.conjugated()*other).angNorm()
     
     def dist2(self, other):
-        """ Compute the square of the usual quaternion metric distance to the
+        """Compute the square of the usual quaternion metric distance to the
         'other' quaternion."""
         return (self._s - other._s)**2 + (self._v - other._v).length2()
 
     def dist(self, other):
-        """ Compute the usual quaternion metric distance to the
+        """Compute the usual quaternion metric distance to the
         'other' quaternion."""
-        return numpy.sqrt(self.dist2(other))
+        return np.sqrt(self.dist2(other))
 
     def fromAxisAngle(self, axis, angle):
-        """ Set this quaternion to the equivalent of the given 'axis'
+        """Set this quaternion to the equivalent of the given 'axis'
         and 'angle'."""
-        sa = numpy.sin(0.5 * angle)
-        ca = numpy.cos(0.5 * angle)
+        sa = np.sin(0.5 * angle)
+        ca = np.cos(0.5 * angle)
         axis.normalize()
         self._s = ca
         self._v = sa * axis
         
     def toAxisAngle(self):
-        """ Return an '(axis, angle)' pair representing the orientation
+        """Return an '(axis, angle)' pair representing the orientation
         of this quaternion."""
-        alpha = 2 * numpy.arccos(self._s)
+        alpha = 2 * np.arccos(self._s)
         if alpha != 0:
-            n = self._v / numpy.sin(alpha / 2)
+            n = self._v / np.sin(alpha / 2)
         else:
-            n = math3d.Vector()
+            n = m3d.Vector()
         return (n, alpha)
 
     def fromRotationVector(self, w):
-        """ Set this quaternion to the equivalent of the given
+        """Set this quaternion to the equivalent of the given
         rotation vector 'w'."""
         angle = w.length()
         if angle > _eps:
             axis = w.normalized()
         else:
             ## Select arbitrary x-direction as axis and set angle to zero
-            axis = math3d.Vector.e1
+            axis = m3d.Vector.e1
             angle = 0.0
         self.fromAxisAngle(axis, angle)
     
     def toRotationVector(self):
-        """ Return a rotation vector representing the rotation of this
+        """Return a rotation vector representing the rotation of this
         quaternion."""
         n, alpha = self.toAxisAngle()
         if alpha != 0.0:
@@ -242,7 +232,7 @@ class Quaternion(object):
             return n
         
     def fromOrientation(self, orient, positive=True):
-        """ Set this quaternion to represent the given
+        """Set this quaternion to represent the given
         orientation. The used method should be robust;
         cf. http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation.
         The mentioned method from wikipedia has problems with certain
@@ -254,7 +244,7 @@ class Quaternion(object):
         M = orient.data
         tr = M.trace() + 1.0
         if tr > 1e-10:
-            s = 0.5 / numpy.sqrt(tr)
+            s = 0.5 / np.sqrt(tr)
             self._s = 0.25 / s
             self._v.x = s * (M[2, 1] - M[1, 2])
             self._v.y = s * (M[0, 2] - M[2, 0])
@@ -264,10 +254,10 @@ class Quaternion(object):
             u = diag.argmax()
             v = (u + 1) % 3
             w = (v + 1) % 3
-            r = numpy.sqrt(1 + M[u, u] - M[v, v] - M[w, w])
+            r = np.sqrt(1 + M[u, u] - M[v, v] - M[w, w])
             if abs(r) < 1e-10:
                 self._s = 1.0
-                self._v = math3d.Vector(0, 0, 0)
+                self._v = m3d.Vector(0, 0, 0)
             else:
                 tworinv = 1.0 / (2 * r)
                 self._s = (M[w, v] - M[v, w]) * tworinv
@@ -280,7 +270,7 @@ class Quaternion(object):
             self *= -1.0
                         
     def toOrientation(self):
-        """ Return an orientation object representing the same
+        """Return an orientation object representing the same
         rotation as this quaternion."""
         ## Return an Orientation representing this quaternion
         self.normalize()
@@ -292,55 +282,55 @@ class Quaternion(object):
         x2 = x**2
         y2 = y**2
         z2 = z**2
-        return math3d.Orientation(numpy.array([
+        return m3d.Orientation(np.array([
             [1 - 2 * (y2 + z2), 2 * x * y - 2 * s * z, 2 * s * y + 2 * x * z],
             [2 * x * y + 2 * s * z, 1 - 2 * (x2 + z2), -2 * s * x + 2 * y * z],
             [-2 * s * y + 2 * x * z, 2 * s * x + 2 * y * z, 1 - 2 * (x2 + y2)]
             ]))
     
     def norm(self):
-        """ Return the norm of this quaternion."""
-        return numpy.sqrt(self.norm2())
+        """Return the norm of this quaternion."""
+        return np.sqrt(self.norm2())
     
     def norm2(self):
-        """ Return the square of the norm of this quaternion."""
+        """Return the square of the norm of this quaternion."""
         return self._s**2 + self._v.length2()
 
     def conjugate(self):
-        """ In-place conjugation of this quaternion."""
+        """In-place conjugation of this quaternion."""
         self._v = -self._v
 
     def conjugated(self):
-        """ Return a quaternion which is the conjugated of this quaternion."""
+        """Return a quaternion which is the conjugated of this quaternion."""
         qc = self.copy()
         qc.conjugate()
         return qc
         
     def normalize(self):
-        """ Normalize this quaternion. """
+        """Normalize this quaternion. """
         n = self.norm()
         if abs(n) < 1e-10:
             self._s = 1
-            self._v = math3d.Vector(0.0, 0.0, 0.0)
+            self._v = m3d.Vector(0.0, 0.0, 0.0)
         else:
             ninv = 1.0 / n
             self._s *= ninv
             self._v *= ninv
          
     def normalized(self):
-        """ Return a normalised version of this quaternion. """
+        """Return a normalised version of this quaternion. """
         q = Quaternion(self)
         q.normalize()
         return q
 
     def invert(self):
-        """ In-place inversion of this quaternion. """
+        """In-place inversion of this quaternion. """
         n2 = self.norm2()
         self.conjugate()
         self *= 1 / n2
         
     def inverse(self):
-        """ Return an inverse of this quaternion."""
+        """Return an inverse of this quaternion."""
         qi = self.copy()
         qi.invert()
         return qi  

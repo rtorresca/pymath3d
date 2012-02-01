@@ -1,27 +1,16 @@
 """
-Copyright (C) 2011 Morten Lind
-mailto: morten@lind.no-ip.org
-
-This file is part of PyMath3D (Math3D for Python).
-
-PyMath3D is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
- PyMath3D is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with PyMath3D.  If not, see <http://www.gnu.org/licenses/>.
-"""
-"""
 Module implementing the Vector class.
 """
 
-import numpy
+__author__ = "Morten Lind"
+__copyright__ = "Morten Lind 2009-2012"
+__credits__ = ["Morten Lind"]
+__license__ = "GPL"
+__maintainer__ = "Morten Lind"
+__email__ = "morten@lind.no-ip.org"
+__status__ = "Production"
+
+import numpy as np
 
 from math3d.utils import isNumTypes, isNumType, isSequence, isThreeSequence, _eps
 
@@ -37,9 +26,10 @@ class Vector(object):
     class Error(Exception):
         """ Exception class."""
         def __init__(self, message):
-            self.message = message
+            self.message = 'Vector Error : ' + message
+            Exception.__init__(self, self.message)
         def __repr__(self):
-            return self.__class__ + '.Error :' + self.message
+            return self.message
 
     @classmethod
     def canCreateOn(cls, *arg):
@@ -61,21 +51,21 @@ class Vector(object):
         is represented as a position vector. Otherwise it is
         represented as a real vector."""
         if len(args) == 3 and isNumTypes(args):
-            self._data=numpy.array(list(map(float, args)))
+            self._data=np.array(list(map(float, args)))
         elif len(args) == 2 and isNumTypes(args):
-            self._data = numpy.array(list(map(float,[args[0], args[1], 0])))
+            self._data = np.array(list(map(float,[args[0], args[1], 0])))
         elif len(args) == 1:
             arg = args[0]
             if isThreeSequence(arg):
-                self._data = numpy.array(list(map(float, arg)))
+                self._data = np.array(list(map(float, arg)))
             elif isSequence(arg) and len(arg)  == 2:
-                self._data = numpy.array(list(map(float, [arg[0], arg[1], 0])))
+                self._data = np.array(list(map(float, [arg[0], arg[1], 0])))
             elif type(arg) == Vector:
                 self._data = arg._data.copy()
             else:
                 raise self.Error('__init__ : could not create vector on argument : ' + str(args[0]))
         else:
-            self._data = numpy.array([0.0,0.0,0.0])
+            self._data = np.array([0.0,0.0,0.0])
         self._isPosition = 1
         if 'position' in kwargs:
             if kwargs['position']: self._isPosition = 1
@@ -120,7 +110,7 @@ class Vector(object):
             if type(val) == Vector:
                 self._data = copy(val._data)
             elif isThreeSequence(val):
-                self._data = numpy.array(val)
+                self._data = np.array(val)
         else:
             object.__setattr__(self, name, val)
 
@@ -139,7 +129,7 @@ class Vector(object):
 
     def __eq__(self,other):
         if type(other) == Vector:
-            return numpy.sum((self._data-other._data)**2) < _eps
+            return np.sum((self._data-other._data)**2) < utils._eps
         else:
             raise self.Error('Could not compare to non-Vector!')
 
@@ -162,7 +152,7 @@ class Vector(object):
             costheta = 1
         elif costheta < -1:
             costheta = -1
-        return numpy.arccos(costheta)
+        return np.arccos(costheta)
 
     def sangle(self, other, refVec=None):
         """ With default reference rotation vector as Z-axis (if
@@ -180,11 +170,11 @@ class Vector(object):
     
     def length(self):
         """ Standard Euclidean length."""
-        return numpy.sqrt(self.length2())
+        return np.sqrt(self.length2())
 
     def length2(self):
         """ Square of the standard Euclidean length."""
-        return numpy.dot(self._data, self._data)
+        return np.dot(self._data, self._data)
 
     def normalize(self):
         """ In-place normalization of this Vector."""
@@ -202,7 +192,7 @@ class Vector(object):
     def dist(self, other):
         """ Compute euclidean distance between points given by self
         and 'other'."""
-        return numpy.sqrt(self.dist2(other))
+        return np.sqrt(self.dist2(other))
     
     def dist2(self, other):
         """ Compute euclidean distance between points given by self
@@ -211,11 +201,11 @@ class Vector(object):
 
 
     def cross(self, other):
-        return Vector(numpy.cross(self._data, other._data))
+        return Vector(np.cross(self._data, other._data))
 
     def __sub__(self, other):
         if type(other) == Vector:
-            return Vector(numpy.subtract(self._data, other._data))
+            return Vector(np.subtract(self._data, other._data))
 
     def __isub__(self, other):
         if type(other) == Vector:
@@ -226,9 +216,9 @@ class Vector(object):
         """ Multiplication with an 'other' Vector (inner product) or
         with a scalar."""
         if type(other) == Vector:
-            return numpy.dot(self._data, other._data)
+            return np.dot(self._data, other._data)
         elif isNumType(other):
-            return Vector(numpy.dot(self._data, other))
+            return Vector(np.dot(self._data, other))
 
     def __imul__(self, other):
         """ Inplace multiplication with a scalar, 'other'. """
