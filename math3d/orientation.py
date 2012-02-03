@@ -16,7 +16,7 @@ import string
 import numpy as np
 
 import math3d as m3d
-from math3d.utils import isSequence, isNumTypes, _eps
+from math3d.utils import isSequence,  isNumTypes,  _eps
 
 def isOrientation(o):
     print('Deprecation warning: "isOrientation(o)".'
@@ -184,8 +184,11 @@ class Orientation(object):
         if type(rotVec) == m3d.Vector:
             rotVec = rotVec.data
         angle = np.linalg.norm(rotVec)
-        axis = rotVec/angle
-        self.fromAxisAngle(axis, angle)
+        if np.abs(angle) < _eps:
+            self._data = np.identity(3)
+        else:
+            axis = rotVec/angle
+            self.fromAxisAngle(axis, angle)
 
     def toAxisAngle(self):
         """ Return an (axis,angle) pair representing the equivalent

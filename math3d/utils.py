@@ -13,7 +13,7 @@ __status__ = "Production"
 import numpy as np
 
 ## Possibly replace by 1000*np.finfo(float).resolution
-_eps = 10e-10
+_eps = np.finfo(np.float32).eps
 
 ## Tuple of types considered sequences 
 _seqTypes = (list, tuple, np.ndarray)

@@ -36,29 +36,33 @@ class Transform(object):
         def __repr__(self):
             return self.message
 
-    def __create_on_sequence(self, args):
-        if len(args) == 1 and isSequence(args[0]):
-            self.__createOnSequence(args[0])
-        elif len(args) == 2:
-            self._o = m3d.Orientation(args[0])
-            self._v = m3d.Vector(args[1])
-        elif len(args) == 4:
-            self._o = m3d.Orientation(args[:3])
-            self._v = m3d.Vector(args[3])
-        elif len(args) == 12:
-            self._o = m3d.Orientation(args[:9])
-            self._v = m3d.Vector(args[9:])
+    def __create_on_sequence(self, arg):
+        """Called from init when a single argument of sequence type
+        was given the constructor."""
+        # if len(arg) == 1 and isSequence(arg[0]):
+        #     self.__createOnSequence(arg[0])
+        if type(arg) in (tuple, list):
+            self.__create_on_sequence(np.array(arg, dtype=np.float32))
+        elif type(arg) == np.ndarray and arg.shape in ((4,4), (3,4)):
+            self._o = m3d.Orientation(arg[:3,:3])
+            self._v = m3d.Vector(arg[:3,3])
+        elif type(arg) == np.ndarray and arg.shape==(6,):
+                # # Assume a pose vector of 3 position vector and 3 rotation vector components
+                self._v = m3d.Vector(arg[:3])
+                self._o = m3d.Orientation(arg[3:])
         else:
             raise self.Error(
-                'Could not create Transform on arguments : "' + str(args) + '"')
+                'Could not create Transform on arguments : "' + str(arg) + '"')
         
     def __init__(self, *args):
         """A Transform is a homogeneous transform on SE(3), internally
         represented by an Orientation and a Vector. A Transform can be constructed on:
         * A Transform.
         * A numpy array, list or tuple of shape (4,4) or (3,4) giving direct data; as [orient | pos].
-        * A numpy array, list, or tuple of shape (6,) giving a pose vector; concatenated position and rotation vector.
-        * A numpy array
+        * A --''-- of shape (6,) giving a pose vector; concatenated position and rotation vector.
+        * Two --''--; the first for orientation and the second for position.
+        * Four --''--; the first three for orientation and the fourth for position.
+        * Twelve numbers, the first nine used for orientation and the last three for position.
         * An ordered pair of Orientation and Vector.
         """
         if len(args) == 0: # or (len(args) == 1 and type(args[0]) == type(None)):
@@ -70,19 +74,19 @@ class Transform(object):
                    hasattr(arg,'pos') and hasattr(arg,'orient'): # and Orientation.canCreateOn(arg.orient) and m3d.Vector.canCreateOn(arg.pos):
                 self._v = m3d.Vector(arg.pos)
                 self._o = m3d.Orientation(arg.orient)
-            elif type(arg) == np.ndarray and arg.shape in ((4,4), (3,4)):
-                self._o = m3d.Orientation(arg[:3,:3])
-                self._v = m3d.Vector(arg[:3,3])
-            elif type(arg) == np.ndarray and arg.shape==(6,):
-                # # Assume a pose vector of 3 position vector and 3 rotation vector components
-                self._v = m3d.Vector(arg[:3])
-                self._o = m3d.Orientation(arg[3:])
             else:
-                raise self.Error(
-                    'Could not create Transform on arguments : "'
-                    + str(args) + '"')
-        elif len(args) >= 1:
-            self.__create_on_sequence(args)
+                self.__create_on_sequence(arg)
+        elif args == 2:
+            self._o = m3d.Orientation(args[0])
+            self._v = m3d.Vector(args[1])
+        elif len(args) == 4:
+            self._o = m3d.Orientation(args[:3])
+            self._v = m3d.Vector(args[3])
+        elif len(args) == 12:
+            # // 12 numbers are required
+            args = np.array(args, dtype=float32)
+            self._o = m3d.Orientation(args[:9])
+            self._v = m3d.Vector(args[9:])
         else:
             raise self.Error(
                 'Could not create Transform on arguments : "' + str(args) + '"')
