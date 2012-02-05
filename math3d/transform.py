@@ -76,7 +76,7 @@ class Transform(object):
                 self._o = m3d.Orientation(arg.orient)
             else:
                 self.__create_on_sequence(arg)
-        elif args == 2:
+        elif len(args) == 2:
             self._o = m3d.Orientation(args[0])
             self._v = m3d.Vector(args[1])
         elif len(args) == 4:
