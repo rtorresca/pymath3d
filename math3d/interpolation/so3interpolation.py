@@ -43,7 +43,7 @@ class SO3Interpolation(object):
     def quat(self, time, checkrange=True):
         """Return the quaternion in the slerp at 'time'; in [0,1]."""
         if checkrange:
-            time = float(time)
+            time = np.float64(time)
             if time < 0.0 or time > 1.0:
                 raise self.Error('"time" must be number in [0.0 ; 1.0]. Was %f' % time) 
         return self._qstart * (self._qstartconjqend) ** time

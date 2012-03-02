@@ -42,7 +42,7 @@ class SE3Interpolation(SO3Interpolation, R3Interpolation):
         """Class callable method for giving the transform at time
         'time'; in [0,1]."""
         if checkrange:
-            time = float(time)
+            time = np.float64(time)
             if time < 0.0 or time > 1.0:
                 raise self.Error('"time" must be number in [0.0 ; 1.0]. Was %f' % time)
         return Transform(self.orient(time, False), self.pos(time, False))

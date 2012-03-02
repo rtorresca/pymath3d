@@ -38,7 +38,7 @@ class R3Interpolation(object):
     def pos(self, time, checkrange=True):
         """Called to get the interpolated position at 'time'."""
         if checkrange:
-            time = float(time)
+            time = np.float64(time)
             if time < 0.0 or time > 1.0:
                 raise self.Error('"time" must be number in [0.0 ; 1.0]. Was %f' % time)
         return self._p0 + time * self._displ
