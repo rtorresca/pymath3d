@@ -10,6 +10,8 @@ __maintainer__ = "Morten Lind"
 __email__ = "morten@lind.no-ip.org"
 __status__ = "Production"
 
+import numpy as np
+
 from math3d.vector import Vector
 
 class R3Interpolation(object):

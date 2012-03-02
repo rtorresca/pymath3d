@@ -10,6 +10,8 @@ __maintainer__ = "Morten Lind"
 __email__ = "morten@lind.no-ip.org"
 __status__ = "Production"
 
+import numpy as np
+
 from math3d.transform import Transform
 from math3d.interpolation.so3interpolation import SO3Interpolation
 from math3d.interpolation.r3interpolation import R3Interpolation
