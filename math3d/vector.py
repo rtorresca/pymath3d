@@ -24,7 +24,7 @@ class Vector(object):
     operations."""
     
     class Error(Exception):
-        """ Exception class."""
+        """Exception class."""
         def __init__(self, message):
             self.message = 'Vector Error : ' + message
             Exception.__init__(self, self.message)
@@ -46,7 +46,7 @@ class Vector(object):
             return False
 
     def __init__(self, *args, **kwargs):
-        """ Constructor for Vector. If optional keyword argument
+        """Constructor for Vector. If optional keyword argument
         'position' is evaluates to true, or is not given, the vector
         is represented as a position vector. Otherwise it is
         represented as a real vector."""
@@ -72,14 +72,14 @@ class Vector(object):
             else: self._isPosition = 0
     
     def __copy__(self):
-        """ Copy method for creating a copy of this Vector."""
+        """Copy method for creating a copy of this Vector."""
         return Vector(self)
     
     def __deepcopy__(self, memo):
         return self.__copy__()
     
     def copy(self, other=None):
-        """ Copy data from 'other' to self. """
+        """Copy data from 'other' to self. """
         if other is None:
             return Vector(self)
         else:
@@ -140,12 +140,12 @@ class Vector(object):
         return self.__repr__()
     
     def isPos(self):
-        """ If the vector is a position vector, default, then it
+        """If the vector is a position vector, default, then it
         transforms differently than a real vector."""
         return self._isPosition
 
     def angle(self, other):
-        """ Return the angle (radians) to the 'other' vector. This is the
+        """Return the angle (radians) to the 'other' vector. This is the
         absolute, positive angle."""
         costheta = (self * other) / (self.length() * other.length())
         if costheta > 1:
@@ -155,7 +155,7 @@ class Vector(object):
         return np.arccos(costheta)
 
     def sangle(self, other, refVec=None):
-        """ With default reference rotation vector as Z-axis (if
+        """With default reference rotation vector as Z-axis (if
         'refVec' == None), compute the signed angle of rotation from
         self to 'other'."""
         theta = self.angle(other)
@@ -169,37 +169,50 @@ class Vector(object):
         return theta
     
     def length(self):
-        """ Standard Euclidean length."""
+        """Standard Euclidean length."""
         return np.sqrt(self.length2())
 
     def length2(self):
-        """ Square of the standard Euclidean length."""
+        """Square of the standard Euclidean length."""
         return np.dot(self._data, self._data)
 
     def normalize(self):
-        """ In-place normalization of this Vector."""
+        """In-place normalization of this Vector."""
         l = self.length()
         if l != 1.0:
             self._data = self._data / l
 
     def normalized(self):
-        """ Returns a normalized Vector with same direction as this
+        """Returns a normalized Vector with same direction as this
         one."""
         nv = Vector(self)
         nv.normalize()
         return nv
 
     def dist(self, other):
-        """ Compute euclidean distance between points given by self
+        """Compute euclidean distance between points given by self
         and 'other'."""
         return np.sqrt(self.dist2(other))
     
     def dist2(self, other):
-        """ Compute euclidean distance between points given by self
+        """Compute euclidean distance between points given by self
         and 'other'."""
         return (self - other).length2()
 
-
+    @property
+    def cross_operator(self):
+        """Return the cross product operator for this
+        Vector. I.e. the skew-symmetric operator Cv, such that Cv * u
+        == v x u, for any vector u."""
+        Cv = np.zeros((3,3))
+        Cv[0,1] = -self._data[2]
+        Cv[0,2] = self._data[1]
+        Cv[1,0] = self._data[2]
+        Cv[1,2] = -self._data[0]
+        Cv[2,0] = -self._data[1]
+        Cv[2,1] = self._data[0]
+        return Cv
+    
     def cross(self, other):
         return Vector(np.cross(self._data, other._data))
 
@@ -213,7 +226,7 @@ class Vector(object):
         return self
     
     def __mul__(self, other):
-        """ Multiplication with an 'other' Vector (inner product) or
+        """Multiplication with an 'other' Vector (inner product) or
         with a scalar."""
         if type(other) == Vector:
             return np.dot(self._data, other._data)
@@ -221,7 +234,7 @@ class Vector(object):
             return Vector(np.dot(self._data, other))
 
     def __imul__(self, other):
-        """ Inplace multiplication with a scalar, 'other'. """
+        """In-place multiplication with a scalar, 'other'. """
         if isNumType(other):
             self._data *= other
         else:
@@ -229,14 +242,19 @@ class Vector(object):
         return self
     
     def __rmul__(self, other):
-        """ Right multiplication with a scalar, 'other'. """
+        """Right multiplication with a scalar, 'other'. """
         if isNumType(other):
             return Vector(other * self._data)
         else:
             raise self.Error('__rmul__ : Could not multiply by non-number')
         
+<<<<<<< TREE
+    def __div__(self, other):
+        """Division with a scalar, 'other'. """
+=======
     def __truediv__(self, other):
         """ Division with a scalar, 'other'. """
+>>>>>>> MERGE-SOURCE
         if isNumType(other):
             return Vector(1.0 / other * self._data)
         else:
@@ -244,14 +262,14 @@ class Vector(object):
     __div__ = __truediv__
     
     def __add__(self, other):
-        """ Return the sum of this and the 'other' vector."""
+        """Return the sum of this and the 'other' vector."""
         if type(other) == Vector:
             return Vector(self._data + other._data)
         else:
             raise self.Error('__add__ : Could not add non-vector')
 
     def __iadd__(self, other):
-        """ In-place add the 'other' vector to this vector."""
+        """In-place add the 'other' vector to this vector."""
         if type(other) == Vector:
             self._data += other._data
         else:
