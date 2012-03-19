@@ -12,9 +12,9 @@ __status__ = "Production"
 
 import numpy as np
 
-from math3d.transform import Transform
-from math3d.interpolation.so3interpolation import SO3Interpolation
-from math3d.interpolation.r3interpolation import R3Interpolation
+from ..transform import Transform
+from .so3interpolation import SO3Interpolation
+from .r3interpolation import R3Interpolation
 
 class SE3Interpolation(SO3Interpolation, R3Interpolation):
     """A class for object representing a linear interpolation in task

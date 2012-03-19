@@ -21,7 +21,7 @@ along with PyMath3D.  If not, see <http://www.gnu.org/licenses/>.
 Module for top level imports in PyMath3D.
 '''
 
-from math3d.quaternion import isQuaternion, Quaternion
-from math3d.orientation import isOrientation, Orientation, newOrientFromXY, newOrientFromXZ, newOrientRotZ, newOrientRotY, newOrientRotX
-from math3d.vector import isVector, Vector
-from math3d.transform import isTransform, Transform, newTransFromXYP, newTransFromXZP
+from .quaternion import isQuaternion, Quaternion
+from .orientation import isOrientation, Orientation, newOrientFromXY, newOrientFromXZ, newOrientRotZ, newOrientRotY, newOrientRotX
+from .vector import isVector, Vector
+from .transform import isTransform, Transform, newTransFromXYP, newTransFromXZP

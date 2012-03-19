@@ -12,8 +12,11 @@ __status__ = "Production"
 
 import numpy as np
 
+# # Circular dependencies prevents direct import of Orientation, hence
+# # global addressing
 import math3d as m3d
-from math3d.utils import isNumType, _eps
+from .utils import isNumType, _eps
+from .vector import Vector
 
 def isQuaternion(q):
     return type(q) == Quaternion
@@ -40,14 +43,14 @@ class Quaternion(object):
         if len(args) == 0:
             ## Default constructor
             self._s = 1.0
-            self._v = m3d.Vector()
+            self._v = Vector()
         elif len(args) == 1:
             ## Try with orientation or quaternion
             if type(args[0]) == m3d.Orientation:
-                self._v = m3d.Vector()
+                self._v = Vector()
                 self.fromOrientation(args[0])
             ## Try with rotation vector
-            if type(args[0]) == m3d.Vector:
+            if type(args[0]) == Vector:
                 self.fromRotationVector(args[0])
 ## Copy constructor
             elif type(args[0]) == Quaternion:
@@ -55,22 +58,22 @@ class Quaternion(object):
                 self._v = args[0]._v.copy()
         elif len(args) == 2:
             ## Test for (axis, angle) and (s, v) determined by order
-            if isNumType(args[0]) and type(args[1]) == m3d.Vector:
+            if isNumType(args[0]) and type(args[1]) == Vector:
                 ## Interpret as s, v
                 self._s = args[0]
                 self._v = args[1].copy()
-            elif isNumType(args[1]) and type(args[0]) == m3d.Vector:
+            elif isNumType(args[1]) and type(args[0]) == Vector:
                 ## Interpret as axis-angle
                 axis = args[0].copy()
                 ang = args[1]
                 self.fromAxisAngle(axis, ang)
         elif len(args) == 3 and np.all(np.isreal):
             ## Assume three components of a rotation vector
-            self.fromRotationVector(m3d.Vector(args))
+            self.fromRotationVector(Vector(args))
         elif len(args) == 4 and np.all(np.isreal):
             ## Assume numbers for s, x, y, and z
             self._s = args[0]
-            self._v = m3d.Vector(args[1:])
+            self._v = Vector(args[1:])
 
     def __getattr__(self, name):
         if name == 's':
@@ -120,7 +123,7 @@ class Quaternion(object):
         """Multiplication is interpreted by either transforming
         (rotating) a Vector, ordinary Quaternion multiplication, or
         multiplication by scalar."""
-        if type(other) == m3d.Vector:
+        if type(other) == Vector:
             ## Do a rotation of the vector
             return (self * Quaternion(0, other) * self.inverse())._v
         elif type(other) == Quaternion:
@@ -148,7 +151,7 @@ class Quaternion(object):
         'x'."""
         if abs(1 - abs(self._s)) < 1e-7:
             self._s = 1
-            self._v = m3d.Vector(0, 0, 0)
+            self._v = Vector(0, 0, 0)
         else:
             theta = np.arccos(self._s)
             sintheta = np.sin(theta)
@@ -207,7 +210,7 @@ class Quaternion(object):
         if alpha != 0:
             n = self._v / np.sin(alpha / 2)
         else:
-            n = m3d.Vector()
+            n = Vector()
         return (n, alpha)
 
     def fromRotationVector(self, w):
@@ -218,7 +221,7 @@ class Quaternion(object):
             axis = w.normalized()
         else:
             ## Select arbitrary x-direction as axis and set angle to zero
-            axis = m3d.Vector.e1
+            axis = Vector.e1
             angle = 0.0
         self.fromAxisAngle(axis, angle)
     
@@ -257,7 +260,7 @@ class Quaternion(object):
             r = np.sqrt(1 + M[u, u] - M[v, v] - M[w, w])
             if abs(r) < 1e-10:
                 self._s = 1.0
-                self._v = m3d.Vector(0, 0, 0)
+                self._v = Vector(0, 0, 0)
             else:
                 tworinv = 1.0 / (2 * r)
                 self._s = (M[w, v] - M[v, w]) * tworinv
@@ -311,7 +314,7 @@ class Quaternion(object):
         n = self.norm()
         if abs(n) < 1e-10:
             self._s = 1
-            self._v = m3d.Vector(0.0, 0.0, 0.0)
+            self._v = Vector(0.0, 0.0, 0.0)
         else:
             ninv = 1.0 / n
             self._s *= ninv

@@ -13,8 +13,9 @@ __status__ = "Production"
 
 import numpy as np
 
-import math3d as m3d
-from math3d.utils import isSequence, _eps
+from .utils import isSequence, _eps
+from .vector import Vector
+from .orientation import Orientation
 
 def isTransform(t):
     if __debug__: print('Deprecation warning: "isTransform(t)".'
@@ -44,12 +45,12 @@ class Transform(object):
         if type(arg) in (tuple, list):
             self.__create_on_sequence(np.array(arg, dtype=np.float64))
         elif type(arg) == np.ndarray and arg.shape in ((4,4), (3,4)):
-            self._o = m3d.Orientation(arg[:3,:3])
-            self._v = m3d.Vector(arg[:3,3])
+            self._o = Orientation(arg[:3,:3])
+            self._v = Vector(arg[:3,3])
         elif type(arg) == np.ndarray and arg.shape==(6,):
                 # # Assume a pose vector of 3 position vector and 3 rotation vector components
-                self._v = m3d.Vector(arg[:3])
-                self._o = m3d.Orientation(arg[3:])
+                self._v = Vector(arg[:3])
+                self._o = Orientation(arg[3:])
         else:
             raise self.Error(
                 'Could not create Transform on arguments : "' + str(arg) + '"')
@@ -66,27 +67,27 @@ class Transform(object):
         * An ordered pair of Orientation and Vector.
         """
         if len(args) == 0: # or (len(args) == 1 and type(args[0]) == type(None)):
-            self._v = m3d.Vector()
-            self._o = m3d.Orientation()
+            self._v = Vector()
+            self._o = Orientation()
         elif len(args) == 1:
             arg = args[0]
             if type(arg) == Transform or \
-                   hasattr(arg,'pos') and hasattr(arg,'orient'): # and Orientation.canCreateOn(arg.orient) and m3d.Vector.canCreateOn(arg.pos):
-                self._v = m3d.Vector(arg.pos)
-                self._o = m3d.Orientation(arg.orient)
+                   hasattr(arg,'pos') and hasattr(arg,'orient'): # and Orientation.canCreateOn(arg.orient) and Vector.canCreateOn(arg.pos):
+                self._v = Vector(arg.pos)
+                self._o = Orientation(arg.orient)
             else:
                 self.__create_on_sequence(arg)
         elif len(args) == 2:
-            self._o = m3d.Orientation(args[0])
-            self._v = m3d.Vector(args[1])
+            self._o = Orientation(args[0])
+            self._v = Vector(args[1])
         elif len(args) == 4:
-            self._o = m3d.Orientation(args[:3])
-            self._v = m3d.Vector(args[3])
+            self._o = Orientation(args[:3])
+            self._v = Vector(args[3])
         elif len(args) == 12:
             # // 12 numbers are required
             args = np.array(args, dtype=float64)
-            self._o = m3d.Orientation(args[:9])
-            self._v = m3d.Vector(args[9:])
+            self._o = Orientation(args[:9])
+            self._v = Vector(args[9:])
         else:
             raise self.Error(
                 'Could not create Transform on arguments : "' + str(args) + '"')
@@ -115,12 +116,12 @@ class Transform(object):
         if name == 'orient':
             if type(value) == np.ndarray:
                 self._data[:3,:3] = value
-            elif type(value) == m3d.Orientation:
+            elif type(value) == Orientation:
                 self._data[:3,:3] = value._data
         elif name == 'pos':
             if type(value) == np.ndarray:
                 self._data[:3,3] = value
-            elif type(value) == m3d.Vector:
+            elif type(value) == Vector:
                 self._data[:3,3] = value._data
         else:
             object.__setattr__(self, name, value)
@@ -149,9 +150,9 @@ class Transform(object):
         print('!!!! Warning !!!!  : Coercion called on Transform!!!')
         if type(other) == Transform:
             return (self, other)
-        elif type(other) == m3d.Vector:
+        elif type(other) == Vector:
             return (self.pos, other)
-        elif type(other) == m3d.Orientation:
+        elif type(other) == Orientation:
             return (self.orient, other)
         else:
             return None
@@ -212,11 +213,11 @@ class Transform(object):
             #v = self._o * other._v + self._v
             #return Transform(o, v)
             return Transform(np.dot(self._data, other._data))
-        elif type(other) == m3d.Vector:
+        elif type(other) == Vector:
             #return self._o * other + other._isPosition * self._v
             v = np.ones(4)
             v[:3] = other._data
-            return m3d.Vector(np.dot(self._data, v)[:3])
+            return Vector(np.dot(self._data, v)[:3])
         elif type(other) == np.ndarray and other.shape == (3,):
             return np.dot(self._o._data, other)+self._v._data
         elif isSequence(other):
@@ -251,9 +252,9 @@ def newTransFromXZP(cx, cz, p):
     return t
 
 def _test():
-    cx = m3d.Vector(2, 3, 0)
-    cz = m3d.Vector.e2
-    p = m3d.Vector(1, 2, 3)
+    cx = Vector(2, 3, 0)
+    cz = Vector.e2
+    p = Vector(1, 2, 3)
     t = newTransFromXZP(cx, cz, p)
     print((t*cx))
     it = t.inverse()

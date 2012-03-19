@@ -12,7 +12,7 @@ __status__ = "Production"
 
 import numpy as np
 
-from math3d.vector import Vector
+from ..vector import Vector
 
 class R3Interpolation(object):
     """Simple linear position interpolation in R^3."""

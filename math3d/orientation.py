@@ -11,12 +11,13 @@ __maintainer__ = "Morten Lind"
 __email__ = "morten@lind.no-ip.org"
 __status__ = "Production"
 
-import string
-
 import numpy as np
 
+# # Circular dependencies prevents direct import of Orientation, hence
+# # global addressing
 import math3d as m3d
-from math3d.utils import isSequence,  isNumTypes,  _eps
+from .utils import isSequence,  isNumTypes,  _eps
+from .vector import Vector
 
 def isOrientation(o):
     print('Deprecation warning: "isOrientation(o)".'
@@ -65,7 +66,7 @@ class Orientation(object):
                 self._data = arg.data
             elif type(arg) == m3d.Quaternion:
                 self._data = arg.toOrientation()._data
-            elif type(arg) == m3d.Vector:
+            elif type(arg) == Vector:
                 ## Interpret as a rotation vector
                 self._data = np.identity(3)
                 self.fromRotationVector(arg)
@@ -74,7 +75,7 @@ class Orientation(object):
             else:
                 raise self.Error('Creating on type %s is not supported' % str(type(arg)))
         elif len(args) == 3:
-            if np.all(np.array([type(a)==m3d.Vector for a in args])):
+            if np.all(np.array([type(a)==Vector for a in args])):
                 array_args = (a._data for a in args)
             elif np.all(np.array([type(a)==np.ndarray for a in args])):
                 array_args = args
@@ -106,11 +107,11 @@ class Orientation(object):
     def __getattr__(self, name):
         if name == 'data':
             return self._data.copy()
-        elif name[:3] in ['vec', 'col'] and string.lower(name)[-1] in 'xyz':
-            idx = 'xyz'.find(string.lower(name)[-1])
+        elif name[:3] in ['vec', 'col'] and name[-1].lower() in 'xyz':
+            idx = 'xyz'.find(name[-1].lower())
             a = self._data[:,idx]
             if name[:3] == 'vec':
-                a = m3d.Vector(a)
+                a = Vector(a)
             return a
         else:
             raise AttributeError('Attribute "%s" not found in Orientation'%name)
@@ -135,11 +136,11 @@ class Orientation(object):
         if name == '_data':
             ## This is dangerous, since there is no consistency check.
             self.__dict__['_data']=val
-        elif name[:3] in ['vec', 'col'] and string.lower(name[-1]) in 'xyz':
+        elif name[:3] in ['vec', 'col'] and name[-1].lower() in 'xyz':
             ## This is dangerous since there is no automatic
             ## re-normalization
-            idx = 'xyz'.find(string.lower(name[-1]))
-            if type(val) == m3d.Vector:
+            idx = 'xyz'.find(name[-1].lower())
+            if type(val) == Vector:
                 val = val.data
             self._data[:3,idx] = val
         else:
@@ -181,7 +182,7 @@ class Orientation(object):
     def fromRotationVector(self, rotVec):
         """ Set this Orientation to represent the one given in
         a rotation vector in 'rotVec'. 'rotVec' must be a Vector or an numpy array of shape (3,)"""
-        if type(rotVec) == m3d.Vector:
+        if type(rotVec) == Vector:
             rotVec = rotVec.data
         angle = np.linalg.norm(rotVec)
         if np.abs(angle) < _eps:
@@ -199,7 +200,7 @@ class Orientation(object):
     def fromAxisAngle(self, axis, angle):
         """ Set this orientation to the equivalent to rotation of
         'angle' around 'axis'."""
-        if type(axis) == m3d.Vector:
+        if type(axis) == Vector:
             axis = axis.data
         ## Force normalization
         axis /= np.linalg.norm(axis)
@@ -224,21 +225,21 @@ class Orientation(object):
         ca = np.cos(angle)
         sa = np.sin(angle)
         self._data[:,:] = np.array([[1, 0, 0], [0, ca, -sa], [0, sa, ca]])
-        #self.fromAxisAngle(m3d.Vector.e0, angle)
+        #self.fromAxisAngle(Vector.e0, angle)
         
     def rotY(self, angle):
         """ Replace this orientation by that of a rotation around y."""
         ca=np.cos(angle)
         sa=np.sin(angle)
         self._data[:,:] = np.array([[ca, 0, sa], [0, 1, 0], [-sa, 0, ca]])
-        #self.fromAxisAngle(m3d.Vector.e1, angle)
+        #self.fromAxisAngle(Vector.e1, angle)
         
     def rotZ(self, angle):
         """ Replace this orientation by that of a rotation around z. """
         ca = np.cos(angle)
         sa = np.sin(angle)
         self._data[:,:] = np.array([[ca, -sa, 0], [sa, ca, 0], [0, 0, 1]])
-        #self.fromAxisAngle(m3d.Vector.e2,angle)
+        #self.fromAxisAngle(Vector.e2,angle)
 
     def rotateT(self, axis, angle):
         """ In-place rotation of this orientation angle radians in
@@ -258,34 +259,34 @@ class Orientation(object):
     def rotateXB(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         x axis in the base reference system. (Inefficient!)"""
-        self.rotateB(m3d.Vector.e0, angle)
+        self.rotateB(Vector.e0, angle)
     
     def rotateYB(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         y axis in the base reference system. (Inefficient!)"""
-        self.rotateB(m3d.Vector.e1, angle)
+        self.rotateB(Vector.e1, angle)
     
     def rotateZB(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         z axis in the base reference system. (Inefficient!)"""
-        self.rotateB(m3d.Vector.e2, angle)
+        self.rotateB(Vector.e2, angle)
     
     def rotateXT(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         x axis in the transformed reference system. (Inefficient!)"""
-        self.rotateT(m3d.Vector.e0, angle)
+        self.rotateT(Vector.e0, angle)
     rotateX = rotateXT
     
     def rotateYT(self,angle):
         """ In-place rotation of this oriantation by a rotation around
         y axis in the transformed reference system. (Inefficient!)"""
-        self.rotateT(m3d.Vector.e1,angle)
+        self.rotateT(Vector.e1,angle)
     rotateY = rotateYT
     
     def rotateZT(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         z axis in the transformed reference system. (Inefficient!)"""
-        self.rotateT(m3d.Vector.e2, angle)
+        self.rotateT(Vector.e2, angle)
     rotateZ = rotateZT
     
     def __repr__(self):
@@ -317,8 +318,8 @@ class Orientation(object):
     def __mul__(self, other):
         if type(other) == Orientation:
             return Orientation(np.dot(self._data, other._data))
-        elif type(other) == m3d.Vector:
-            return m3d.Vector(np.dot(self._data, other._data))
+        elif type(other) == Vector:
+            return Vector(np.dot(self._data, other._data))
         elif isSequence(other):
             return list(map(self.__mul__, other))
         
@@ -360,6 +361,6 @@ def newOrientRotY(angle):
 if __name__ == '__main__':
     o = Orientation()
     r = Orientation()
-    o.fromXY(m3d.Vector(1, 1, 0), m3d.Vector(-1, 1, 0))
+    o.fromXY(Vector(1, 1, 0), Vector(-1, 1, 0))
     r.rotZ(np.pi / 2)
     ro = r * o

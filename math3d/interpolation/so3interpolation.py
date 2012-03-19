@@ -12,8 +12,8 @@ __status__ = "Production"
 
 import numpy as np
 
-from math3d.orientation import Orientation
-from math3d.quaternion import Quaternion
+from ..orientation import Orientation
+from ..quaternion import Quaternion
 
 class SO3Interpolation(object):
     """A SLERP interpolator class in SO(3)."""

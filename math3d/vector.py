@@ -20,7 +20,7 @@ def isVector(v):
     return type(v) == Vector
 
 class Vector(object):
-    """ A Vector is a 3D vector (member of R3) with standard euclidian
+    """ A Vector is a 3D vector (member of R3) with standard Euclidian
     operations."""
     
     class Error(Exception):
@@ -63,7 +63,7 @@ class Vector(object):
             elif type(arg) == Vector:
                 self._data = arg._data.astype(np.float64)
             else:
-                raise self.Error('__init__ : could not create vector on argument : ' + str(args[0]))
+                raise self.Error('__init__ : could not create vector on argument : ' + str(args[0]) + ' of type %s'%str(type(args[0])))
         else:
             self._data = np.array([0.0,0.0,0.0], dtype=np.float64)
         self._isPosition = 1
@@ -235,13 +235,14 @@ class Vector(object):
         else:
             raise self.Error('__rmul__ : Could not multiply by non-number')
         
-    def __div__(self, other):
+    def __truediv__(self, other):
         """ Division with a scalar, 'other'. """
         if isNumType(other):
             return Vector(1.0 / other * self._data)
         else:
             raise self.Error('__rdiv__ : Could not divide by non-number')
-        
+    __div__ = __truediv__
+    
     def __add__(self, other):
         """ Return the sum of this and the 'other' vector."""
         if type(other) == Vector:
