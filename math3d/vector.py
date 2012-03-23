@@ -248,13 +248,8 @@ class Vector(object):
         else:
             raise self.Error('__rmul__ : Could not multiply by non-number')
         
-<<<<<<< TREE
-    def __div__(self, other):
-        """Division with a scalar, 'other'. """
-=======
     def __truediv__(self, other):
         """ Division with a scalar, 'other'. """
->>>>>>> MERGE-SOURCE
         if isNumType(other):
             return Vector(1.0 / other * self._data)
         else:
