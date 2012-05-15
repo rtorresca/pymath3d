@@ -118,11 +118,19 @@ class Transform(object):
                 self._data[:3,:3] = value
             elif type(value) == Orientation:
                 self._data[:3,:3] = value._data
+            elif type(value) in [list, tuple]:
+                self._data[:3,:3] = value
+            else:
+                raise self.Error('Trying to set "orient" by an object of type "%s". Needs list, tuple, ndarray, or Orientation.' % str(type(value)))
         elif name == 'pos':
             if type(value) == np.ndarray:
                 self._data[:3,3] = value
             elif type(value) == Vector:
                 self._data[:3,3] = value._data
+            elif type(value) in [list, tuple]:
+                self._data[:3,3] = value
+            else:
+                raise self.Error('Trying to set "pos" by an object of type "%s". Needs tuple, list, ndarray, or Vector.' % str(type(value)))
         else:
             object.__setattr__(self, name, value)
             
