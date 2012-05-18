@@ -32,7 +32,7 @@ class Transform(object):
     class Error(Exception):
         """ Exception class."""
         def __init__(self, message):
-            self.message = 'Transform Error : ' + message
+            self.message = message
             Exception.__init__(self, self.message)
         def __repr__(self):
             return self.message
@@ -121,7 +121,9 @@ class Transform(object):
             elif type(value) in [list, tuple]:
                 self._data[:3,:3] = value
             else:
-                raise self.Error('Trying to set "orient" by an object of type "%s". Needs list, tuple, ndarray, or Orientation.' % str(type(value)))
+                raise self.Error('Trying to set "orient" by an object of '
+                                 + 'type "%s". ' % str(type(value))
+                                 + 'Needs list, tuple, ndarray, or Orientation.')
         elif name == 'pos':
             if type(value) == np.ndarray:
                 self._data[:3,3] = value
@@ -130,7 +132,9 @@ class Transform(object):
             elif type(value) in [list, tuple]:
                 self._data[:3,3] = value
             else:
-                raise self.Error('Trying to set "pos" by an object of type "%s". Needs tuple, list, ndarray, or Vector.' % str(type(value)))
+                raise self.Error('Trying to set "pos" by an object of '
+                                 + 'type "%s". '  % str(type(value))
+                                 + 'Needs tuple, list, ndarray, or Vector.')
         else:
             object.__setattr__(self, name, value)
             
@@ -231,8 +235,8 @@ class Transform(object):
         elif isSequence(other):
             return list(map(self.__mul__,other))
         else:
-            raise self.Error('Inadequate data type for multiplication in "other" : "'
-                             + str(type(other)) + '"')
+            raise self.Error('Inadequate data type for multiplication '
+                             + 'in "other" : %s' % str(type(other)))
         
     def toArray(self):
         """Return a tuple pair of an 3x3 orientation array and
