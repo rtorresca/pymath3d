@@ -237,7 +237,12 @@ class Transform(object):
         else:
             raise self.Error('Inadequate data type for multiplication '
                              + 'in "other" : %s' % str(type(other)))
-        
+
+    @property
+    def pose_vector(self):
+        """ Get the transform in pose vector representation "(x, y, z, rx, ry, rz)"."""
+        return np.append(self._v._data, self._o.rotation_vector._data)
+
     def toArray(self):
         """Return a tuple pair of an 3x3 orientation array and
         position as 3-array."""

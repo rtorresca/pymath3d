@@ -16,7 +16,7 @@ import numpy as np
 # # Circular dependencies prevents direct import of Orientation, hence
 # # global addressing
 import math3d as m3d
-from .utils import isSequence,  isNumTypes,  _eps
+from .utils import isSequence,  isNumTypes,  _eps,  _deprecation_warning
 from .vector import Vector
 
 def isOrientation(o):
@@ -171,11 +171,19 @@ class Orientation(object):
         #if self.colX.dist(self.colY.cross(self.colZ)) > _eps:
         self.colX = self.vec_y.cross(self.vec_z)
 
+    @property
+    def rotation_vector(self):
+        """ Return a rotation vector representing this
+        orientation. This is essentially the logarithm of the rotation
+        matrix."""
+        q = m3d.Quaternion(self)
+        return q.rotation_vector
 
     def toRotationVector(self):
         """ Return a rotation vector representing this
         orientation. This is essentially the logarithm of the rotation
         matrix."""
+        _deprecation_warning('toRotationVector -> rotation_vector')
         q = m3d.Quaternion(self)
         return q.toRotationVector()
 

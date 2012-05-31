@@ -15,7 +15,7 @@ import numpy as np
 # # Circular dependencies prevents direct import of Orientation, hence
 # # global addressing
 import math3d as m3d
-from .utils import isNumType, _eps
+from .utils import isNumType, _eps, _deprecation_warning
 from .vector import Vector
 
 def isQuaternion(q):
@@ -202,10 +202,22 @@ class Quaternion(object):
         axis.normalize()
         self._s = ca
         self._v = sa * axis
-        
+
+    @property
+    def axis_angle(self):
+        """Return an '(axis, angle)' pair representing the orientation
+        of this quaternion."""
+        alpha = 2 * np.arccos(self._s)
+        if alpha != 0:
+            n = self._v / np.sin(alpha / 2)
+        else:
+            n = Vector()
+        return (n, alpha)
+
     def toAxisAngle(self):
         """Return an '(axis, angle)' pair representing the orientation
         of this quaternion."""
+        _deprecation_warning('toAxisAngle -> axis_angle')
         alpha = 2 * np.arccos(self._s)
         if alpha != 0:
             n = self._v / np.sin(alpha / 2)
@@ -224,10 +236,21 @@ class Quaternion(object):
             axis = Vector.e1
             angle = 0.0
         self.fromAxisAngle(axis, angle)
-    
+
+    @property
+    def rotation_vector(self):
+        """Return a rotation vector representing the rotation of this
+        quaternion."""
+        n, alpha = self.axis_angle
+        if alpha != 0.0:
+            return alpha * n
+        else:
+            return n
+
     def toRotationVector(self):
         """Return a rotation vector representing the rotation of this
         quaternion."""
+        _deprecation_warning('toRotationVector -> rotation_vector')
         n, alpha = self.toAxisAngle()
         if alpha != 0.0:
             return alpha * n
