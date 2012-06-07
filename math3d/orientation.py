@@ -93,17 +93,53 @@ class Orientation(object):
         o = Orientation()
         o.copy(self)
         return o
-    
+
     def __deepcopy__(self, memo):
         return self.__copy__()
-    
+
     def copy(self, other=None):
         """Copy data from other to self. """
         if other is None:
             return copy(self)
         else:
             self._data[:,:] = other._data.copy()
+
+    @property
+    def vec_x(self):
+        """ Return the x-direction of the moving coordinate system in
+        base reference as a Vector."""
+        return Vector(self._data[:,0])
+
+    @property
+    def col_x(self):
+        """ Return the x-direction of the moving coordinate system in
+        base reference as an array."""
+        return self._data[:,0]
     
+    @property
+    def vec_y(self):
+        """ Return the y-direction of the moving coordinate system in
+        base reference as a Vector."""
+        return Vector(self._data[:,1])
+
+    @property
+    def col_y(self):
+        """ Return the y-direction of the moving coordinate system in
+        base reference as an array."""
+        return self._data[:,1]
+    
+    @property
+    def vec_z(self):
+        """ Return the z-direction of the moving coordinate system in
+        base reference as a Vector."""
+        return Vector(self._data[:,2])
+
+    @property
+    def col_z(self):
+        """ Return the z-direction of the moving coordinate system in
+        base reference as an array."""
+        return self._data[:,2]
+
     def __getattr__(self, name):
         if name == 'data':
             return self._data.copy()
@@ -116,16 +152,16 @@ class Orientation(object):
         else:
             raise AttributeError('Attribute "%s" not found in Orientation'%name)
             #raise self.Error, 'Orientation does not have attribute "%s"' % name
-        
+
     def __getitem__(self, indices):
         return self._data.__getitem__(indices)
-    
+
     def __coerce__(self, other):
         if type(other) == Orientation:
             return (self, other)
         else:
             return None
-        
+
     def __eq__(self,other):
         if type(other) == Orientation:
             return np.sum((self._data-other._data)**2) < _eps

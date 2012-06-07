@@ -29,6 +29,9 @@ class Transform(object):
     and a Vector in member '_v' (accessible through 'pos') to
     represent the position part."""
 
+    """ A set of acceptable multi-value types for entering data."""
+    __value_types = (np.ndarray, list, tuple)
+
     class Error(Exception):
         """ Exception class."""
         def __init__(self, message):
@@ -91,9 +94,9 @@ class Transform(object):
         else:
             raise self.Error(
                 'Could not create Transform on arguments : "' + str(args) + '"')
-        self._setFromOV(self._o, self._v)
+        self._from_ov(self._o, self._v)
         
-    def _setFromOV(self, o, v):
+    def _from_ov(self, o, v):
         self._data = np.identity(4)
         ## First take over the data from Orientation and Vector
         self._data[:3,:3] = o._data
@@ -101,42 +104,74 @@ class Transform(object):
         ## Then share data with Orientation and Vector.
         self._o._data = self._data[:3,:3]
         self._v._data = self._data[:3,3]
-        
-    def __getattr__(self, name):
-        if name == 'data':
-            return self._data.copy()
-        elif name == 'orient':
-            return self._o
-        elif name == 'pos':
-            return self._v
+
+    @property
+    def pos(self):
+        return self._v
+
+    @pos.setter
+    def pos(self, new_pos):
+        if type(new_pos) in self.__value_types:
+            self._data[:3,3] = new_pos
+        elif type(new_pos) == Vector:
+            self._data[:3,3] = new_pos._data
         else:
-            raise AttributeError('Attribute "%s" not found in Transform'%name)
-        
-    def __setattr__(self, name, value):
-        if name == 'orient':
-            if type(value) == np.ndarray:
-                self._data[:3,:3] = value
-            elif type(value) == Orientation:
-                self._data[:3,:3] = value._data
-            elif type(value) in [list, tuple]:
-                self._data[:3,:3] = value
-            else:
-                raise self.Error('Trying to set "orient" by an object of '
-                                 + 'type "%s". ' % str(type(value))
-                                 + 'Needs list, tuple, ndarray, or Orientation.')
-        elif name == 'pos':
-            if type(value) == np.ndarray:
-                self._data[:3,3] = value
-            elif type(value) == Vector:
-                self._data[:3,3] = value._data
-            elif type(value) in [list, tuple]:
-                self._data[:3,3] = value
-            else:
-                raise self.Error('Trying to set "pos" by an object of '
-                                 + 'type "%s". '  % str(type(value))
-                                 + 'Needs tuple, list, ndarray, or Vector.')
+            raise self.Error('Trying to set "pos" by an object of '
+                             + 'type "%s". '  % str(type(new_pos))
+                             + 'Needs tuple, list, ndarray, or Vector.')
+
+    @property
+    def orient(self):
+        return  self._o
+    
+    @orient.setter
+    def orient(self, new_orient):
+        if type(new_orient) in self.__value_types:
+            self._data[:3,:3] = new_pos
+        elif type(new_orient) == Orientation:
+            self._data[:3,:3] = new_orient._data
         else:
-            object.__setattr__(self, name, value)
+            raise self.Error('Trying to set "orient" by an object of '
+                             + 'type "%s". '  % str(type(new_pos))
+                             + 'Needs tuple, list, ndarray, or Orientation.')
+
+    @property
+    def data(self):
+        return self._data.copy()
+
+    # def __getattr__(self, name):
+    #     if name == 'data':
+    #         return self._data.copy()
+    #     elif name == 'orient':
+    #         return self._o
+    #     elif name == 'pos':
+    #         return self._v
+    #     else:
+    #         raise AttributeError('Attribute "%s" not found in Transform'%name)
+        
+    # def __setattr__(self, name, value):
+    #     if name == 'orient':
+    #         if type(value) == :
+    #             self._data[:3,:3] = value
+    #         elif type(value) == Orientation:
+    #             self._data[:3,:3] = value._data
+    #         elif type(value) in [np.ndarray, list, tuple]:
+    #             self._data[:3,:3] = value
+    #         else:
+    #             raise self.Error('Trying to set "orient" by an object of '
+    #                              + 'type "%s". ' % str(type(value))
+    #                              + 'Needs list, tuple, ndarray, or Orientation.')
+    #     elif name == 'pos':
+    #         if type(value) == Vector:
+    #             self._data[:3,3] = value._data
+    #         elif type(value) in [list, tuple, np.ndarray]:
+    #             self._data[:3,3] = value
+    #         else:
+    #             raise self.Error('Trying to set "pos" by an object of '
+    #                              + 'type "%s". '  % str(type(value))
+    #                              + 'Needs tuple, list, ndarray, or Vector.')
+    #     else:
+    #         object.__setattr__(self, name, value)
             
     def __copy__(self):
         """Copy method for creating a (deep) copy of this Transform."""
@@ -180,15 +215,15 @@ class Transform(object):
         the given 'cx' and 'cy' directions and translation given by
         'p'."""
         self._o.fromXY(cx, cy)
-        self._v.pos = p
-        self._setFromOV(self._o, self._v)
+        self._v = p
+        self._from_ov(self._o, self._v)
         
     def fromXZP(self, cx, cz, p):
         """Make this transform correspond to the orientation given by
         the given 'cx' and 'cz' directions and translation given by 'p'."""
         self._o.fromXZ(cx, cz)
-        self._v.pos = p
-        self._setFromOV(self._o, self._v)
+        self._v = p
+        self._from_ov(self._o, self._v)
 
     def dist2(self, other):
         """Return the square of the metric distance, as unweighted
@@ -273,8 +308,5 @@ def _test():
     cz = Vector.e2
     p = Vector(1, 2, 3)
     t = newTransFromXZP(cx, cz, p)
-    print((t*cx))
+    print(t*cx)
     it = t.inverse()
-
-if __name__ == '__main__':
-    _test()
