@@ -12,7 +12,7 @@ __status__ = "Production"
 
 import numpy as np
 
-from math3d.utils import isNumTypes, isNumType, isSequence, isThreeSequence, _eps
+from math3d.utils import isNumTypes, isNumType, isSequence, isThreeSequence, _eps, _deprecation_warning
 
 def isVector(v):
     if __debug__: print('Deprecation warning: "isVector(v)". '
@@ -170,7 +170,7 @@ class Vector(object):
     
     def length(self):
         """Standard Euclidean length."""
-        return np.sqrt(self.length2())
+        return np.sqrt(self.length_sq)
 
     @property
     def length_sq(self):
@@ -201,7 +201,7 @@ class Vector(object):
     def dist2(self, other):
         """Compute euclidean distance between points given by self
         and 'other'."""
-        return (self - other).length2()
+        return (self - other).length_sq
 
     @property
     def cross_operator(self):

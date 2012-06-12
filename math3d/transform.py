@@ -278,16 +278,24 @@ class Transform(object):
         """ Get the transform in pose vector representation "(x, y, z, rx, ry, rz)"."""
         return np.append(self._v._data, self._o.rotation_vector._data)
 
-    def toArray(self):
+    @property
+    def array(self):
         """Return a tuple pair of an 3x3 orientation array and
         position as 3-array."""
         #return (self._o._data.copy(),self._v._data.copy())
         return (self._data[:3,:3], self._data[:3,3])
-    
-    def toList(self):
+    def toArray(self):
+        _deprecation_warning('toArray() -> [prop] array')
+        return self.array
+
+    @property
+    def list(self):
         """Return a list with orientation and position in list form."""
         #return [self._o._data.tolist(),self._v._data.tolist()]
         return [self._data[:3,:3].tolist(), self._data[:3,3].tolist()]
+    def toList(self):
+        _deprecation_warning('toList() -> [prop] list')
+        return self.list
     
 def newTransFromXYP(cx, cy, p):
     """Create a transform corresponding to the orientation given by

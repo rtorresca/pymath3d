@@ -356,7 +356,7 @@ class Orientation(object):
     def ang_dist_sq(self, other):
         """ Return the square of the orientation distance (the angle
         of rotation) to the 'other' orientation."""
-        return (self.inverse()*other).rotation_vector.length2()
+        return (self.inverse()*other).rotation_vector.length_sq
     def angDist2(self, other):
         _deprecation_warning('angDist2 -> ang_dist_sq')
         return self.ang_dist_sq(other)

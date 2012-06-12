@@ -10,8 +10,10 @@ __maintainer__ = "Morten Lind"
 __email__ = "morten@lind.no-ip.org"
 __status__ = "Production"
 
-import numpy as np
+import numbers
 import traceback
+
+import numpy as np
 
 def _deprecation_warning(msg):
     print('math3d: A deprecated method was invoked. Suggestion for replacement: "%s"' %msg)
@@ -39,7 +41,4 @@ def isNumType(val):
     return type(val) in _numTypes
 
 def isNumTypes(lst):
-    for li in lst:
-        if type(li) not in _numTypes:
-            return False
-    return True
+    return np.all([lambda li: isinstance(li, numbers.Number) for li in lst])

@@ -194,7 +194,7 @@ class Quaternion(object):
     def dist2(self, other):
         """Compute the square of the usual quaternion metric distance to the
         'other' quaternion."""
-        return (self._s - other._s)**2 + (self._v - other._v).length2()
+        return (self._s - other._s)**2 + (self._v - other._v).length_sq
 
     def dist(self, other):
         """Compute the usual quaternion metric distance to the
@@ -322,7 +322,7 @@ class Quaternion(object):
     @property
     def norm_sq(self):
         """Return the square of the norm of this quaternion."""
-        return self._s**2 + self._v.length2()
+        return self._s**2 + self._v.length_sq
     def norm2(self):
         _deprecation_warning('norm2() -> [prop] norm_sq')
         return self.norm_sq
