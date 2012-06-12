@@ -212,16 +212,14 @@ class Orientation(object):
         """ Return a rotation vector representing this
         orientation. This is essentially the logarithm of the rotation
         matrix."""
-        q = m3d.Quaternion(self)
-        return q.rotation_vector
+        return m3d.Quaternion(self).rotation_vector
 
     def toRotationVector(self):
         """ Return a rotation vector representing this
         orientation. This is essentially the logarithm of the rotation
         matrix."""
-        _deprecation_warning('toRotationVector -> rotation_vector')
-        q = m3d.Quaternion(self)
-        return q.toRotationVector()
+        _deprecation_warning('toRotationVector() -> [prop] rotation_vector')
+        return self.rotation_vector
 
     def fromRotationVector(self, rotVec):
         """ Set this Orientation to represent the one given in
@@ -235,11 +233,16 @@ class Orientation(object):
             axis = rotVec/angle
             self.fromAxisAngle(axis, angle)
 
+    @property 
+    def axis_angle(self):
+        """ Return an (axis,angle) pair representing the equivalent
+        orientation."""
+        return m3d.Quaternion(self).axis_angle
     def toAxisAngle(self):
         """ Return an (axis,angle) pair representing the equivalent
         orientation."""
-        q = m3d.Quaternion(self)
-        return q.toAxisAngle()
+        _deprecation_warning('toAxisAngle() -> [prop] axis_angle')
+        return self.axis_angle
 
     def fromAxisAngle(self, axis, angle):
         """ Set this orientation to the equivalent to rotation of
@@ -270,7 +273,7 @@ class Orientation(object):
         sa = np.sin(angle)
         self._data[:,:] = np.array([[1, 0, 0], [0, ca, -sa], [0, sa, ca]])
     def rotX(self, angle):
-        _deprecation_warning('rotX -> set_to_x_rotation')
+        _deprecation_warning('rotX() -> set_to_x_rotation()')
         return self.set_to_x_rotation(angle)
     
     def set_to_y_rotation(self, angle):
@@ -280,7 +283,7 @@ class Orientation(object):
         self._data[:,:] = np.array([[ca, 0, sa], [0, 1, 0], [-sa, 0, ca]])
         #self.fromAxisAngle(Vector.e1, angle)
     def rotY(self, angle):
-        _deprecation_warning('rotY -> set_to_y_rotation')
+        _deprecation_warning('rotY() -> set_to_y_rotation()')
         return self.set_to_y_rotation(angle)
 
     def set_to_z_rotation(self, angle):
@@ -290,7 +293,7 @@ class Orientation(object):
         self._data[:,:] = np.array([[ca, -sa, 0], [sa, ca, 0], [0, 0, 1]])
         #self.fromAxisAngle(Vector.e2,angle)
     def rotZ(self, angle):
-        _deprecation_warning('rotZ -> set_to_zrotation')
+        _deprecation_warning('rotZ() -> set_to_z_rotation()')
         return self.set_to_z_rotation(angle)
 
     def rotateT(self, axis, angle):
@@ -350,16 +353,22 @@ class Orientation(object):
     def __str__(self):
         return self.__repr__()
 
-    def angDist2(self, other):
+    def ang_dist_sq(self, other):
         """ Return the square of the orientation distance (the angle
         of rotation) to the 'other' orientation."""
-        return (self.inverse()*other).toRotationVector().length2()
+        return (self.inverse()*other).rotation_vector.length2()
+    def angDist2(self, other):
+        _deprecation_warning('angDist2 -> ang_dist_sq')
+        return self.ang_dist_sq(other)
 
-    def angDist(self, other):
+    def ang_dist(self, other):
         """ Return the orientation distance (the angle of rotation) to
         the 'other' orientation."""
-        return np.sqrt(self.angDist2(other))
-    
+        return np.sqrt(self.ang_dist_sq(other))
+    def angDist(self, other):
+        _deprecation_warning('angDist -> ang_dist')
+        return self.ang_dist(other)
+
     def invert(self):
         """ In-place inversion of this orientation."""
         self._data[:,:] = self._data.transpose().copy()
@@ -416,9 +425,11 @@ def newOrientRotY(angle):
     o.rotY(angle)
     return o
 
-if __name__ == '__main__':
+def _test():
     o = Orientation()
     r = Orientation()
     o.fromXY(Vector(1, 1, 0), Vector(-1, 1, 0))
-    r.rotZ(np.pi / 2)
+    r.set_to_z_rotation(np.pi / 2)
     ro = r * o
+    print(ro.ang_dist(r))
+    print(ro.axis_angle)

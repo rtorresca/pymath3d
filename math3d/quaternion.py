@@ -174,16 +174,23 @@ class Quaternion(object):
         q *= -1.0
         return q
 
-    def angNorm(self):
+    @property
+    def ang_norm(self):
         """Return the angular norm, i.e. the angular rotation, of
         this quaternion."""
         return 2*np.arccos(self._s)
+    def angNorm(self):
+        _deprecation_warning('angNorm() -> [prop] ang_norm')
+        return self.ang_norm
 
-    def angDist(self, other):
+    def ang_dist(self, other):
         """Compute the rotation angle distance to the 'other'
         quaternion."""
         return (self.conjugated()*other).angNorm()
-    
+    def angDist(self, other):
+        _deprecation_warning('angDist() -> ang_dist()')
+        return self.ang_dist(other)
+
     def dist2(self, other):
         """Compute the square of the usual quaternion metric distance to the
         'other' quaternion."""
@@ -213,17 +220,11 @@ class Quaternion(object):
         else:
             n = Vector()
         return (n, alpha)
-
     def toAxisAngle(self):
         """Return an '(axis, angle)' pair representing the orientation
         of this quaternion."""
-        _deprecation_warning('toAxisAngle -> axis_angle')
-        alpha = 2 * np.arccos(self._s)
-        if alpha != 0:
-            n = self._v / np.sin(alpha / 2)
-        else:
-            n = Vector()
-        return (n, alpha)
+        _deprecation_warning('toAxisAngle() -> [prop] axis_angle')
+        return self.axis_angle
 
     def fromRotationVector(self, w):
         """Set this quaternion to the equivalent of the given
@@ -246,17 +247,12 @@ class Quaternion(object):
             return alpha * n
         else:
             return n
-
     def toRotationVector(self):
         """Return a rotation vector representing the rotation of this
         quaternion."""
         _deprecation_warning('toRotationVector -> rotation_vector')
-        n, alpha = self.toAxisAngle()
-        if alpha != 0.0:
-            return alpha * n
-        else:
-            return n
-        
+        return self.rotation_vector
+    
     def fromOrientation(self, orient, positive=True):
         """Set this quaternion to represent the given
         orientation. The used method should be robust;
@@ -294,8 +290,9 @@ class Quaternion(object):
                 self._v[w] = (M[w, u] + M[u, w]) * tworinv
         if positive and self._s < 0:
             self *= -1.0
-                        
-    def toOrientation(self):
+
+    @property
+    def orientation(self):
         """Return an orientation object representing the same
         rotation as this quaternion."""
         ## Return an Orientation representing this quaternion
@@ -313,15 +310,23 @@ class Quaternion(object):
             [2 * x * y + 2 * s * z, 1 - 2 * (x2 + z2), -2 * s * x + 2 * y * z],
             [-2 * s * y + 2 * x * z, 2 * s * x + 2 * y * z, 1 - 2 * (x2 + y2)]
             ]))
-    
+    def toOrientation(self):
+        _deprecation_warning('toOrientation -> [prop] orientation')
+        return self.orientation
+
+    # // Should be property
     def norm(self):
         """Return the norm of this quaternion."""
         return np.sqrt(self.norm2())
-    
-    def norm2(self):
+
+    @property
+    def norm_sq(self):
         """Return the square of the norm of this quaternion."""
         return self._s**2 + self._v.length2()
-
+    def norm2(self):
+        _deprecation_warning('norm2() -> [prop] norm_sq')
+        return self.norm_sq
+    
     def conjugate(self):
         """In-place conjugation of this quaternion."""
         self._v = -self._v
@@ -360,9 +365,4 @@ class Quaternion(object):
         qi = self.copy()
         qi.invert()
         return qi  
-
-if __name__ == '__main__':
-    import readline
-    import rlcompleter
-    readline.parse_and_bind("tab: complete")
 
