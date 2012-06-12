@@ -317,7 +317,7 @@ class Quaternion(object):
     # // Should be property
     def norm(self):
         """Return the norm of this quaternion."""
-        return np.sqrt(self.norm2())
+        return np.sqrt(self.norm_sq)
 
     @property
     def norm_sq(self):
