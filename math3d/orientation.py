@@ -51,7 +51,7 @@ class Orientation(object):
             self.fromRotationVector(seq)
         else:
             raise self.Error('Creating on a numpy array requires shape (3,), (9,) or (3,3)!')
-            
+
     def __init__(self, *args):
         """Create an orientation on either of the following arguments:
         * An Orientation.
@@ -264,26 +264,34 @@ class Orientation(object):
              (1 - ct) * y * z + st * x,
              ct + (1 - ct) * z**2]])
 
-    def rotX(self, angle):
+    def set_to_x_rotation(self, angle):
         """ Replace this orientation by that of a rotation around x."""
         ca = np.cos(angle)
         sa = np.sin(angle)
         self._data[:,:] = np.array([[1, 0, 0], [0, ca, -sa], [0, sa, ca]])
-        #self.fromAxisAngle(Vector.e0, angle)
-        
-    def rotY(self, angle):
+    def rotX(self, angle):
+        _deprecation_warning('rotX -> set_to_x_rotation')
+        return self.set_to_x_rotation(angle)
+    
+    def set_to_y_rotation(self, angle):
         """ Replace this orientation by that of a rotation around y."""
         ca=np.cos(angle)
         sa=np.sin(angle)
         self._data[:,:] = np.array([[ca, 0, sa], [0, 1, 0], [-sa, 0, ca]])
         #self.fromAxisAngle(Vector.e1, angle)
-        
-    def rotZ(self, angle):
+    def rotY(self, angle):
+        _deprecation_warning('rotY -> set_to_y_rotation')
+        return self.set_to_y_rotation(angle)
+
+    def set_to_z_rotation(self, angle):
         """ Replace this orientation by that of a rotation around z. """
         ca = np.cos(angle)
         sa = np.sin(angle)
         self._data[:,:] = np.array([[ca, -sa, 0], [sa, ca, 0], [0, 0, 1]])
         #self.fromAxisAngle(Vector.e2,angle)
+    def rotZ(self, angle):
+        _deprecation_warning('rotZ -> set_to_zrotation')
+        return self.set_to_z_rotation(angle)
 
     def rotateT(self, axis, angle):
         """ In-place rotation of this orientation angle radians in
@@ -295,7 +303,10 @@ class Orientation(object):
     
     def rotateB(self, axis, angle):
         """ In-place rotation of this orientation angle radians in
-        axis perceived in the base reference system."""
+        axis perceived in the base reference system.
+        Arguments:
+        axis -- the axis to rotate about (unit vector with direction).
+        angle -- the angle in radians to rotate about the axis."""
         o = Orientation()
         o.fromAxisAngle(axis, angle)
         self.copy(o * self)
@@ -319,19 +330,19 @@ class Orientation(object):
         """ In-place rotation of this oriantation by a rotation around
         x axis in the transformed reference system. (Inefficient!)"""
         self.rotateT(Vector.e0, angle)
-    rotateX = rotateXT
+    rotate_x = rotateX = rotateXT
     
     def rotateYT(self,angle):
         """ In-place rotation of this oriantation by a rotation around
         y axis in the transformed reference system. (Inefficient!)"""
         self.rotateT(Vector.e1,angle)
-    rotateY = rotateYT
+    rotate_y = rotateY = rotateYT
     
     def rotateZT(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         z axis in the transformed reference system. (Inefficient!)"""
         self.rotateT(Vector.e2, angle)
-    rotateZ = rotateZT
+    rotate_z = rotateZ = rotateZT
     
     def __repr__(self):
         return '<Orientation: \n' + repr(self._data) + '>'
@@ -366,6 +377,9 @@ class Orientation(object):
             return Vector(np.dot(self._data, other._data))
         elif isSequence(other):
             return list(map(self.__mul__, other))
+        else:
+            raise self.Error('Multiplication by something other than '
+                             + 'Orientation, Vector, or a sequence of these, is not allowed!')
         
 def newOrientFromXY(cx, cy):
     """ Create an orientation conforming with the given 'x' and 'y'
