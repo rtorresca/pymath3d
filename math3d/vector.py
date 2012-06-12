@@ -172,10 +172,14 @@ class Vector(object):
         """Standard Euclidean length."""
         return np.sqrt(self.length2())
 
-    def length2(self):
+    @property
+    def length_sq(self):
         """Square of the standard Euclidean length."""
         return np.dot(self._data, self._data)
-
+    def length2(self):
+        _deprecation_warning('lenght2() -> [prop] length_sq')
+        return self.length_sq
+    
     def normalize(self):
         """In-place normalization of this Vector."""
         l = self.length()

@@ -52,7 +52,7 @@ class SO3Interpolation(object):
 
     def orient(self, time, checkrange=True):
         """Return the orientation in the slerp at 'time'; in [0,1]. """
-        return self.quat(time, checkrange).toOrientation()
+        return self.quat(time, checkrange).orientation
     
 SLERP = SO3Interpolation
 OrientationInterpolation = SO3Interpolation

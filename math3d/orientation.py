@@ -65,7 +65,7 @@ class Orientation(object):
             if type(arg) == Orientation:
                 self._data = arg.data
             elif type(arg) == m3d.Quaternion:
-                self._data = arg.toOrientation()._data
+                self._data = arg.orientation._data
             elif type(arg) == Vector:
                 ## Interpret as a rotation vector
                 self._data = np.identity(3)
