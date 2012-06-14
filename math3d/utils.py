@@ -11,12 +11,15 @@ __email__ = "morten@lind.no-ip.org"
 __status__ = "Production"
 
 import numbers
-import traceback
+import inspect
 
 import numpy as np
 
 def _deprecation_warning(msg):
-    print('math3d: A deprecated method was invoked. Suggestion for replacement: "%s"' %msg)
+    f = inspect.stack()[1]
+    print(f)
+    print('math3d: At %s : %d:\n\tA deprecated method was invoked. ' % (f[1], f[2])
+          + 'Suggestion for replacement: "%s"' % msg)
     
 ## Possibly replace by 1000*np.finfo(float).resolution
 _eps = np.finfo(np.float64).eps

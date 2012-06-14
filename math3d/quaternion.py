@@ -186,7 +186,7 @@ class Quaternion(object):
     def ang_dist(self, other):
         """Compute the rotation angle distance to the 'other'
         quaternion."""
-        return (self.conjugated()*other).angNorm()
+        return (self.conjugated()*other).ang_norm()
     def angDist(self, other):
         _deprecation_warning('angDist() -> ang_dist()')
         return self.ang_dist(other)
