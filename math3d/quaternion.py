@@ -51,7 +51,7 @@ class Quaternion(object):
                 self.fromOrientation(args[0])
             ## Try with rotation vector
             if type(args[0]) == Vector:
-                self.fromRotationVector(args[0])
+                self.from_rotation_vector(args[0])
 ## Copy constructor
             elif type(args[0]) == Quaternion:
                 self._s = args[0]._s
@@ -69,7 +69,7 @@ class Quaternion(object):
                 self.fromAxisAngle(axis, ang)
         elif len(args) == 3 and np.all(np.isreal):
             ## Assume three components of a rotation vector
-            self.fromRotationVector(Vector(args))
+            self.from_rotation_vector(Vector(args))
         elif len(args) == 4 and np.all(np.isreal):
             ## Assume numbers for s, x, y, and z
             self._s = args[0]
@@ -226,7 +226,7 @@ class Quaternion(object):
         _deprecation_warning('toAxisAngle() -> [prop] axis_angle')
         return self.axis_angle
 
-    def fromRotationVector(self, w):
+    def from_rotation_vector(self, rot_vec):
         """Set this quaternion to the equivalent of the given
         rotation vector 'w'."""
         angle = w.length()
@@ -237,7 +237,10 @@ class Quaternion(object):
             axis = Vector.e1
             angle = 0.0
         self.fromAxisAngle(axis, angle)
-
+    def fromRotationVector(self, rot_vec):
+        _deprecation_warning('fromRotationVector() -> from_rotation_vector()')
+        self.from_rotation_vector(rot_vec)
+        
     @property
     def rotation_vector(self):
         """Return a rotation vector representing the rotation of this

@@ -48,7 +48,7 @@ class Orientation(object):
             self._data.shape = (3,3)
         elif seq.shape == (3,):
             self._data = np.identity(3)
-            self.fromRotationVector(seq)
+            self.from_rotation_vector(seq)
         else:
             raise self.Error('Creating on a numpy array requires shape (3,), (9,) or (3,3)!')
 
@@ -69,7 +69,7 @@ class Orientation(object):
             elif type(arg) == Vector:
                 ## Interpret as a rotation vector
                 self._data = np.identity(3)
-                self.fromRotationVector(arg)
+                self.from_rotation_vector(arg)
             elif isSequence(arg):
                 self.__create_on_sequence(arg)
             else:
@@ -242,9 +242,10 @@ class Orientation(object):
         else:
             axis = rot_vec / angle
             self.from_axis_angle(axis, angle)
-    def fromRotationVector(self, rotVec):
+    def fromRotationVector(self, rot_vec):
         _deprecation_warning('fromRotationVector() -> from_rotation_vector()')
-
+        self.from_rotation_vector(rot_vec)
+        
     @property 
     def axis_angle(self):
         """ Return an (axis,angle) pair representing the equivalent
