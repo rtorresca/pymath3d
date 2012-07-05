@@ -182,6 +182,25 @@ class Orientation(object):
         else:
             object.__setattr__(self, name, val)
 
+    @property
+    def error(self):
+        """ Compute and return the square root of the sum of squared
+        dot products of the axis vectors, as a representation of the
+        error of the orientation matrix."""
+        vecx = self.vecx
+        vecy = self.vecy
+        vecz = self.vecz
+        sq_sum = (vecx*vecy)**2
+        sq_sum += (vecy*vecz)**2
+        sq_sum += (vecz*vecx)**2
+        return np.sqrt(sq_sum)
+    
+    # def renormalize(self):
+    #     """ Correct the axis vectors by a Gram-Schmidt procedure."""
+    #     colx = self._data[:,0]
+    #     coly = self._data
+        
+
     def from_xy(self, x_vec, y_vec):
         """ Reset this orientation to the one that conforms with the
         given x and y directions."""

@@ -293,7 +293,8 @@ class Quaternion(object):
                 self._v[w] = (M[w, u] + M[u, w]) * tworinv
         if positive and self._s < 0:
             self *= -1.0
-
+        self.normalize()
+        
     @property
     def orientation(self):
         """Return an orientation object representing the same
