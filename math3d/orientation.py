@@ -350,34 +350,37 @@ class Orientation(object):
         """ In-place rotation of this oriantation by a rotation around
         x axis in the base reference system. (Inefficient!)"""
         self.rotateB(Vector.e0, angle)
+    rotate_xb = rotateXB
     
     def rotateYB(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         y axis in the base reference system. (Inefficient!)"""
         self.rotateB(Vector.e1, angle)
+    rotate_yb = rotateYB
     
     def rotateZB(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         z axis in the base reference system. (Inefficient!)"""
         self.rotateB(Vector.e2, angle)
+    rotate_zb = rotateZB
     
     def rotateXT(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         x axis in the transformed reference system. (Inefficient!)"""
         self.rotateT(Vector.e0, angle)
-    rotate_x = rotateX = rotateXT
+    rotate_x = rotate_xt = rotateX = rotateXT
     
     def rotateYT(self,angle):
         """ In-place rotation of this oriantation by a rotation around
         y axis in the transformed reference system. (Inefficient!)"""
         self.rotateT(Vector.e1,angle)
-    rotate_y = rotateY = rotateYT
+    rotate_y = rotate_yt = rotateY = rotateYT
     
     def rotateZT(self, angle):
         """ In-place rotation of this oriantation by a rotation around
         z axis in the transformed reference system. (Inefficient!)"""
         self.rotateT(Vector.e2, angle)
-    rotate_z = rotateZ = rotateZT
+    rotate_z = rotate_zt = rotateZ = rotateZT
     
     def __repr__(self):
         return '<Orientation: \n' + repr(self._data) + '>'
