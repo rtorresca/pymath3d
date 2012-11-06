@@ -61,9 +61,9 @@ def _test():
     p0 = Vector([0, 1, 0])
     p1=Vector([1, 0, 1])
     o0 = Orientation()
-    o0.rotX(pi / 2)
+    o0.set_to_x_rotation(pi / 2)
     o1 = Orientation()
-    o1.rotZ(pi / 2)
+    o1.set_to_z_rotation(pi / 2)
     tint = SE3Interpolation(Transform(o0, p0), Transform(o1, p1))
 
 if __name__ == '__main__':

@@ -204,31 +204,30 @@ class Orientation(object):
     def from_xy(self, x_vec, y_vec):
         """ Reset this orientation to the one that conforms with the
         given x and y directions."""
-        if cx * cy > _eps:
-            print('warning ... orthogonalizing!')
-            #print ('%s %s'%(str(cx),str(cy))
-        self.colX = cx.normalized()
-        self.colY = cy.normalized()
-        self.colZ = cx.cross(cy).normalized()
+        self.colX = x_vec.normalized()
+        self.colY = y_vec.normalized()
+        self.colZ = x_vec.cross(y_vec).normalized()
         ## A last normalization check!
         #if self.colX.dist(self.colY.cross(self.colZ)) > _eps:
-        self.colX=self.vec_y.cross(self.vec_z)
-    def fromXY(self, cx, cy):
+        self.colX=self.vec_z.cross(self.vec_z)
+    def fromXY(self, x_vec, y_vec):
         _deprecation_warning('fromXY -> from_xy')
+        self.from_xy(x_vec, y_vec)
         
     def from_xz(self, x_vec, z_vec):
         """ Reset this orientation to the one that conforms with the
         given x and z directions."""
-        if cx * cz > _eps:
+        if x_vec * z_vec > _eps:
             print('warning ... orthogonalizing!')
-        self.colX = cx.normalized()
-        self.colZ = cz.normalized()
-        self.colY = cz.cross(cx).normalized()
+        self.colX = x_vec.normalized()
+        self.colZ = z_vec.normalized()
+        self.colY = z_vec.cross(x_vec).normalized()
         ## A last normalization check!
         #if self.colX.dist(self.colY.cross(self.colZ)) > _eps:
         self.colX = self.vec_y.cross(self.vec_z)
-    def fromXZ(self, cx, cz):
+    def fromXZ(self, x_vec, z_vec):
         _deprecation_warning('fromXZ -> from_xz')
+        self.from_xz(x_vec, z_vec)
 
     @property
     def rotation_vector(self):
@@ -424,24 +423,68 @@ class Orientation(object):
         else:
             raise self.Error('Multiplication by something other than '
                              + 'Orientation, Vector, or a sequence of these, is not allowed!')
-        
-def newOrientFromXY(cx, cy):
+
+    @classmethod
+    def new_from_xy(cls, x_vector, y_vector):
+        """ Factory for a new orientation with given x- and
+        y-direction."""
+        o = Orientation()
+        o.from_xy(x_vector, y_vector)
+        return o
+
+    @classmethod
+    def new_from_xz(cls, x_vector, z_vector):
+        """ Factory for a new orientation with given x- and
+        z-direction."""
+        o = Orientation()
+        o.from_xz(x_vector, z_vector)
+        return o
+
+    @classmethod
+    def new_rot_x(cls, angle):
+        """ Factory for a new orientation which is a rotation in the
+        signed angle 'angle' around the x-direction."""
+        o = Orientation()
+        o.set_to_x_rotation(angle)
+        return o
+
+    @classmethod
+    def new_rot_y(cls, angle):
+        """ Factory for a new orientation which is a rotation in the
+        signed angle 'angle' around the y-direction."""
+        o = Orientation()
+        o.set_to_y_rotation(angle)
+        return o
+
+    @classmethod
+    def new_rot_z(cls, angle):
+        """ Factory for a new orientation which is a rotation in the
+        signed angle 'angle' around the z-direction."""
+        o = Orientation()
+        o.set_to_z_rotation(angle)
+        return o
+
+
+def newOrientFromXY(x_vec, y_vec):
     """ Create an orientation conforming with the given 'x' and 'y'
     directions."""
+    _deprecation_warning('newOrientFromXY -> Orientation.new_from_xy')
     o = Orientation()
-    o.from_xy(cx, cy)
+    o.from_xy(x_vec, y_vec)
     return o
 
-def newOrientFromXZ(cx, cz):
+def newOrientFromXZ(x_vec, z_vec):
     """ Create an orientation conforming with the given 'x' and 'z'
-    directions."""    
+    directions."""
+    _deprecation_warning('newOrientFromXZ -> Orientation.new_from_xz')
     o = Orientation()
-    o.from_xz(cx, cz)
+    o.from_xz(x_vec, z_vec)
     return o
 
 def newOrientRotZ(angle):
     """ Create an orientation corresponding to a rotation for 'angle'
     around the z direction."""
+    _deprecation_warning('newOrientRotZ -> Orientation.new_rot_z')
     o = Orientation()
     o.set_to_z_rotation(angle)
     return o
@@ -449,6 +492,7 @@ def newOrientRotZ(angle):
 def newOrientRotX(angle):
     """ Create an orientation corresponding to a rotation for 'angle'
     around the x direction."""
+    _deprecation_warning('newOrientRotX -> Orientation.new_rot_x')
     o = Orientation()
     o.set_to_x_rotation(angle)
     return o
@@ -456,6 +500,7 @@ def newOrientRotX(angle):
 def newOrientRotY(angle):
     """ Create an orientation corresponding to a rotation for 'angle'
     around the y direction."""
+    _deprecation_warning('newOrientRotY -> Orientation.new_rot_y')
     o = Orientation()
     o.set_to_y_rotation(angle)
     return o

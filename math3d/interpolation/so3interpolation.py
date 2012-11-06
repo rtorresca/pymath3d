@@ -62,9 +62,9 @@ def _test():
     global o, o1, q, q1, osl, qsl
     from math import pi
     o = Orientation()
-    o.rotX(pi / 2)
+    o.set_to_x_rotation(pi / 2)
     o1 = Orientation()
-    o1.rotZ(pi / 2)
+    o1.set_to_z_rotation(pi / 2)
     q = Quaternion(o)
     q1 = Quaternion(o1)
     qsl = SO3Interpolation(q,q1)

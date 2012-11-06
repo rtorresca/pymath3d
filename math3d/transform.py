@@ -13,7 +13,7 @@ __status__ = "Production"
 
 import numpy as np
 
-from .utils import isSequence, _eps
+from .utils import isSequence, _eps, _deprecation_warning
 from .vector import Vector
 from .orientation import Orientation
 
@@ -210,20 +210,26 @@ class Transform(object):
         else:
             raise self.Error('Could not compare to non-Transform!')
 
-    def fromXYP(self, cx, cy, p):
+    def from_xyp(self, vec_x, vec_y, p):
         """Make this transform correspond to the orientation given by
-        the given 'cx' and 'cy' directions and translation given by
+        the given 'vec_x' and 'vec_y' directions and translation given by
         'p'."""
-        self._o.fromXY(cx, cy)
+        self._o.from_xy(vec_x, vec_y)
         self._v = p
         self._from_ov(self._o, self._v)
+    def fromXYP(self, vec_x, vec_y, p):
+        _deprecation_warning('fromXYP -> from_xyp')
+        self.from_xyp(vec_x, vec_y, p)
         
-    def fromXZP(self, cx, cz, p):
+    def from_xzp(self, vec_x, vec_z, p):
         """Make this transform correspond to the orientation given by
-        the given 'cx' and 'cz' directions and translation given by 'p'."""
-        self._o.fromXZ(cx, cz)
+        the given 'vec_x' and 'vec_z' directions and translation given by 'p'."""
+        self._o.from_xz(vec_x, vec_z)
         self._v = p
         self._from_ov(self._o, self._v)
+    def fromXZP(self, vec_x, vec_z, p):
+        _deprecation_warning('fromXZP -> from_xzp')
+        self.from_xzp(vec_x, vec_z, p)
 
     def dist2(self, other):
         """Return the square of the metric distance, as unweighted
@@ -296,25 +302,47 @@ class Transform(object):
     def toList(self):
         _deprecation_warning('toList() -> [prop] list')
         return self.list
-    
+
+    @classmethod
+    def new_from_xyp(self, vec_x, vec_y, p):
+        """Create a transform corresponding to the orientation given
+        by the given 'vec_x' and 'vec_y' directions and translation given by
+        'p'."""
+        t = Transform()
+        t.from_xyp(vec_x, vec_y, p)
+        return t
+
+    @classmethod
+    def new_from_xzp(self, vec_x, vec_z, p):
+        """Create a transform corresponding to the orientation given
+        by the given 'vec_x' and 'vec_z' directions and translation given by
+        'p'."""
+        t = Transform()
+        t.from_xzp(vec_x, vec_z, p)
+        return t
+
+
 def newTransFromXYP(cx, cy, p):
     """Create a transform corresponding to the orientation given by
     the given 'cx' and 'cy' directions and translation given by 'p'."""
+    _deprecation_warning('newTransFromXYP -> Transform.new_from_xyp')
     t = Transform()
-    t.fromXYP(cx, cy, p)
+    t.from_xyp(cx, cy, p)
     return t
 
 def newTransFromXZP(cx, cz, p):
     """ Create a transform corresponding to the orientation given by
     the given 'cx' and 'cz' directions and translation given by 'p'."""
+    _deprecation_warning('newTransFromXZP -> Transform.new_from_xzp')
     t = Transform()
-    t.fromXZP(cx, cz, p)
+    t.from_xzp(cx, cz, p)
     return t
 
 def _test():
     cx = Vector(2, 3, 0)
     cz = Vector.e2
     p = Vector(1, 2, 3)
-    t = newTransFromXZP(cx, cz, p)
+    t = Transform.new_from_xzp(cx, cz, p)
     print(t*cx)
     it = t.inverse()
+    print(t*it)
