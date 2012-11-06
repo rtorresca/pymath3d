@@ -360,7 +360,7 @@ class Quaternion(object):
 
     def invert(self):
         """In-place inversion of this quaternion. """
-        n2 = self.norm2()
+        n2 = self.norm_sq
         self.conjugate()
         self *= 1 / n2
         
