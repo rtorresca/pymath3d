@@ -215,17 +215,17 @@ class Transform(object):
         the given 'vec_x' and 'vec_y' directions and translation given by
         'origo'."""
         self._o.from_xy(vec_x, vec_y)
-        self._v = p
+        self._v = origo
         self._from_ov(self._o, self._v)
     def fromXYP(self, vec_x, vec_y, p):
         _deprecation_warning('fromXYP -> from_xyp')
         self.from_xyp(vec_x, vec_y, p)
         
-    def from_xzp(self, vec_x, vec_z, p):
+    def from_xzp(self, vec_x, vec_z, origo):
         """Make this transform correspond to the orientation given by
         the given 'vec_x' and 'vec_z' directions and translation given by 'p'."""
         self._o.from_xz(vec_x, vec_z)
-        self._v = p
+        self._v = origo
         self._from_ov(self._o, self._v)
     def fromXZP(self, vec_x, vec_z, p):
         _deprecation_warning('fromXZP -> from_xzp')
