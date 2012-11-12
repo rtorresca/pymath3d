@@ -210,10 +210,10 @@ class Transform(object):
         else:
             raise self.Error('Could not compare to non-Transform!')
 
-    def from_xyp(self, vec_x, vec_y, origo
+    def from_xyp(self, vec_x, vec_y, origo):
         """Make this transform correspond to the orientation given by
         the given 'vec_x' and 'vec_y' directions and translation given by
-        'origo"
+        'origo'."""
         self._o.from_xy(vec_x, vec_y)
         self._v = p
         self._from_ov(self._o, self._v)
@@ -307,18 +307,18 @@ class Transform(object):
     def new_from_xyp(self, vec_x, vec_y, origo):
         """Create a transform corresponding to the orientation given
         by the given 'vec_x' and 'vec_y' directions and translation given by
-        'origo"
+        'origo'."""
         t = Transform()
-        t.from_xyp(vec_x, vec_y, origo
+        t.from_xyp(vec_x, vec_y, origo)
         return t
 
     @classmethod
-    def new_from_xzp(self, vec_x, vec_z, origo
+    def new_from_xzp(self, vec_x, vec_z, origo):
         """Create a transform corresponding to the orientation given
         by the given 'vec_x' and 'vec_z' directions and translation given by
-        'origo"
+        'origo'."""
         t = Transform()
-        t.from_xzp(vec_x, vec_z, origo
+        t.from_xzp(vec_x, vec_z, origo)
         return t
 
 
