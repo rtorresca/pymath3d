@@ -187,12 +187,12 @@ class Orientation(object):
         """ Compute and return the square root of the sum of squared
         dot products of the axis vectors, as a representation of the
         error of the orientation matrix."""
-        vecx = self.vecx
-        vecy = self.vecy
-        vecz = self.vecz
-        sq_sum = (vecx*vecy)**2
-        sq_sum += (vecy*vecz)**2
-        sq_sum += (vecz*vecx)**2
+        vec_x = self.vec_x
+        vec_y = self.vec_y
+        vec_z = self.vec_z
+        sq_sum = (vec_x*vec_y)**2
+        sq_sum += (vec_y*vec_z)**2
+        sq_sum += (vec_z*vec_x)**2
         return np.sqrt(sq_sum)
     
     # def renormalize(self):
@@ -204,12 +204,12 @@ class Orientation(object):
     def from_xy(self, x_vec, y_vec):
         """ Reset this orientation to the one that conforms with the
         given x and y directions."""
-        self.colX = x_vec.normalized()
-        self.colY = y_vec.normalized()
-        self.colZ = x_vec.cross(y_vec).normalized()
+        self.vec_x = x_vec.normalized()
+        self.vec_y = y_vec.normalized()
+        self.vec_z = x_vec.cross(y_vec).normalized()
         ## A last normalization check!
-        #if self.colX.dist(self.colY.cross(self.colZ)) > _eps:
-        self.colX=self.vec_z.cross(self.vec_z)
+        #if self.vec_x.dist(self.vec_y.cross(self.vec_z)) > _eps:
+        self.vec_x=self.vec_y.cross(self.vec_z).normalized()
     def fromXY(self, x_vec, y_vec):
         _deprecation_warning('fromXY -> from_xy')
         self.from_xy(x_vec, y_vec)
@@ -219,12 +219,12 @@ class Orientation(object):
         given x and z directions."""
         if x_vec * z_vec > _eps:
             print('warning ... orthogonalizing!')
-        self.colX = x_vec.normalized()
-        self.colZ = z_vec.normalized()
-        self.colY = z_vec.cross(x_vec).normalized()
+        self.vec_x = x_vec.normalized()
+        self.vec_z = z_vec.normalized()
+        self.vec_y = z_vec.cross(x_vec).normalized()
         ## A last normalization check!
-        #if self.colX.dist(self.colY.cross(self.colZ)) > _eps:
-        self.colX = self.vec_y.cross(self.vec_z)
+        #if self.vec_x.dist(self.vec_y.cross(self.vec_z)) > _eps:
+        self.vec_x = self.vec_y.cross(self.vec_z)
     def fromXZ(self, x_vec, z_vec):
         _deprecation_warning('fromXZ -> from_xz')
         self.from_xz(x_vec, z_vec)
