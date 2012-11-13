@@ -3,11 +3,11 @@ Module implementing the Quaternion class.
 """
 
 __author__ = "Morten Lind"
-__copyright__ = "Morten Lind 2009-2012"
+__copyright__ = "Morten Lind 2012"
 __credits__ = ["Morten Lind"]
-__license__ = "GPL"
+__license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
-__email__ = "morten@lind.no-ip.org"
+__email__ = "morten@lind.dyndns.dk"
 __status__ = "Production"
 
 import numpy as np
@@ -52,7 +52,7 @@ class Quaternion(object):
             ## Try with rotation vector
             if type(args[0]) == Vector:
                 self.from_rotation_vector(args[0])
-## Copy constructor
+            ## Copy constructor
             elif type(args[0]) == Quaternion:
                 self._s = args[0]._s
                 self._v = args[0]._v.copy()
@@ -67,13 +67,16 @@ class Quaternion(object):
                 axis = args[0].copy()
                 ang = args[1]
                 self.fromAxisAngle(axis, ang)
-        elif len(args) == 3 and np.all(np.isreal):
+        elif len(args) == 3 and np.all(np.isreal(args)):
             ## Assume three components of a rotation vector
             self.from_rotation_vector(Vector(args))
-        elif len(args) == 4 and np.all(np.isreal):
+        elif len(args) == 4 and np.all(np.isreal(args)):
             ## Assume numbers for s, x, y, and z
             self._s = args[0]
             self._v = Vector(args[1:])
+        if np.abs(self.norm() - 1.0) > _eps:
+            print('Quaternion.__init__ : Warning : Arguments did not constitute a unit quaternion. Normalizing.')
+            self.normalize()
 
     def __getattr__(self, name):
         if name == 's':
@@ -229,9 +232,9 @@ class Quaternion(object):
     def from_rotation_vector(self, rot_vec):
         """Set this quaternion to the equivalent of the given
         rotation vector 'w'."""
-        angle = w.length()
+        angle = rot_vec.length()
         if angle > _eps:
-            axis = w.normalized()
+            axis = rot_vec.normalized()
         else:
             ## Select arbitrary x-direction as axis and set angle to zero
             axis = Vector.e1
@@ -240,7 +243,7 @@ class Quaternion(object):
     def fromRotationVector(self, rot_vec):
         _deprecation_warning('fromRotationVector() -> from_rotation_vector()')
         self.from_rotation_vector(rot_vec)
-        
+
     @property
     def rotation_vector(self):
         """Return a rotation vector representing the rotation of this
@@ -370,3 +373,17 @@ class Quaternion(object):
         qi.invert()
         return qi  
 
+    @property
+    def array(self):
+        """ Return an ndarray with the fundamental data
+        of the Quaternion.  The layout is as described by the
+        Quaternion.list property"""
+        return np.array(self.list)
+
+    @property
+    def list(self):
+        """ Return the fundamental data of the Quaternion as a
+        list. The scalar part is placed in the first element, at index
+        0, and the vector data at the remainder, slice [1:]."""
+        return [self._s]+self._v.list
+        

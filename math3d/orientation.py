@@ -4,11 +4,11 @@ represented internally by an orthogonal 3x3 matrix.
 """
 
 __author__ = "Morten Lind"
-__copyright__ = "Morten Lind 2009-2012"
+__copyright__ = "Morten Lind 2012"
 __credits__ = ["Morten Lind"]
-__license__ = "GPL"
+__license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
-__email__ = "morten@lind.no-ip.org"
+__email__ = "morten@lind.dyndns.dk"
 __status__ = "Production"
 
 import numpy as np
@@ -423,6 +423,16 @@ class Orientation(object):
         else:
             raise self.Error('Multiplication by something other than '
                              + 'Orientation, Vector, or a sequence of these, is not allowed!')
+    @property
+    def array(self):
+        """ Return a copy of the ndarray which is the fundamental data
+        of the Orientation."""
+        return self._data.copy()
+
+    @property
+    def list(self):
+        """ Return the fundamental data of the Orientation as a list."""
+        return self._data.tolist()
 
     @classmethod
     def new_from_xy(cls, x_vector, y_vector):

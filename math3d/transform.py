@@ -4,11 +4,11 @@ represented internally by associated orientation and a vector objects.
 """
 
 __author__ = "Morten Lind"
-__copyright__ = "Morten Lind 2009-2012"
+__copyright__ = "Morten Lind 2012"
 __credits__ = ["Morten Lind"]
-__license__ = "GPL"
+__license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
-__email__ = "morten@lind.no-ip.org"
+__email__ = "morten@lind.dyndns.dk"
 __status__ = "Production"
 
 import numpy as np
@@ -295,14 +295,25 @@ class Transform(object):
         return self.array
 
     @property
-    def list(self):
-        """Return a list with orientation and position in list form."""
+    def structued_list(self):
+        """Return a list with separate orientation and position in list form."""
         #return [self._o._data.tolist(),self._v._data.tolist()]
         return [self._data[:3,:3].tolist(), self._data[:3,3].tolist()]
     def toList(self):
         _deprecation_warning('toList() -> [prop] list')
         return self.list
 
+    @property
+    def array(self):
+        """ Return a copy of the ndarray which is the fundamental data
+        of the Transform."""
+        return self._data.copy()
+
+    @property
+    def list(self):
+        """ Return the fundamental data of the Transform as a list."""
+        return self._data.tolist()
+        
     @classmethod
     def new_from_xyp(self, vec_x, vec_y, origo):
         """Create a transform corresponding to the orientation given

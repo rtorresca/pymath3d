@@ -3,12 +3,13 @@ Module implementing the Vector class.
 """
 
 __author__ = "Morten Lind"
-__copyright__ = "Morten Lind 2009-2012"
+__copyright__ = "Morten Lind 2012"
 __credits__ = ["Morten Lind"]
-__license__ = "GPL"
+__license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
-__email__ = "morten@lind.no-ip.org"
+__email__ = "morten@lind.dyndns.dk"
 __status__ = "Production"
+
 
 import numpy as np
 
@@ -205,9 +206,9 @@ class Vector(object):
 
     @property
     def cross_operator(self):
-        """Return the cross product operator for this
-        Vector. I.e. the skew-symmetric operator Cv, such that Cv * u
-        == v x u, for any vector u."""
+        """Return the cross product operator for this Vector. I.e. the
+        skew-symmetric operator Cv, such that Cv * u == v x u, for any
+        vector u."""
         Cv = np.zeros((3,3))
         Cv[0,1] = -self._data[2]
         Cv[0,2] = self._data[1]
@@ -219,6 +220,29 @@ class Vector(object):
     
     def cross(self, other):
         return Vector(np.cross(self._data, other._data))
+
+    @property
+    def array(self):
+        """ Return a copy of the ndarray which is the fundamental data
+        of the Vector."""
+        return self._data.copy()
+
+    @property
+    def list(self):
+        """ Return the fundamental data of the Vector as a list."""
+        return self._data.tolist()
+        
+    @property
+    def row_matrix(self):
+        """ Property for getting a single-row matrix with the data
+        from the vector."""
+        return self._data.reshape((1,3))
+
+    @property
+    def col_matrix(self):
+        """ Property for getting a single-column matrix with the data
+        from the vector."""
+        return self._data.reshape((3,1))
 
     def __sub__(self, other):
         if type(other) == Vector:
