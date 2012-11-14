@@ -98,7 +98,7 @@ class Quaternion(object):
     @property
     def scalar_part(self):
         """Return the scalar part of the quaternion."""
-        return self._v
+        return self._s
 
     def __setattr__(self, name, val):
         if name in ['s', 'x', 'y', 'z']:
