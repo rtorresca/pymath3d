@@ -23,17 +23,17 @@ def isTransform(t):
     return type(t)==Transform
 
 class Transform(object):
-    """ A Transform is a member of SE(3), represented as a homogenous
+    """A Transform is a member of SE(3), represented as a homogenous
     transformation matrix. It uses an Orientation in member '_o'
     (accessible through 'orient') to represent the orientation part
     and a Vector in member '_v' (accessible through 'pos') to
     represent the position part."""
 
-    """ A set of acceptable multi-value types for entering data."""
+    """A set of acceptable multi-value types for entering data."""
     __value_types = (np.ndarray, list, tuple)
 
     class Error(Exception):
-        """ Exception class."""
+        """Exception class."""
         def __init__(self, message):
             self.message = message
             Exception.__init__(self, self.message)
@@ -281,7 +281,7 @@ class Transform(object):
 
     @property
     def pose_vector(self):
-        """ Get the transform in pose vector representation "(x, y, z, rx, ry, rz)"."""
+        """Get the transform in pose vector representation "(x, y, z, rx, ry, rz)"."""
         return np.append(self._v._data, self._o.rotation_vector._data)
 
     @property
@@ -304,14 +304,20 @@ class Transform(object):
         return self.list
 
     @property
+    def matrix(self):
+        """Property for getting a (4,4) np-matrix with the data
+        from the transform."""
+        return np.matrix(self._data)
+
+    @property
     def array(self):
-        """ Return a copy of the ndarray which is the fundamental data
+        """Return a copy of the (4,4) ndarray which is the fundamental data
         of the Transform."""
         return self._data.copy()
 
     @property
     def list(self):
-        """ Return the fundamental data of the Transform as a list."""
+        """Return the fundamental data of the Transform as a list."""
         return self._data.tolist()
         
     @classmethod
@@ -342,7 +348,7 @@ def newTransFromXYP(cx, cy, p):
     return t
 
 def newTransFromXZP(cx, cz, p):
-    """ Create a transform corresponding to the orientation given by
+    """Create a transform corresponding to the orientation given by
     the given 'cx' and 'cz' directions and translation given by 'p'."""
     _deprecation_warning('newTransFromXZP -> Transform.new_from_xzp')
     t = Transform()

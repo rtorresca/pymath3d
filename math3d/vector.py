@@ -21,7 +21,7 @@ def isVector(v):
     return type(v) == Vector
 
 class Vector(object):
-    """ A Vector is a 3D vector (member of R3) with standard Euclidian
+    """A Vector is a 3D vector (member of R3) with standard Euclidian
     operations."""
     
     class Error(Exception):
@@ -207,40 +207,40 @@ class Vector(object):
     @property
     def cross_operator(self):
         """Return the cross product operator for this Vector. I.e. the
-        skew-symmetric operator Cv, such that Cv * u == v x u, for any
+        skew-symmetric operator cross_op, such that cross_op * u == v x u, for any
         vector u."""
-        Cv = np.zeros((3,3))
-        Cv[0,1] = -self._data[2]
-        Cv[0,2] = self._data[1]
-        Cv[1,0] = self._data[2]
-        Cv[1,2] = -self._data[0]
-        Cv[2,0] = -self._data[1]
-        Cv[2,1] = self._data[0]
-        return Cv
+        cross_op = np.zeros((3,3))
+        cross_op[0,1] = -self._data[2]
+        cross_op[0,2] = self._data[1]
+        cross_op[1,0] = self._data[2]
+        cross_op[1,2] = -self._data[0]
+        cross_op[2,0] = -self._data[1]
+        cross_op[2,1] = self._data[0]
+        return cross_op
     
     def cross(self, other):
         return Vector(np.cross(self._data, other._data))
 
     @property
     def array(self):
-        """ Return a copy of the ndarray which is the fundamental data
+        """Return a copy of the ndarray which is the fundamental data
         of the Vector."""
         return self._data.copy()
 
     @property
     def list(self):
-        """ Return the fundamental data of the Vector as a list."""
+        """Return the fundamental data of the Vector as a list."""
         return self._data.tolist()
         
     @property
-    def row_matrix(self):
-        """ Property for getting a single-row matrix with the data
+    def matrix(self):
+        """Property for getting a single-column np-matrix with the data
         from the vector."""
-        return self._data.reshape((1,3))
+        return np.matrix(self._data).T
 
     @property
-    def col_matrix(self):
-        """ Property for getting a single-column matrix with the data
+    def column(self):
+        """Property for getting a single-column array with the data
         from the vector."""
         return self._data.reshape((3,1))
 
@@ -277,7 +277,7 @@ class Vector(object):
             raise self.Error('__rmul__ : Could not multiply by non-number')
         
     def __truediv__(self, other):
-        """ Division with a scalar, 'other'. """
+        """Division with a scalar, 'other'. """
         if isNumType(other):
             return Vector(1.0 / other * self._data)
         else:

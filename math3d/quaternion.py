@@ -88,11 +88,21 @@ class Quaternion(object):
         elif name == 'z':
             return self._v.z
         else:
-            raise AttributeError('Attribute "%s" not found in Quaternion class'%name)
+            raise AttributeError('Attribute "%s" not found in Quaternion class' % name)
+
+    @property
+    def vector_part(self):
+        """Return a copy of the vector part of the quaternion."""
+        return self._v.copy()
+
+    @property
+    def scalar_part(self):
+        """Return the scalar part of the quaternion."""
+        return self._v
 
     def __setattr__(self, name, val):
         if name in ['s', 'x', 'y', 'z']:
-            raise AttributeError('Not allowed to set attribute "%s" in Quaternion'%name)
+            raise AttributeError('Not allowed to set attribute "%s" in Quaternion' % name)
         else:
             object.__setattr__(self, name, val)
         
@@ -375,15 +385,16 @@ class Quaternion(object):
 
     @property
     def array(self):
-        """ Return an ndarray with the fundamental data
+        """Return an ndarray with the fundamental data
         of the Quaternion.  The layout is as described by the
         Quaternion.list property"""
         return np.array(self.list)
 
     @property
     def list(self):
-        """ Return the fundamental data of the Quaternion as a
+        """Return the fundamental data of the Quaternion as a
         list. The scalar part is placed in the first element, at index
         0, and the vector data at the remainder, slice [1:]."""
         return [self._s]+self._v.list
         
+    
