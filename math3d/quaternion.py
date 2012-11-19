@@ -123,9 +123,8 @@ class Quaternion(object):
         return self.__copy__()
     
     def copy(self, other=None):
-        """Set this quaternion to a copy of other, if not
-        None. Otherwise, return a quaternion which is a copy of this
-        quaternion."""
+        """Copy data from 'other' to self. If no argument given,
+        i.e. 'other==None', return a copy of this Quaternion."""
         if other is None:
             return Quaternion(self)
         else:

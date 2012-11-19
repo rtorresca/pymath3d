@@ -181,11 +181,12 @@ class Transform(object):
         return self.__copy__()
 
     def copy(self, other=None):
-        """Copy data from other to self. """
+        """Copy data from 'other' to self. If no argument given,
+        i.e. 'other==None', return a copy of this Transform."""
         if other is None:
             return Transform(self)
         else:
-            self._data[:,:] = other._data.copy()
+            self._data[:,:] = other._data
         
     def __repr__(self):
         return '<Transform:\n' + repr(self.orient) + '\n' + repr(self.pos) + '>'

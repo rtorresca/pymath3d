@@ -80,11 +80,12 @@ class Vector(object):
         return self.__copy__()
     
     def copy(self, other=None):
-        """Copy data from 'other' to self. """
+        """Copy data from 'other' to self. If no argument given,
+        i.e. 'other==None', return a copy of this Vector."""
         if other is None:
             return Vector(self)
         else:
-            self._data[:] = other._data.copy()
+            self._data[:] = other._data
 
     def __getattr__(self,name):
         if name == 'data':

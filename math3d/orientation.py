@@ -90,19 +90,18 @@ class Orientation(object):
 
     def __copy__(self):
         """Copy method for creating a copy of this Orientation."""
-        o = Orientation()
-        o.copy(self)
-        return o
+        return Orientation(self)
 
     def __deepcopy__(self, memo):
         return self.__copy__()
 
     def copy(self, other=None):
-        """Copy data from other to self. """
+        """Copy data from 'other' to self. If no argument given,
+        i.e. 'other==None', return a copy of this Orientation"""
         if other is None:
-            return copy(self)
+            return Orientation(self)
         else:
-            self._data[:,:] = other._data.copy()
+            self._data[:,:] = other._data
 
     @property
     def vec_x(self):
