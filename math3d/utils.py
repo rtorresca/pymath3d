@@ -21,8 +21,8 @@ def _deprecation_warning(msg):
     print('math3d: At %s : %d:\n\tA deprecated method was invoked. ' % (f[1], f[2])
           + 'Suggestion for replacement: "%s"' % msg)
     
-## Possibly replace by 1000*np.finfo(float).resolution
-_eps = np.finfo(np.float64).eps
+## Limit for accuracy of consistencies and comparison.
+_eps = np.finfo(np.float32).resolution
 
 ## Tuple of types considered sequences 
 _seqTypes = (list, tuple, np.ndarray)
