@@ -278,7 +278,7 @@ class Quaternion(object):
         http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
         is used; the one from 'Angel'
         """
-        M = orient.data
+        M = orient._data
         tr = M.trace() + 1.0
         if tr > 1e-10:
             s = 0.5 / np.sqrt(tr)
