@@ -286,7 +286,7 @@ class Transform(object):
         return np.append(self._v._data, self._o.rotation_vector._data)
 
     @property
-    def array(self):
+    def structured_array(self):
         """Return a tuple pair of an 3x3 orientation array and
         position as 3-array."""
         #return (self._o._data.copy(),self._v._data.copy())
