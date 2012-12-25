@@ -1,0 +1,2 @@
+#!/bin/sh
+fakeroot dh binary  --with python2,python3

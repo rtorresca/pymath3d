@@ -1,0 +1,21 @@
+Source: math3d
+Section: unknown
+Priority: extra
+Maintainer: Morten Lind <morten@lind.dyndns.dk>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.3
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://git.debian.org/collab-maint/python-math3d.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/python-math3d.git;a=summary
+X-Python-Version: >= 2.6
+X-Python3-Version: >= 3.1
+
+Package: python-math3d
+Architecture: all
+Depends: ${python:Depends}, ${misc:Depends}
+Description: 3D Special Euclidean mathematics package for Python.
+
+Package: python3-math3d
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}
+Description: 3D Special Euclidean mathematics package for Python.
