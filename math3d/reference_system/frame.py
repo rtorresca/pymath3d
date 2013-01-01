@@ -19,12 +19,14 @@ class Frame(object):
     a root frame, and the transform which represents the frame in its
     root."""
     
-    def __init__(self, name, root_frame=None, xform=Transform()):
-        """ Initialize a frame by a 'name', a 'root_frame' (defaults
-        to None) and a transform (defaults to the identity)."""
-        self.name = name
-        self.root = root_frame
+    def __init__(self, name, root_frame=None, xform=None):
+        """Initialize a frame by a 'name', a 'root_frame' (defaults to
+        None) and a transform (defaults to the identity)."""
+        self._name = name
+        self._root_frame = root_frame
         ## The transform from this to root coordinates, i.e. 'this in root'
+        if xform is None:
+            xform = Transform()
         self._xform = xform
         
     @property
@@ -32,6 +34,10 @@ class Frame(object):
         """Give access to the fundamental transform which represents
         this frame in its root frame."""
         return self._xform
-    
+
     def __repr__(self):
-        return 'Frame:%s' % self.name
+        return (
+            'Frame: "{_name}" in frame "{_root_frame}" with pose vector '
+            '{_xform.pose_vector}'
+            ).format(**self.__dict__)
+
