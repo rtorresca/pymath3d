@@ -35,6 +35,15 @@ class Frame(object):
         this frame in its root frame."""
         return self._xform
 
+    @property
+    def name(self):
+        """The name of this frame."""
+        return self._name
+
+    @property
+    def root_frame(self):
+        return self._root_frame
+
     def __repr__(self):
         return (
             'Frame: "{_name}" in frame "{_root_frame}" with pose vector '
