@@ -304,9 +304,9 @@ class Vector(object):
         return Vector(-self._data)
 
 # Unit Vectors
-Vector.e0 = Vector(1,0,0)
-Vector.e1 = Vector(0,1,0)
-Vector.e2 = Vector(0,0,1)
+Vector.ex = Vector.e0 = Vector(1,0,0)
+Vector.ey = Vector.e1 = Vector(0,1,0)
+Vector.ez = Vector.e2 = Vector(0,0,1)
     
 def _test():
     print((Vector.canCreateOn(1,2,3), Vector.canCreateOn((1,2,3)), Vector.canCreateOn(1,2)))

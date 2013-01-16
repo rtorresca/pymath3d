@@ -480,6 +480,32 @@ class Orientation(object):
         o.set_to_z_rotation(angle)
         return o
 
+    @classmethod
+    def new_vec_to_vec(cls, from_vec, to_vec):
+        """Factory for a new orientation which is the rotation in the
+        signed angle 'angle' around the z-direction which rotates
+        'from_vec' to 'to_vec'."""
+        angle = from_vec.angle(to_vec)
+        if angle <= 1.0e-8:
+            # // Identity
+            return Orientation()
+        elif angle < np.pi-1.0e-8:
+            # // Regular, minimal rotation
+            return Orientation(angle * from_vec.cross(to_vec).normalized())
+        else:
+            # // Find a suitable rotation axis
+            x_angle = Vector.ex.angle(from_vec)
+            if x_angle > 1e-3 and x_angle < np.pi - 1.0e-3:
+                return Orientation(angle * 
+                                   Vector.ex.cross(from_vec).normalized())
+            y_angle = Vector.ey.angle(from_vec)
+            if y_angle > 1e-3 and y_angle < np.pi - 1.0e-3:
+                return Orientation(angle * 
+                                   Vector.ey.cross(from_vec).normalized())
+            z_angle = Vector.ez.angle(from_vec)
+            if z_angle > 1e-3 and z_angle < np.pi - 1.0e-3:
+                return Orientation(angle * 
+                                   Vector.ez.cross(from_vec).normalized())
 
 def newOrientFromXY(x_vec, y_vec):
     """Create an orientation conforming with the given 'x' and 'y'
