@@ -13,6 +13,7 @@ __status__ = "Development"
 import numpy as np
 from .frame import Frame
 from .point import Point
+from .free_vector import FreeVector
 from ..transform import Transform
 
 class ReferenceSystem(object):
@@ -33,7 +34,8 @@ class ReferenceSystem(object):
         only the 'World' frame."""
         self._frames = {'world': Frame('world')}
         self._points = {}
-        
+        self._free_vectors = {}
+
     def _get_root_path(self, frame):
         """Assemble the root path as a list of frames leading from the
         given 'frame' to the root of the reference system. 'frame' may
@@ -57,8 +59,8 @@ class ReferenceSystem(object):
         frames 'frame_1' and 'frame_2'. The frames may be given
         directly as Frame objects or as strings identifying frames in
         the reference system."""
-        frame_1 = frame_1 if type(frame_1) == str else self._frames[frame_1]
-        frame_2 = frame_2 if type(frame_2) == str else self._frames[frame_2]
+        frame_1 = frame_1 # if type(frame_1) == str else self._frames[frame_1]
+        frame_2 = frame_2 # if type(frame_2) == str else self._frames[frame_2]
         rp1 = self._get_root_path(frame_1)
         rp2 = self._get_root_path(frame_2)
         # // find a common root frame
@@ -89,6 +91,24 @@ class ReferenceSystem(object):
         ## Return the transformed position vector.
         return trf * point.pos_vec
         
+    def get_free_vec(self, free_vec_name):
+        """Retrieve the point object registered under the given
+        'point_name'."""
+        return self._free_vectors[free_vec_name]
+        
+    def free_vector_in_ref(self, free_vec, target_frame):
+        """Return a vector for 'free_vec' with reference in the given
+        'target_frame'. 'free_vec' may be given as a FreeVector
+        instance with internal reference to a registered frame, or as
+        a string naming a registered point."""
+        if type(free_vec) == str:
+            free_vec = self.get_free_vec(free_vec)
+        ## Get the transform from the free_vec's root frame to target frame coordinates.
+        trf = self.transform(target_frame, free_vec._root_frame)
+        ## Return the transformed free vector.
+        return trf.orient * free_vec.free_vec
+
+
     def transform(self, frame_target, frame_base):
         """ Return the transform from 'frame_target' coordinates to
         'frame_base' coordinates. The frames may be given directly as
@@ -101,79 +121,89 @@ class ReferenceSystem(object):
 
     __call__=transform
 
-    def add_new_point(self, point_name, root, pos_vec):
+    def add_point(self, point_name, root, pos_vec):
         """Add a new, specified point to the reference system."""
         if point_name in self._points:
             raise self.Error(
                 'Trying to register a new point with name "%s",'
                 ' which is already registered!' % point_name)
         if type(root) == str:
-            root = self.get_frame(root)
+            root = self._frames[root]
         self._points[point_name] = Point(point_name, root, pos_vec) 
 
+    def add_free_vector(self, vec_name, root, free_vec):
+        """Add a new free vector with given 'name', representation
+        'root', and representation 'free_vec'."""
+        if vec_name in self._free_vectors:
+            raise self.Error(
+                'Trying to register a new free vector with name "%s",'
+                ' which is already registered!' % vec_name)
+        if type(root) == str:
+            root = self._frames[root]
+        self._free_vectors[vec_name] = FreeVector(vec_name, root, free_vec) 
 
-    def add_new_frame(frame_name, root, xform_getter=None):
+    def add_frame(self, frame_name, root, xform=None):
         """Add a new, specified frame to the reference system."""
         if frame_name in self._frames:
             raise self.Error(
                 'Trying to register a new frame with name "%s",'
                 ' which is already registered!' % frame_name)
         if type(root) == str:
-            root = self.get_frame(root)
+            root = self._frames[root]
         if not root in self._frames.values():
             raise self.Error(
                 'Trying to register a new frame with root "%s",'
                 ' which is not in the reference system!' % root.name)
-        self._frames[frame_name] = Frame(frame_name, root, xform_getter)
+        self._frames[frame_name] = Frame(frame_name, root, xform)
 
-    def add_frame_object(frame_object):
-        """Add a specialized frame object, """
-        if frame.name in self._frames:
-            raise self.Error(
-                'Trying to register a frame with name "%s",'
-                ' which is already registered!' % frame.name)
-        self._frames[frame.name] = frame_object
+    # def add_frame_object(frame_object):
+    #     """Add a specialized frame object, """
+    #     if frame.name in self._frames:
+    #         raise self.Error(
+    #             'Trying to register a frame with name "%s",'
+    #             ' which is already registered!' % frame.name)
+    #     self._frames[frame.name] = frame_object
         
-    def add_frame(self, frame_name, root=None, xform=None):
-        """Add a frame identified by 'frame_name' to the reference
-        system, rooted at 'root', and using either 'xform' as
-        transform or a given 'frame' object which should provide the
-        same interface as a Frame object. 'root' may be given as a
-        frame or as a string identifying a frame."""
-        if type(root) == Frame:
-            root = root
-            root_name = root._name
-        elif type(root) == str:
-            root_name = root
-            root = self._frames[root]
-        else:
-            ## Check if a frame_object is given and get root from that.
-            if frame_object is None:
-                raise self.Error(
-                    'Either a valid root frame must be given in "root" argument,'
-                    ' or a specific "frame_object" with reference must'
-                    ' be given.')
-            else:
-                root = frame_object._root_frame
-                root_name = root._name
-        if not root_name in self._frames:
-            raise self.Error('Root frame "%s" ' % root_name
-                             + 'not found in reference system')
-        if frame_name in self._frames:
-            raise self.Error('Frame name "%s" ' % frame_name
-                             + 'already exists in  the reference system')
-        if xform is None and frame_object is None:
-            raise self.Error('Need specification of new frame by argument '
-                             + '"xform" or "frame".')
-        elif not xform is None and not frame_object is  None:
-            raise self.Error('Need one single specification in arguments '
-                             + '"xform" or "frame". One of them must be None!')
-        if not xform is None:
-            self._frames[frame_name] = Frame(frame_name, root, xform)
-        elif not frame is None:
-            self._frames[frame_name] = frame
-            if type(frame._root_frame) == str:
-                frame._root_frame = self._frames[frame._root_frame]
+    # def add_frame(self, frame_name, root=None, xform=None):
+    #     """Add a frame identified by 'frame_name' to the reference
+    #     system, rooted at 'root', and using either 'xform' as
+    #     transform or a given 'frame' object which should provide the
+    #     same interface as a Frame object. 'root' may be given as a
+    #     frame or as a string identifying a frame."""
+    #     if type(root) == Frame:
+    #         root = root
+    #         root_name = root._name
+    #     elif type(root) == str:
+    #         root_name = root
+    #         root = self._frames[root]
+    #     else:
+    #         ## Check if a frame_object is given and get root from that.
+    #         if frame_object is None:
+    #             raise self.Error(
+    #                 'Either a valid root frame must be given in "root" argument,'
+    #                 ' or a specific "frame_object" with reference must'
+    #                 ' be given.')
+    #         else:
+    #             root = frame_object._root_frame
+    #             root_name = root._name
+    #     if not root_name in self._frames:
+    #         raise self.Error('Root frame "%s" ' % root_name
+    #                          + 'not found in reference system')
+    #     if frame_name in self._frames:
+    #         raise self.Error('Frame name "%s" ' % frame_name
+    #                          + 'already exists in  the reference system')
+    #     if xform is None and frame_object is None:
+    #         raise self.Error('Need specification of new frame by argument '
+    #                          + '"xform" or "frame".')
+    #     elif not xform is None and not frame_object is  None:
+    #         raise self.Error('Need one single specification in arguments '
+    #                          + '"xform" or "frame". One of them must be None!')
+    #     if not xform is None:
+    #         self._frames[frame_name] = Frame(frame_name, root, xform)
+    #     elif not frame is None:
+    #         self._frames[frame_name] = frame
+    #         if type(frame._root_frame) == str:
+    #             frame._root_frame = self._frames[frame._root_frame]
 
     def __getitem__(self, name):
         """Mapping based access to the Frame objects in the reference

@@ -1,5 +1,5 @@
 """
-Module for class Point in the ReferenceSystem class.
+Module for class Vector in the ReferenceSystem class.
 """
 
 __author__ = "Morten Lind"
@@ -12,10 +12,10 @@ __status__ = "Development"
 
 import numpy as np
 
-from ..vector import Vector
+from ..vector import Vector 
 #from .ref_sys_object import RefSysObject
 
-class Point(object): 
+class FreeVector(object): 
     """A point in the reference system is identified by a label name,
     and a vector with reference to a specific reference frame in the
     reference system. The vector representing the point is to be
@@ -23,7 +23,7 @@ class Point(object):
     reference system will be able to express the point in any
     registered frame of reference."""
 
-    def __init__(self, name, root_frame=None, pos_vec=None):
+    def __init__(self, name, root_frame=None, free_vec=None):
         """ Create a new point with given 'name', defined in
         'root_frame' and with position vector 'pos_vec'. 'root_frame'
         and 'pos_vec' may be None at creation time. If None, the
@@ -32,17 +32,20 @@ class Point(object):
         reference frame must be filled in to make sense."""
         self._name = name
         self._root_frame = root_frame
-        if pos_vec is None:
-            pos_vec = Vector()
-        self._pos_vec = pos_vec
+        if free_vec is None:
+            free_vec = Vector()
+        self._free_vec = free_vec
         
     @property
-    def pos_vec(self):
+    def free_vec(self):
         """Give access to the position vector in the natural frame of
         reference."""
-        return self._pos_vec
+        return self._free_vec
+    @property
+    def root_frame(self):
+        return self._root_frame
 
     def __repr__(self):
         return (
-            'Point: "{self._name}" in frame "{self._root_frame}" ' 
-            'with vector {self._pos_vec}').format(self=self)
+            'FreeVector: "{self._name}" in frame "{self._root_frame}" ' 
+            'with vector {self._free_vec}').format(self=self)

@@ -21,19 +21,28 @@ class Frame(object):
     
     def __init__(self, name, root_frame=None, xform=None):
         """Initialize a frame by a 'name', a 'root_frame' (defaults to
-        None) and a transform (defaults to the identity)."""
+        None) and a transform (defaults to the identity). If 'xform' is
+        not of class m3d.Transform, it is supposed to evaluate to one
+        by access to an attribute 'xform'."""
         self._name = name
         self._root_frame = root_frame
         ## The transform from this to root coordinates, i.e. 'this in root'
         if xform is None:
             xform = Transform()
+        if type(xform) is not Transform:
+            self._volatile = True
+        else:
+            self._volatile = False
         self._xform = xform
         
     @property
     def xform(self):
         """Give access to the fundamental transform which represents
         this frame in its root frame."""
-        return self._xform
+        if self._volatile:
+            return self._xform.xform
+        else:
+            return self._xform
 
     @property
     def name(self):
@@ -45,8 +54,11 @@ class Frame(object):
         return self._root_frame
 
     def __repr__(self):
-        return (
-            'Frame: "{_name}" in frame "{_root_frame}" with pose vector '
-            '{_xform.pose_vector}'
-            ).format(**self.__dict__)
+        if self._name == 'world':
+            return 'Frame: "world"'
+        else:
+            return (
+                'Frame: "{self.name}" in frame "{self.root_frame.name}" with pose vector '
+                '{self.xform.pose_vector}'
+                ).format(self=self)
 
