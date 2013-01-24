@@ -87,12 +87,12 @@ class ReferenceSystem(object):
         if type(point) == str:
             point = self.get_point(point)
         ## Get the transform from the point's root frame to target frame coordinates.
-        trf = self.transform(target_frame, point._root_frame)
+        trf = self.transform(point._root_frame, target_frame)
         ## Return the transformed position vector.
         return trf * point.pos_vec
         
     def get_free_vec(self, free_vec_name):
-        """Retrieve the point object registered under the given
+        """Retrieve the free vector object registered under the given
         'point_name'."""
         return self._free_vectors[free_vec_name]
         
@@ -105,7 +105,7 @@ class ReferenceSystem(object):
             free_vec = self.get_free_vec(free_vec)
         ## Get the transform from the free_vec's root frame to target
         ## frame coordinates.
-        trf = self.transform(target_frame, free_vec._root_frame)
+        trf = self.transform(free_vec._root_frame, target_frame)
         ## Return the transformed free vector.
         return trf.orient * free_vec.free_vec
 
