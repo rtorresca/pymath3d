@@ -23,19 +23,25 @@ class Point(object):
     reference system will be able to express the point in any
     registered frame of reference."""
 
-    def __init__(self, name, root_frame=None, pos_vec=None):
+    def __init__(self, name, root_frame=None, pos_vec=None, by_ref=True):
         """ Create a new point with given 'name', defined in
         'root_frame' and with position vector 'pos_vec'. 'root_frame'
         and 'pos_vec' may be None at creation time. If None, the
         position vector will be initialized to the zero vector. At
         time of registering in a reference system instance, the
-        reference frame must be filled in to make sense."""
+        reference frame must be filled in to make sense. If 'by_ref'
+        is True, the default, then the given object is stored by
+        reference; which is practical for external, implicit update."""
         self._name = name
         self._root_frame = root_frame
         if pos_vec is None:
             pos_vec = Vector()
-        self._pos_vec = pos_vec
-        
+        self._by_ref = by_ref
+        if by_ref:
+            self._pos_vec = pos_vec
+        else:
+            self._pos_vec = pos_vec.copy()
+
     @property
     def pos_vec(self):
         """Give access to the position vector in the natural frame of

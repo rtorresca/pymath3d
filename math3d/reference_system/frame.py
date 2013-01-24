@@ -19,11 +19,15 @@ class Frame(object):
     a root frame, and the transform which represents the frame in its
     root."""
     
-    def __init__(self, name, root_frame=None, xform=None):
+    def __init__(self, name, root_frame=None, xform=None, by_ref=True):
         """Initialize a frame by a 'name', a 'root_frame' (defaults to
-        None) and a transform (defaults to the identity). If 'xform' is
-        not of class m3d.Transform, it is supposed to evaluate to one
-        by access to an attribute 'xform'."""
+        None) and a transform (defaults to the identity). If 'xform'
+        is not of class m3d.Transform, it is supposed to evaluate to
+        one by access to an attribute 'xform'. If 'by_ref' is True,
+        the default, then the given object is stored by reference;
+        which is practical for external, implicit update. In case of
+        by value semantic (if 'by_ref==False') the given xform object
+        must have a valid '.copy()' method."""
         self._name = name
         self._root_frame = root_frame
         ## The transform from this to root coordinates, i.e. 'this in root'
@@ -33,8 +37,12 @@ class Frame(object):
             self._volatile = True
         else:
             self._volatile = False
-        self._xform = xform
-        
+        self._by_ref = by_ref
+        if by_ref:
+            self._xform = xform
+        else:
+            self._xform = xform.copy()
+
     @property
     def xform(self):
         """Give access to the fundamental transform which represents
