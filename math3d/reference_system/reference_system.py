@@ -10,6 +10,8 @@ __maintainer__ = "Morten Lind"
 __email__ = "morten@lind.dyndns.dk"
 __status__ = "Development"
 
+import functools
+
 import numpy as np
 from .frame import Frame
 from .point import Point
@@ -29,9 +31,10 @@ class ReferenceSystem(object):
         def __str__(self):
             return self.msg
         
-    def __init__(self):
+    def __init__(self, name='<UnNamed>'):
         """Initialize an empty reference system, i.e. one that holds
         only the 'World' frame."""
+        self._name = name
         self._frames = {'world': Frame('world')}
         self._points = {}
         self._free_vectors = {}
@@ -52,7 +55,7 @@ class ReferenceSystem(object):
     def _chain_transform(self, transform_chain):
         """Reduce the sequence of transforms given in 'transform_chain' to one
         transform by multiplication."""
-        return reduce(lambda t,f:t*f.xform, transform_chain, Transform())
+        return functools.reduce(lambda t,f:t*f.xform, transform_chain, Transform())
         
     def _get_common_root_paths(self, frame_1, frame_2):
         """Assemble the paths to the deepest common root of the given

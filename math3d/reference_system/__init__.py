@@ -12,4 +12,5 @@ __status__ = "Development"
 
 from .frame import Frame
 from .point import Point
+from .free_vector import FreeVector
 from .reference_system import ReferenceSystem

@@ -13,11 +13,10 @@ __status__ = "Production"
 
 import numpy as np
 
-from math3d.utils import isNumTypes, isNumType, isSequence, isThreeSequence, _eps, _deprecation_warning
+from . import utils
 
 def isVector(v):
-    if __debug__: print('Deprecation warning: "isVector(v)". '
-                        + 'Use "return type(v) == Vector"')
+    utils._deprecation_warning('return type(v) == Vector')
     return type(v) == Vector
 
 class Vector(object):
@@ -36,8 +35,8 @@ class Vector(object):
     def canCreateOn(cls, *arg):
         if type(arg) == cls:
             return True
-        elif isSequence(arg):
-            if len(arg) <= 3 and isNumTypes(arg):
+        elif utils.is_sequence(arg):
+            if len(arg) <= 3 and utils.is_num_types(arg):
                 return True
             elif len(arg) == 1:
                 return cls.canCreateOn(*arg[0])
@@ -51,15 +50,15 @@ class Vector(object):
         'position' is evaluates to true, or is not given, the vector
         is represented as a position vector. Otherwise it is
         represented as a real vector."""
-        if len(args) == 3 and isNumTypes(args):
+        if len(args) == 3 and utils.is_num_types(args):
             self._data=np.array(args, dtype=np.float64)
-        elif len(args) == 2 and isNumTypes(args):
+        elif len(args) == 2 and utils.is_num_types(args):
             self._data = np.array((args[0], args[1], 0), dtype=np.float64)
         elif len(args) == 1:
             arg = args[0]
-            if isThreeSequence(arg):
+            if utils.is_three_sequence(arg):
                 self._data = np.array(arg, dtype=np.float64)
-            elif isSequence(arg) and len(arg)  == 2:
+            elif utils.is_sequence(arg) and len(arg)  == 2:
                 self._data = np.array((arg[0], arg[1], 0), dtype=np.float64)
             elif type(arg) == Vector:
                 self._data = arg._data.astype(np.float64)
@@ -111,7 +110,7 @@ class Vector(object):
         elif name == 'pos':
             if type(val) == Vector:
                 self._data = copy(val._data)
-            elif isThreeSequence(val):
+            elif utils.is_three_sequence(val):
                 self._data = np.array(val)
         else:
             object.__setattr__(self, name, val)
@@ -179,7 +178,7 @@ class Vector(object):
         """Square of the standard Euclidean length."""
         return np.dot(self._data, self._data)
     def length2(self):
-        _deprecation_warning('lenght2() -> [prop] length_sq')
+        utils._deprecation_warning('lenght2() -> [prop] length_sq')
         return self.length_sq
     
     def normalize(self):
@@ -259,12 +258,12 @@ class Vector(object):
         with a scalar."""
         if type(other) == Vector:
             return np.dot(self._data, other._data)
-        elif isNumType(other):
+        elif utils.is_num_type(other):
             return Vector(np.dot(self._data, other))
 
     def __imul__(self, other):
         """In-place multiplication with a scalar, 'other'. """
-        if isNumType(other):
+        if utils.is_num_type(other):
             self._data *= other
         else:
             raise self.Error('__imul__ : Could not multiply by non-number')
@@ -272,14 +271,14 @@ class Vector(object):
     
     def __rmul__(self, other):
         """Right multiplication with a scalar, 'other'. """
-        if isNumType(other):
+        if utils.is_num_type(other):
             return Vector(other * self._data)
         else:
             raise self.Error('__rmul__ : Could not multiply by non-number')
         
     def __truediv__(self, other):
         """Division with a scalar, 'other'. """
-        if isNumType(other):
+        if utils.is_num_type(other):
             return Vector(1.0 / other * self._data)
         else:
             raise self.Error('__rdiv__ : Could not divide by non-number')

@@ -15,7 +15,8 @@ import numpy as np
 # # Circular dependencies prevents direct import of Orientation, hence
 # # global addressing
 import math3d as m3d
-from .utils import isNumType, _eps, _deprecation_warning
+
+from . import utils
 from .vector import Vector
 
 def isQuaternion(q):
@@ -58,11 +59,11 @@ class Quaternion(object):
                 self._v = args[0]._v.copy()
         elif len(args) == 2:
             ## Test for (axis, angle) and (s, v) determined by order
-            if isNumType(args[0]) and type(args[1]) == Vector:
+            if utils.is_num_type(args[0]) and type(args[1]) == Vector:
                 ## Interpret as s, v
                 self._s = args[0]
                 self._v = args[1].copy()
-            elif isNumType(args[1]) and type(args[0]) == Vector:
+            elif utils.is_num_type(args[1]) and type(args[0]) == Vector:
                 ## Interpret as axis-angle
                 axis = args[0].copy()
                 ang = args[1]
@@ -74,7 +75,7 @@ class Quaternion(object):
             ## Assume numbers for s, x, y, and z
             self._s = args[0]
             self._v = Vector(args[1:])
-        if np.abs(self.norm() - 1.0) > _eps:
+        if np.abs(self.norm() - 1.0) > utils._eps:
             print('Quaternion.__init__ : Warning : Arguments did not constitute a unit quaternion. Normalizing.')
             self.normalize()
 
@@ -143,17 +144,17 @@ class Quaternion(object):
             return Quaternion(self._s * other._s - self._v * other._v,
                                self._v.cross(other._v) +
                               self._s * other._v + other._s * self._v)
-        elif isNumType(other):
+        elif utils.is_num_type(other):
             return Quaternion(other * self._s, other * self._v)
 
     def __rmul__(self, rother):
         """Right-multiply by number. """
-        if isNumType(rother):
+        if utils.is_num_type(rother):
             return Quaternion(rother * self._s, rother * self._v)
 
     def __imul__(self, other):
         """In-place multiply."""
-        if isNumType(other):
+        if utils.is_num_type(other):
             self._s *= other
             self._v *= other
         return self
@@ -192,7 +193,7 @@ class Quaternion(object):
         this quaternion."""
         return 2*np.arccos(self._s)
     def angNorm(self):
-        _deprecation_warning('angNorm() -> [prop] ang_norm')
+        utils._deprecation_warning('angNorm() -> [prop] ang_norm')
         return self.ang_norm
 
     def ang_dist(self, other):
@@ -200,7 +201,7 @@ class Quaternion(object):
         quaternion."""
         return (self.conjugated()*other).ang_norm()
     def angDist(self, other):
-        _deprecation_warning('angDist() -> ang_dist()')
+        utils._deprecation_warning('angDist() -> ang_dist()')
         return self.ang_dist(other)
 
     def dist2(self, other):
@@ -235,14 +236,14 @@ class Quaternion(object):
     def toAxisAngle(self):
         """Return an '(axis, angle)' pair representing the orientation
         of this quaternion."""
-        _deprecation_warning('toAxisAngle() -> [prop] axis_angle')
+        utils._deprecation_warning('toAxisAngle() -> [prop] axis_angle')
         return self.axis_angle
 
     def from_rotation_vector(self, rot_vec):
         """Set this quaternion to the equivalent of the given
         rotation vector 'w'."""
         angle = rot_vec.length()
-        if angle > _eps:
+        if angle > utils._eps:
             axis = rot_vec.normalized()
         else:
             ## Select arbitrary x-direction as axis and set angle to zero
@@ -250,7 +251,7 @@ class Quaternion(object):
             angle = 0.0
         self.fromAxisAngle(axis, angle)
     def fromRotationVector(self, rot_vec):
-        _deprecation_warning('fromRotationVector() -> from_rotation_vector()')
+        utils._deprecation_warning('fromRotationVector() -> from_rotation_vector()')
         self.from_rotation_vector(rot_vec)
 
     @property
@@ -265,7 +266,7 @@ class Quaternion(object):
     def toRotationVector(self):
         """Return a rotation vector representing the rotation of this
         quaternion."""
-        _deprecation_warning('toRotationVector -> rotation_vector')
+        utils._deprecation_warning('toRotationVector -> rotation_vector')
         return self.rotation_vector
     
     def fromOrientation(self, orient, positive=True):
@@ -327,7 +328,7 @@ class Quaternion(object):
             [-2 * s * y + 2 * x * z, 2 * s * x + 2 * y * z, 1 - 2 * (x2 + y2)]
             ]))
     def toOrientation(self):
-        _deprecation_warning('toOrientation -> [prop] orientation')
+        utils._deprecation_warning('toOrientation -> [prop] orientation')
         return self.orientation
 
     # // Should be property
@@ -340,7 +341,7 @@ class Quaternion(object):
         """Return the square of the norm of this quaternion."""
         return self._s**2 + self._v.length_sq
     def norm2(self):
-        _deprecation_warning('norm2() -> [prop] norm_sq')
+        utils._deprecation_warning('norm2() -> [prop] norm_sq')
         return self.norm_sq
     
     def conjugate(self):

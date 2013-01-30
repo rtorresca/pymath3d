@@ -13,13 +13,12 @@ __status__ = "Production"
 
 import numpy as np
 
-from .utils import isSequence, _eps, _deprecation_warning
+from . import utils
 from .vector import Vector
 from .orientation import Orientation
 
 def isTransform(t):
-    if __debug__: print('Deprecation warning: "isTransform(t)".'
-          + ' Use "type(t) == math3d.Transform".')
+    utils._deprecation_warning('type(t) == math3d.Transform')
     return type(t)==Transform
 
 class Transform(object):
@@ -43,7 +42,7 @@ class Transform(object):
     def __create_on_sequence(self, arg):
         """Called from init when a single argument of sequence type
         was given the constructor."""
-        # if len(arg) == 1 and isSequence(arg[0]):
+        # if len(arg) == 1 and utils.is_sequence(arg[0]):
         #     self.__createOnSequence(arg[0])
         if type(arg) in (tuple, list):
             self.__create_on_sequence(np.array(arg, dtype=np.float64))
@@ -207,7 +206,7 @@ class Transform(object):
         
     def __eq__(self,other):
         if type(other) == Transform:
-            return np.sum((self._data-other._data)**2) < _eps
+            return np.sum((self._data-other._data)**2) < utils._eps
         else:
             raise self.Error('Could not compare to non-Transform!')
 
@@ -219,7 +218,7 @@ class Transform(object):
         self._v = origo
         self._from_ov(self._o, self._v)
     def fromXYP(self, vec_x, vec_y, p):
-        _deprecation_warning('fromXYP -> from_xyp')
+        utils._deprecation_warning('fromXYP -> from_xyp')
         self.from_xyp(vec_x, vec_y, p)
         
     def from_xzp(self, vec_x, vec_z, origo):
@@ -229,7 +228,7 @@ class Transform(object):
         self._v = origo
         self._from_ov(self._o, self._v)
     def fromXZP(self, vec_x, vec_z, p):
-        _deprecation_warning('fromXZP -> from_xzp')
+        utils._deprecation_warning('fromXZP -> from_xzp')
         self.from_xzp(vec_x, vec_z, p)
 
     def dist2(self, other):
@@ -274,7 +273,7 @@ class Transform(object):
             return Vector(np.dot(self._data, v)[:3])
         elif type(other) == np.ndarray and other.shape == (3,):
             return np.dot(self._o._data, other)+self._v._data
-        elif isSequence(other):
+        elif utils.is_sequence(other):
             return list(map(self.__mul__,other))
         else:
             raise self.Error('Inadequate data type for multiplication '
@@ -292,7 +291,7 @@ class Transform(object):
         #return (self._o._data.copy(),self._v._data.copy())
         return (self._data[:3,:3], self._data[:3,3])
     def toArray(self):
-        _deprecation_warning('toArray() -> [prop] array')
+        utils._deprecation_warning('toArray() -> [prop] array')
         return self.array
 
     @property
@@ -301,7 +300,7 @@ class Transform(object):
         #return [self._o._data.tolist(),self._v._data.tolist()]
         return [self._data[:3,:3].tolist(), self._data[:3,3].tolist()]
     def toList(self):
-        _deprecation_warning('toList() -> [prop] list')
+        utils._deprecation_warning('toList() -> [prop] list')
         return self.list
 
     @property
@@ -343,7 +342,7 @@ class Transform(object):
 def newTransFromXYP(cx, cy, p):
     """Create a transform corresponding to the orientation given by
     the given 'cx' and 'cy' directions and translation given by 'p'."""
-    _deprecation_warning('newTransFromXYP -> Transform.new_from_xyp')
+    utils._deprecation_warning('newTransFromXYP -> Transform.new_from_xyp')
     t = Transform()
     t.from_xyp(cx, cy, p)
     return t
@@ -351,7 +350,7 @@ def newTransFromXYP(cx, cy, p):
 def newTransFromXZP(cx, cz, p):
     """Create a transform corresponding to the orientation given by
     the given 'cx' and 'cz' directions and translation given by 'p'."""
-    _deprecation_warning('newTransFromXZP -> Transform.new_from_xzp')
+    utils._deprecation_warning('newTransFromXZP -> Transform.new_from_xzp')
     t = Transform()
     t.from_xzp(cx, cz, p)
     return t
