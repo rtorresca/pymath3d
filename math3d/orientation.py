@@ -557,7 +557,8 @@ class Orientation(object):
         elif enc.lower() == enc:
             intrinsic = False
         else:
-            raise self.Error('Rotation encoding must either be all intrinsic or extrinsic!')
+            raise self.Error(
+                'Rotation encoding must either be all intrinsic or extrinsic!')
         o = Orientation()
         for r,a in zip(encoding, angles):
             cls._euler_encoding_map[r](o, a)
@@ -617,22 +618,24 @@ class Orientation(object):
         return np.array([ax, ay, az])
                 
 def newOrientFromXY(x_vec, y_vec):
-    """Create an orientation conforming with the given 'x' and 'y' directions."""
+    """Create an orientation conforming with the given 'x' and 'y'
+    directions."""
     _deprecation_warning('newOrientFromXY -> Orientation.new_from_xy')
     o = Orientation()
     o.from_xy(x_vec, y_vec)
     return o
 
 def newOrientFromXZ(x_vec, z_vec):
-    """Create an orientation conforming with the given 'x' and 'z' directions."""
+    """Create an orientation conforming with the given 'x' and 'z'
+    directions."""
     _deprecation_warning('newOrientFromXZ -> Orientation.new_from_xz')
     o = Orientation()
     o.from_xz(x_vec, z_vec)
     return o
 
 def newOrientRotZ(angle):
-    """Create an orientation corresponding to a rotation for 'angle' around the
-    z direction.
+    """Create an orientation corresponding to a rotation for 'angle'
+    around the z direction.
     """
     _deprecation_warning('newOrientRotZ -> Orientation.new_rot_z')
     o = Orientation()
@@ -640,8 +643,8 @@ def newOrientRotZ(angle):
     return o
 
 def newOrientRotX(angle):
-    """Create an orientation corresponding to a rotation for 'angle' around the
-    x direction.
+    """Create an orientation corresponding to a rotation for 'angle'
+    around the x direction.
     """
     _deprecation_warning('newOrientRotX -> Orientation.new_rot_x')
     o = Orientation()
@@ -649,8 +652,8 @@ def newOrientRotX(angle):
     return o
 
 def newOrientRotY(angle):
-    """Create an orientation corresponding to a rotation for 'angle' around the
-    y direction.
+    """Create an orientation corresponding to a rotation for 'angle'
+    around the y direction.
     """
     _deprecation_warning('newOrientRotY -> Orientation.new_rot_y')
     o = Orientation()
