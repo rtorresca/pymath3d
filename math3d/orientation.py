@@ -24,10 +24,15 @@ def isOrientation(o):
           + ' Use "type(o) == math3d.Orientation".')
     return type(o) == Orientation
 
+# Internal constants for Euler conversions
+__eul_safe = [0,1,2,0]
+__eul_next = [1,2,0,1]
+
+
 class Orientation(object):
-    """An Orientation is a member of SO(3) which can be used either
-    to perform a rotational transformation, or for keeping an
-    orientation in 3D."""
+    """An Orientation is a member of SO(3) which can be used either to perform
+    a rotational transformation, or for keeping an orientation in 3D.
+    """
     
     class Error(Exception):
         """Exception class."""
@@ -97,7 +102,8 @@ class Orientation(object):
 
     def copy(self, other=None):
         """Copy data from 'other' to self. If no argument given,
-        i.e. 'other==None', return a copy of this Orientation"""
+        i.e. 'other==None', return a copy of this Orientation
+        """
         if other is None:
             return Orientation(self)
         else:
@@ -105,8 +111,9 @@ class Orientation(object):
 
     @property
     def vec_x(self):
-        """Return the x-direction of the moving coordinate system in
-        base reference as a Vector."""
+        """Return the x-direction of the moving coordinate system in base reference
+        as a Vector.
+        """
         return Vector(self._data[:,0])
 
     @property
@@ -117,26 +124,30 @@ class Orientation(object):
     
     @property
     def vec_y(self):
-        """Return the y-direction of the moving coordinate system in
-        base reference as a Vector."""
+        """Return the y-direction of the moving coordinate system in base reference
+        as a Vector.
+        """
         return Vector(self._data[:,1])
 
     @property
     def col_y(self):
-        """Return the y-direction of the moving coordinate system in
-        base reference as an array."""
+        """Return the y-direction of the moving coordinate system in base reference
+        as an array.
+        """
         return self._data[:,1]
     
     @property
     def vec_z(self):
-        """Return the z-direction of the moving coordinate system in
-        base reference as a Vector."""
+        """Return the z-direction of the moving coordinate system in base reference
+        as a Vector.
+        """
         return Vector(self._data[:,2])
 
     @property
     def col_z(self):
-        """Return the z-direction of the moving coordinate system in
-        base reference as an array."""
+        """Return the z-direction of the moving coordinate system in base reference
+        as an array.
+        """
         return self._data[:,2]
 
     def __getattr__(self, name):
@@ -183,9 +194,10 @@ class Orientation(object):
 
     @property
     def error(self):
-        """Compute and return the square root of the sum of squared
-        dot products of the axis vectors, as a representation of the
-        error of the orientation matrix."""
+        """Compute and return the square root of the sum of squared dot products of
+        the axis vectors, as a representation of the error of the
+        orientation matrix.
+        """
         vec_x = self.vec_x
         vec_y = self.vec_y
         vec_z = self.vec_z
@@ -201,8 +213,9 @@ class Orientation(object):
         
 
     def from_xy(self, x_vec, y_vec):
-        """Reset this orientation to the one that conforms with the
-        given x and y directions."""
+        """Reset this orientation to the one that conforms with the given x and y
+        directions.
+        """
         self.vec_x = x_vec.normalized()
         self.vec_y = y_vec.normalized()
         self.vec_z = x_vec.cross(y_vec).normalized()
@@ -214,8 +227,9 @@ class Orientation(object):
         self.from_xy(x_vec, y_vec)
         
     def from_xz(self, x_vec, z_vec):
-        """Reset this orientation to the one that conforms with the
-        given x and z directions."""
+        """Reset this orientation to the one that conforms with the given x and z
+        directions.
+        """
         if x_vec * z_vec > _eps:
             print('warning ... orthogonalizing!')
         self.vec_x = x_vec.normalized()
@@ -230,9 +244,9 @@ class Orientation(object):
 
     @property
     def rotation_vector(self):
-        """Return a rotation vector representing this
-        orientation. This is essentially the logarithm of the rotation
-        matrix."""
+        """Return a rotation vector representing this orientation. This is
+        essentially the logarithm of the rotation matrix.
+        """
         return self.quaternion.rotation_vector
 
     @property
@@ -241,16 +255,17 @@ class Orientation(object):
         return m3d.Quaternion(self)
 
     def toRotationVector(self):
-        """Return a rotation vector representing this
-        orientation. This is essentially the logarithm of the rotation
-        matrix."""
+        """Return a rotation vector representing this orientation. This is
+        essentially the logarithm of the rotation matrix.
+        """
         _deprecation_warning('toRotationVector() -> [prop] rotation_vector')
         return self.rotation_vector
 
     def from_rotation_vector(self, rot_vec):
-        """Set this Orientation to represent the one given in a
-        rotation vector in 'rot_vec'. 'rot_vec' must be a Vector or an
-        numpy array of shape (3,)"""
+        """Set this Orientation to represent the one given in a rotation vector in
+        'rot_vec'. 'rot_vec' must be a Vector or an numpy array of shape
+        (3,)
+        """
         if type(rot_vec) == Vector:
             rot_vec = rot_vec.data
         angle = np.linalg.norm(rot_vec)
@@ -265,18 +280,17 @@ class Orientation(object):
         
     @property 
     def axis_angle(self):
-        """Return an (axis,angle) pair representing the equivalent
-        orientation."""
+        """Return an (axis,angle) pair representing the equivalent orientation."""
         return m3d.Quaternion(self).axis_angle
     def toAxisAngle(self):
-        """Return an (axis,angle) pair representing the equivalent
-        orientation."""
+        """Return an (axis,angle) pair representing the equivalent orientation."""
         _deprecation_warning('toAxisAngle() -> [prop] axis_angle')
         return self.axis_angle
 
     def from_axis_angle(self, axis, angle):
-        """Set this orientation to the equivalent to rotation of
-        'angle' around 'axis'."""
+        """Set this orientation to the equivalent to rotation of 'angle' around
+        'axis'.
+        """
         if type(axis) == Vector:
             axis = axis.data
         ## Force normalization
@@ -318,7 +332,7 @@ class Orientation(object):
         return self.set_to_y_rotation(angle)
 
     def set_to_z_rotation(self, angle):
-        """Replace this orientation by that of a rotation around z. """
+        """Replace this orientation by that of a rotation around z."""
         ca = np.cos(angle)
         sa = np.sin(angle)
         self._data[:,:] = np.array([[ca, -sa, 0], [sa, ca, 0], [0, 0, 1]])
@@ -327,57 +341,66 @@ class Orientation(object):
         return self.set_to_z_rotation(angle)
 
     def rotate_t(self, axis, angle):
-        """In-place rotation of this orientation angle radians in
-        axis perceived in the transformed reference system."""
+        """In-place rotation of this orientation angle radians in axis perceived in
+        the transformed reference system.
+        """
         o = Orientation()
         o.from_axis_angle(axis, angle)
         self.copy(self * o)
     rotate = rotateT = rotate_t
     
     def rotate_b(self, axis, angle):
-        """In-place rotation of this orientation angle radians in
-        axis perceived in the base reference system.
-        Arguments:
+        """In-place rotation of this orientation angle radians in axis perceived in
+        the base reference system.  Arguments:
+        
         axis -- the axis to rotate about (unit vector with direction).
-        angle -- the angle in radians to rotate about the axis."""
+        
+        angle -- the angle in radians to rotate about the axis.
+        """
         o = Orientation()
         o.from_axis_angle(axis, angle)
         self.copy(o * self)
     rotateB = rotate_b
     
     def rotate_xb(self, angle):
-        """In-place rotation of this oriantation by a rotation around
-        x axis in the base reference system. (Inefficient!)"""
+        """In-place rotation of this oriantation by a rotation around x axis in the
+        base reference system. (Inefficient!)
+        """
         self.rotate_b(Vector.e0, angle)
-        rotateXB = rotate_xb
+    rotateXB = rotate_xb
     
     def rotate_yb(self, angle):
-        """In-place rotation of this oriantation by a rotation around
-        y axis in the base reference system. (Inefficient!)"""
+        """In-place rotation of this oriantation by a rotation around y axis in the
+        base reference system. (Inefficient!)
+        """
         self.rotate_b(Vector.e1, angle)
     rotateYB = rotate_yb
     
     def rotate_zb(self, angle):
-        """In-place rotation of this oriantation by a rotation around
-        z axis in the base reference system. (Inefficient!)"""
+        """In-place rotation of this oriantation by a rotation around z axis in the
+        base reference system. (Inefficient!)
+        """
         self.rotate_b(Vector.e2, angle)
     rotateZB = rotate_zb
     
     def rotate_xt(self, angle):
-        """In-place rotation of this oriantation by a rotation around
-        x axis in the transformed reference system. (Inefficient!)"""
+        """In-place rotation of this oriantation by a rotation around x axis in the
+        transformed reference system. (Inefficient!)
+        """
         self.rotate_t(Vector.e0, angle)
     rotate_x = rotateX = rotateXT = rotate_xt
     
     def rotate_yt(self,angle):
-        """In-place rotation of this oriantation by a rotation around
-        y axis in the transformed reference system. (Inefficient!)"""
+        """In-place rotation of this oriantation by a rotation around y axis in the
+        transformed reference system. (Inefficient!)
+        """
         self.rotate_t(Vector.e1,angle)
     rotate_y = rotateY = rotateYT = rotate_yt
     
     def rotate_zt(self, angle):
-        """In-place rotation of this oriantation by a rotation around
-        z axis in the transformed reference system. (Inefficient!)"""
+        """In-place rotation of this oriantation by a rotation around z axis in the
+        transformed reference system. (Inefficient!)
+        """
         self.rotate_t(Vector.e2, angle)
     rotate_z = rotateZ = rotateZT = rotate_zt
     
@@ -388,16 +411,18 @@ class Orientation(object):
         return self.__repr__()
 
     def ang_dist_sq(self, other):
-        """Return the square of the orientation distance (the angle
-        of rotation) to the 'other' orientation."""
+        """Return the square of the orientation distance (the angle of rotation) to
+        the 'other' orientation.
+        """
         return (self.inverse()*other).rotation_vector.length_sq
     def angDist2(self, other):
         _deprecation_warning('angDist2 -> ang_dist_sq')
         return self.ang_dist_sq(other)
 
     def ang_dist(self, other):
-        """Return the orientation distance (the angle of rotation) to
-        the 'other' orientation."""
+        """Return the orientation distance (the angle of rotation) to the 'other'
+        orientation.
+        """
         return np.sqrt(self.ang_dist_sq(other))
     def angDist(self, other):
         _deprecation_warning('angDist -> ang_dist')
@@ -421,13 +446,12 @@ class Orientation(object):
         elif isSequence(other):
             return [self * o for o in other]
         else:
-            raise self.Error('Multiplication by something other than '
+            raise self.Error('Multiplication by something other than'
                              + 'Orientation, Vector, or a sequence of these, is not allowed!')
 
     @property
     def matrix(self):
-        """Property for getting a np-matrix with the data
-        from the orientation."""
+        """Property for getting a np-matrix with the data from the orientation."""
         return np.matrix(self._data)
 
     @property
@@ -443,80 +467,183 @@ class Orientation(object):
 
     @classmethod
     def new_from_xy(cls, x_vector, y_vector):
-        """Factory for a new orientation with given x- and
-        y-direction."""
+        """Factory for a new orientation with given x- and y-direction."""
         o = Orientation()
         o.from_xy(x_vector, y_vector)
         return o
 
     @classmethod
     def new_from_xz(cls, x_vector, z_vector):
-        """Factory for a new orientation with given x- and
-        z-direction."""
+        """Factory for a new orientation with given x- and z-direction."""
         o = Orientation()
         o.from_xz(x_vector, z_vector)
         return o
 
     @classmethod
     def new_rot_x(cls, angle):
-        """Factory for a new orientation which is a rotation in the
-        signed angle 'angle' around the x-direction."""
+        """Factory for a new orientation which is a rotation in the signed angle
+        'angle' around the x-direction.
+        """
         o = Orientation()
         o.set_to_x_rotation(angle)
         return o
 
     @classmethod
     def new_rot_y(cls, angle):
-        """Factory for a new orientation which is a rotation in the
-        signed angle 'angle' around the y-direction."""
+        """Factory for a new orientation which is a rotation in the signed angle
+        'angle' around the y-direction.
+        """
         o = Orientation()
         o.set_to_y_rotation(angle)
         return o
 
     @classmethod
     def new_rot_z(cls, angle):
-        """Factory for a new orientation which is a rotation in the
-        signed angle 'angle' around the z-direction."""
+        """Factory for a new orientation which is a rotation in the signed angle
+        'angle' around the z-direction.
+        """
         o = Orientation()
         o.set_to_z_rotation(angle)
         return o
 
+    # // The Euler encoding map is used to easily apply rotations
+    # according the the 'xyzXYZ' encoding scheme for Euler angles
+    _euler_encoding_map = {'x':rotate_xb, 'y':rotate_yb, 'z':rotate_zb,
+                           'X':rotate_xt, 'Y':rotate_yt, 'Z':rotate_zt,}
 
+    @classmethod
+    def new_euler(cls, angles, encoding):
+        """Factory for generating a new orientation from Euler or Tait-Bryan
+        angles. 'angles' must be a sequence of three real numbers giving
+        the Euler or Tait-Bryan angles. 'encoding' must be three
+        characters, all from the set 'xyzXYZ'. The encoding denotes the
+        sequence of axes to rotate around and the case of each character
+        tells if it should be intrinsic or extrinsic axes for the given
+        rotation. Here the notation is adopted from
+        'http://en.wikipedia.org/wiki/Euler_angles'. A lower case
+        character, e.g. 'x', denotes a rotation around the extrinsic
+        axis, i.e. the given axis of the initial coordinate system. An
+        upper-case character, e.g. 'X', denotes a rotation around the
+        axis in the intrinsic, i.e. moved, coordinate system at that
+        particular instance of the sequence. A classical example of
+        proper Euler angles are alpha-beta-gamma angles consisting of
+        all intrinsic rotations, first alpha around the inital z-axis,
+        then beta around rotated x-axis, and finally gamma around
+        rotated z-axis; this is encoded by 'ZXZ'. Note that proper Euler
+        angles always address two different axes, the same (intrinsic)
+        axis is used for the first and third rotation. Tait-Bryan angles
+        address three different axes and classical examples are
+        roll-pitch-yaw, which are encoded as 'ZYX', or yaw-pitch-roll,
+        encoded by'XYZ'. Any sequence of intrinsic rotations may be
+        converted to a corresponding sequence of extrinsic rotations by
+        reversing the angle sequence; e.g. arguments
+        ((alpha,beta,gamma), 'ZYX') gives the same rotation as
+        ((gamma,beta,alpha), 'zyx').
+        """
+        enc = encoding
+        # All rotations must either be intrinsic or extrinsic
+        if enc.upper() == enc:
+            intrinsic = True
+        elif enc.lower() == enc:
+            intrinsic = False
+        else:
+            raise self.Error('Rotation encoding must either be all intrinsic or extrinsic!')
+        o = Orientation()
+        for r,a in zip(encoding, angles):
+            cls._euler_encoding_map[r](o, a)
+        return o
+
+    def to_euler(self, encoding):
+        """The Euler angles 'encoding' follow the documentation for the factory
+        method 'new_euler'. The routine is taken from Ken Shoemake's
+        chapter 'Euler Angle Conversion' in 'Graphics Gems IV', Academic
+        Press, 1994, ISBN 0-12-336155-9.
+        """
+        enc = encoding
+        # All rotations must either be intrinsic or extrinsic
+        if enc.upper() == enc:
+            intrinsic = True
+        elif enc.lower() == enc:
+            intrinsic = False
+        else:
+            raise self.Error(
+                'Rotation encoding must either be all intrinsic or extrinsic!')
+        lenc = enc.lower()
+        repetition = lenc[0] == lenc[2]
+        parity = lenc[1:] in ['xy', 'yz', 'zx']
+        inner = lenc[2]
+        print('INNER=',inner)
+        i = 'xyz'.index(lenc[2])
+        j = (i + 1 + parity) % 3
+        k = (i + 2 - parity) % 3
+        # h = k if repetition else i
+        m = self._data
+        if repetition:
+            print('REP')
+            sy = np.sqrt(m[i, j]**2 + m[i, k]**2)
+            if sy > 16 * np.finfo(np.float32).eps:
+                ax = np.arctan2(m[i, j], m[i, k])
+                ay = np.arctan2(sy, m[i, i])
+                az = np.arctan2(m[j, i], -m[k, i])
+            else:
+                ax = np.arctan2(-m[j, k], m[j, j])
+                ay = np.arctan2(sy, m[i, i])
+                az = 0.0
+        else: # not repetition
+            print('NoREP')
+            cy = np.sqrt(m[i, i]**2 + m[j, i]**2)
+            if cy > 16 * np.finfo(np.float32).eps:
+                ax = np.arctan2(m[k, j], m[k, k])
+                ay = np.arctan2(-m[k, i], cy)
+                az = np.arctan2(m[j, i], m[i, i])
+            else:
+                ax = np.arctan2(-m[j, k], m[j, j])
+                ay = np.arctan2(-m[k, i], cy)
+                az = 0.0
+        if parity:
+            print('PAR')
+            ax, ay, az = -ax, -ay, -az
+        if intrinsic:
+            print('INTR')
+            ax, az = az, ax
+        return np.array([ax, ay, az])
+                
 def newOrientFromXY(x_vec, y_vec):
-    """Create an orientation conforming with the given 'x' and 'y'
-    directions."""
+    """Create an orientation conforming with the given 'x' and 'y' directions."""
     _deprecation_warning('newOrientFromXY -> Orientation.new_from_xy')
     o = Orientation()
     o.from_xy(x_vec, y_vec)
     return o
 
 def newOrientFromXZ(x_vec, z_vec):
-    """Create an orientation conforming with the given 'x' and 'z'
-    directions."""
+    """Create an orientation conforming with the given 'x' and 'z' directions."""
     _deprecation_warning('newOrientFromXZ -> Orientation.new_from_xz')
     o = Orientation()
     o.from_xz(x_vec, z_vec)
     return o
 
 def newOrientRotZ(angle):
-    """Create an orientation corresponding to a rotation for 'angle'
-    around the z direction."""
+    """Create an orientation corresponding to a rotation for 'angle' around the
+    z direction.
+    """
     _deprecation_warning('newOrientRotZ -> Orientation.new_rot_z')
     o = Orientation()
     o.set_to_z_rotation(angle)
     return o
 
 def newOrientRotX(angle):
-    """Create an orientation corresponding to a rotation for 'angle'
-    around the x direction."""
+    """Create an orientation corresponding to a rotation for 'angle' around the
+    x direction.
+    """
     _deprecation_warning('newOrientRotX -> Orientation.new_rot_x')
     o = Orientation()
     o.set_to_x_rotation(angle)
     return o
 
 def newOrientRotY(angle):
-    """Create an orientation corresponding to a rotation for 'angle'
-    around the y direction."""
+    """Create an orientation corresponding to a rotation for 'angle' around the
+    y direction.
+    """
     _deprecation_warning('newOrientRotY -> Orientation.new_rot_y')
     o = Orientation()
     o.set_to_y_rotation(angle)
@@ -530,3 +657,9 @@ def _test():
     ro = r * o
     print(ro.ang_dist(r))
     print(ro.axis_angle)
+
+def _test_to_euler():
+    ang = (0.5, 0.2, 0.1)
+    enc = 'ZYZ'
+    o = Orientation.new_euler(ang, enc)
+    print(np.all(o.to_euler(enc) == np.array(ang)))
