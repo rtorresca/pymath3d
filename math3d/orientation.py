@@ -581,7 +581,8 @@ class Orientation(object):
         elif enc.lower() == enc:
             intrinsic = False
         else:
-            raise self.Error('Rotation encoding must either be all intrinsic or extrinsic!')
+            raise self.Error(
+                'Rotation encoding must either be all intrinsic or extrinsic!')
         o = Orientation()
         for r,a in zip(encoding, angles):
             cls._euler_encoding_map[r](o, a)
