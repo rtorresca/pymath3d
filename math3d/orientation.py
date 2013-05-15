@@ -326,15 +326,15 @@ class Orientation(object):
         _deprecation_warning('rotZ() -> set_to_z_rotation()')
         return self.set_to_z_rotation(angle)
 
-    def rotateT(self, axis, angle):
+    def rotate_t(self, axis, angle):
         """In-place rotation of this orientation angle radians in
         axis perceived in the transformed reference system."""
         o = Orientation()
         o.from_axis_angle(axis, angle)
         self.copy(self * o)
-    rotate = rotateT
+    rotate = rotateT = rotate_t
     
-    def rotateB(self, axis, angle):
+    def rotate_b(self, axis, angle):
         """In-place rotation of this orientation angle radians in
         axis perceived in the base reference system.
         Arguments:
@@ -343,42 +343,43 @@ class Orientation(object):
         o = Orientation()
         o.from_axis_angle(axis, angle)
         self.copy(o * self)
-
-    def rotateXB(self, angle):
+    rotateB = rotate_b
+    
+    def rotate_xb(self, angle):
         """In-place rotation of this oriantation by a rotation around
         x axis in the base reference system. (Inefficient!)"""
-        self.rotateB(Vector.e0, angle)
-    rotate_xb = rotateXB
+        self.rotate_b(Vector.e0, angle)
+        rotateXB = rotate_xb
     
-    def rotateYB(self, angle):
+    def rotate_yb(self, angle):
         """In-place rotation of this oriantation by a rotation around
         y axis in the base reference system. (Inefficient!)"""
-        self.rotateB(Vector.e1, angle)
-    rotate_yb = rotateYB
+        self.rotate_b(Vector.e1, angle)
+    rotateYB = rotate_yb
     
-    def rotateZB(self, angle):
+    def rotate_zb(self, angle):
         """In-place rotation of this oriantation by a rotation around
         z axis in the base reference system. (Inefficient!)"""
-        self.rotateB(Vector.e2, angle)
-    rotate_zb = rotateZB
+        self.rotate_b(Vector.e2, angle)
+    rotateZB = rotate_zb
     
-    def rotateXT(self, angle):
+    def rotate_xt(self, angle):
         """In-place rotation of this oriantation by a rotation around
         x axis in the transformed reference system. (Inefficient!)"""
-        self.rotateT(Vector.e0, angle)
-    rotate_x = rotate_xt = rotateX = rotateXT
+        self.rotate_t(Vector.e0, angle)
+    rotate_x = rotateX = rotateXT = rotate_xt
     
-    def rotateYT(self,angle):
+    def rotate_yt(self,angle):
         """In-place rotation of this oriantation by a rotation around
         y axis in the transformed reference system. (Inefficient!)"""
-        self.rotateT(Vector.e1,angle)
-    rotate_y = rotate_yt = rotateY = rotateYT
+        self.rotate_t(Vector.e1,angle)
+    rotate_y = rotateY = rotateYT = rotate_yt
     
-    def rotateZT(self, angle):
+    def rotate_zt(self, angle):
         """In-place rotation of this oriantation by a rotation around
         z axis in the transformed reference system. (Inefficient!)"""
-        self.rotateT(Vector.e2, angle)
-    rotate_z = rotate_zt = rotateZ = rotateZT
+        self.rotate_t(Vector.e2, angle)
+    rotate_z = rotateZ = rotateZT = rotate_zt
     
     def __repr__(self):
         return '<Orientation: \n' + repr(self._data) + '>'
