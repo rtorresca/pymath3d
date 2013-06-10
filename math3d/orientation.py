@@ -56,11 +56,19 @@ class Orientation(object):
 
     def __init__(self, *args):
         """Create an orientation on either of the following arguments:
+
         * An Orientation.
+
         * A Quaternion.
-        * Three Vectors or numpy arrays of shape (3,) interpreted as columns of the matrix.
-        * One Vector, numpy array, list, or tuple of shape (3,) interpreted as a rotation vector.
-        * A numpy array, list, or tuple of shape (3,3) or (9,) for giving direct matrix data; using row major order.
+
+        * Three Vectors or numpy arrays of shape (3,) interpreted as
+          columns of the matrix.
+
+        * One Vector, numpy array, list, or tuple of shape (3,)
+          interpreted as a rotation vector.
+
+        * A numpy array, list, or tuple of shape (3,3) or (9,) for
+          giving direct matrix data; using row major order.
         """
         if len(args) == 1:
             arg=args[0]
@@ -444,6 +452,8 @@ class Orientation(object):
             return Orientation(np.dot(self._data, other._data))
         elif type(other) == Vector:
             return Vector(np.dot(self._data, other._data))
+        elif type(other) == np.ndarray and other.shape == (3,):
+            return np.dot(self._data, other)
         elif utils.is_sequence(other):
             return [self * o for o in other]
         else:

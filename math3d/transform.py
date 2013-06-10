@@ -59,13 +59,26 @@ class Transform(object):
         
     def __init__(self, *args):
         """A Transform is a homogeneous transform on SE(3), internally
-        represented by an Orientation and a Vector. A Transform can be constructed on:
+        represented by an Orientation and a Vector. A Transform can be
+        constructed on:
+
         * A Transform.
-        * A numpy array, list or tuple of shape (4,4) or (3,4) giving direct data; as [orient | pos].
-        * A --''-- of shape (6,) giving a pose vector; concatenated position and rotation vector.
-        * Two --''--; the first for orientation and the second for position.
-        * Four --''--; the first three for orientation and the fourth for position.
-        * Twelve numbers, the first nine used for orientation and the last three for position.
+
+        * A numpy array, list or tuple of shape (4,4) or (3,4) giving
+          direct data; as [orient | pos].
+
+        * A --''-- of shape (6,) giving a pose vector; concatenated
+          position and rotation vector.
+
+        * Two --''--; the first for orientation and the second for
+          position.
+
+        * Four --''--; the first three for orientation and the fourth
+          for position.
+
+        * Twelve numbers, the first nine used for orientation and the
+          last three for position.
+
         * An ordered pair of Orientation and Vector.
         """
         if len(args) == 0: # or (len(args) == 1 and type(args[0]) == type(None)):
