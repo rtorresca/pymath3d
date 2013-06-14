@@ -45,7 +45,7 @@ class Transform(object):
         # if len(arg) == 1 and utils.is_sequence(arg[0]):
         #     self.__createOnSequence(arg[0])
         if type(arg) in (tuple, list):
-            self.__create_on_sequence(np.array(arg, dtype=np.float64))
+            self.__create_on_sequence(np.array(arg))
         elif type(arg) == np.ndarray and arg.shape in ((4,4), (3,4)):
             self._o = Orientation(arg[:3,:3])
             self._v = Vector(arg[:3,3])
@@ -100,7 +100,7 @@ class Transform(object):
             self._v = Vector(args[3])
         elif len(args) == 12:
             # // 12 numbers are required
-            args = np.array(args, dtype=float64)
+            args = np.array(args
             self._o = Orientation(args[:9])
             self._v = Vector(args[9:])
         else:
@@ -109,7 +109,7 @@ class Transform(object):
         self._from_ov(self._o, self._v)
         
     def _from_ov(self, o, v):
-        self._data = np.identity(4)
+        self._data = np.identity(4, dtype=np.float64)
         ## First take over the data from Orientation and Vector
         self._data[:3,:3] = o._data
         self._data[:3,3] = v._data

@@ -101,7 +101,7 @@ class Orientation(object):
         elif len(args) == 0:
             self._data = np.identity(3)
         # Always ensure that we use float64 as fundamental type
-        self._data=self._data.astype(np.float64)
+        self._data = self._data.astype(np.float64)
 
     def __copy__(self):
         """Copy method for creating a copy of this Orientation."""

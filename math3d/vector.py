@@ -51,26 +51,30 @@ class Vector(object):
         is represented as a position vector. Otherwise it is
         represented as a real vector."""
         if len(args) == 3 and utils.is_num_types(args):
-            self._data=np.array(args, dtype=np.float64)
+            self._data=np.array(args)
         elif len(args) == 2 and utils.is_num_types(args):
-            self._data = np.array((args[0], args[1], 0), dtype=np.float64)
+            self._data = np.array((args[0], args[1], 0))
         elif len(args) == 1:
             arg = args[0]
             if utils.is_three_sequence(arg):
-                self._data = np.array(arg, dtype=np.float64)
+                self._data = np.array(arg)
             elif utils.is_sequence(arg) and len(arg)  == 2:
-                self._data = np.array((arg[0], arg[1], 0), dtype=np.float64)
+                self._data = np.array((arg[0], arg[1], 0))
             elif type(arg) == Vector:
-                self._data = arg._data.astype(np.float64)
+                self._data = arg.data
             else:
-                raise self.Error('__init__ : could not create vector on argument : ' + str(args[0]) + ' of type %s'%str(type(args[0])))
+                raise self.Error(
+                    ('__init__ : could not create vector on argument : "{}"'
+                    + ' of type "{}"').format(str(args[0]), str(type(args[0]))))
         else:
-            self._data = np.array([0.0,0.0,0.0], dtype=np.float64)
+            self._data = np.array([0.0,0.0,0.0])
         self._isPosition = 1
         if 'position' in kwargs:
             if kwargs['position']: self._isPosition = 1
             else: self._isPosition = 0
-    
+        # Ensure data are float64
+        self._data = self._data.astype(np.float64)
+
     def __copy__(self):
         """Copy method for creating a copy of this Vector."""
         return Vector(self)
@@ -105,13 +109,15 @@ class Vector(object):
             self._data[1] = val
         elif name == 'z':
             self._data[2] = val
-        elif name == '_data':
-            self.__dict__[name] = val
+        # elif name == '_data':
+        #     # Important for initialization? Or would
+        #     # object.__setattr__ take care of it?
+        #     self.__dict__[name] = val
         elif name == 'pos':
             if type(val) == Vector:
-                self._data = copy(val._data)
+                self._data[:] = val.data
             elif utils.is_three_sequence(val):
-                self._data = np.array(val)
+                self._data[:] = np.array(val)
         else:
             object.__setattr__(self, name, val)
 
