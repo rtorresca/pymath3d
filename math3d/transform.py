@@ -100,7 +100,7 @@ class Transform(object):
             self._v = Vector(args[3])
         elif len(args) == 12:
             # // 12 numbers are required
-            args = np.array(args
+            args = np.array(args)
             self._o = Orientation(args[:9])
             self._v = Vector(args[9:])
         else:
