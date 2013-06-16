@@ -21,8 +21,7 @@ from . import utils
 from .vector import Vector
 
 def isOrientation(o):
-    print('Deprecation warning: "isOrientation(o)".'
-          + ' Use "type(o) == math3d.Orientation".')
+    utils._deprecation_warning('type(o) == math3d.Orientation')
     return type(o) == Orientation
 
 

@@ -20,6 +20,7 @@ from . import utils
 from .vector import Vector
 
 def isQuaternion(q):
+    utils._deprecation_warning('type(q) == math3d.Quaternion')
     return type(q) == Quaternion
 
 class Quaternion(object):

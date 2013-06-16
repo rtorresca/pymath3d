@@ -19,7 +19,7 @@ from .orientation import Orientation
 
 def isTransform(t):
     utils._deprecation_warning('type(t) == math3d.Transform')
-    return type(t)==Transform
+    return type(t) == Transform
 
 class Transform(object):
     """A Transform is a member of SE(3), represented as a homogenous
