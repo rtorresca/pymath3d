@@ -48,10 +48,12 @@ class Vector(object):
 
     def __init__(self, *args, **kwargs):
         """Constructor for Vector. If optional keyword argument
-        'position' is evaluates to true, or is not given, the vector
-        is represented as a position vector. Otherwise it is
-        represented as a real vector."""
-        if len(args) == 3 and isNumTypes(args):
+        'position' evaluates to True, or is not given, the vector is
+        represented as a position vector. Otherwise it is represented
+        as a free vector."""
+        if len(args) == 0:
+            self._data = np.array([0.0,0.0,0.0], dtype=np.float64)
+        elif len(args) == 3 and isNumTypes(args):
             self._data=np.array(args, dtype=np.float64)
         elif len(args) == 2 and isNumTypes(args):
             self._data = np.array((args[0], args[1], 0), dtype=np.float64)
@@ -64,13 +66,14 @@ class Vector(object):
             elif type(arg) == Vector:
                 self._data = arg._data.astype(np.float64)
             else:
-                raise self.Error('__init__ : could not create vector on argument : ' + str(args[0]) + ' of type %s'%str(type(args[0])))
+                raise self.Error('__init__ : could not create vector on '
+                                 + 'argument : "{}" of type "{}"'
+                                 .format(str(args[0]), str(type(args[0]))))
         else:
-            self._data = np.array([0.0,0.0,0.0], dtype=np.float64)
-        self._isPosition = 1
-        if 'position' in kwargs:
-            if kwargs['position']: self._isPosition = 1
-            else: self._isPosition = 0
+            raise self.Error('__init__ : could not create vector on '
+                             + 'argument : "{}" of type "{}"'
+                             .format(str(args[0]), str(type(args[0]))))
+        self._is_position = kwargs.get('position', 1)
     
     def __copy__(self):
         """Copy method for creating a copy of this Vector."""
@@ -116,35 +119,38 @@ class Vector(object):
         else:
             object.__setattr__(self, name, val)
 
-    def __coerce__(self, other):
-        return None
-
     def __getitem__(self, n):
         return self._data[n]
 
     def __setitem__(self,n,val):
         self._data[n] = val
 
-    def __cmp__(self, other):
-        if self.x == other.x and self.y == other.y and self.z == other.z: return 0
-        else: return cmp(self.x,other.x)
+    # def __cmp__(self, other):
+        
+    #     if self.x == other.x and self.y == other.y and self.z == other.z: return 0
+    #     else: return cmp(self.x,other.x)
 
     def __eq__(self,other):
         if type(other) == Vector:
             return np.sum((self._data-other._data)**2) < utils._eps
         else:
-            raise self.Error('Could not compare to non-Vector!')
+            return NotImplemented
+            # raise self.Error('Could not compare to non-Vector!')
 
     def __repr__(self):
-        return '<Vector: x=%f y=%f z=%f>'%(self.x,self.y,self.z)
+        return '<Vector: ({:.5f}, {:.5f}, {:.5f})>'.format(*self._data) #self.x,self.y,self.z)
 
     def __str__(self):
         return self.__repr__()
     
-    def isPos(self):
-        """If the vector is a position vector, default, then it
+    @property
+    def is_position(self):
+        """If the vector is a position vector, the default, then it
         transforms differently than a real vector."""
-        return self._isPosition
+        return self._is_position
+    def isPos(self):
+        _deprecation_warning('isPos() -> [prop] is_position')
+        return self._is_position
 
     def angle(self, other):
         """Return the angle (radians) to the 'other' vector. This is the
@@ -208,8 +214,8 @@ class Vector(object):
     @property
     def cross_operator(self):
         """Return the cross product operator for this Vector. I.e. the
-        skew-symmetric operator cross_op, such that cross_op * u == v x u, for any
-        vector u."""
+        skew-symmetric operator cross_op, such that cross_op * u == v
+        x u, for any vector u."""
         cross_op = np.zeros((3,3))
         cross_op[0,1] = -self._data[2]
         cross_op[0,2] = self._data[1]
@@ -290,14 +296,16 @@ class Vector(object):
         if type(other) == Vector:
             return Vector(self._data + other._data)
         else:
-            raise self.Error('__add__ : Could not add non-vector')
+            return NotImplemented
+            # raise self.Error('__add__ : Could not add non-vector')
 
     def __iadd__(self, other):
         """In-place add the 'other' vector to this vector."""
         if type(other) == Vector:
             self._data += other._data
         else:
-            raise self.Error('__iadd__ : Could not add non-vector')
+            return NotImplemented
+            # raise self.Error('__iadd__ : Could not add non-vector')
         return self
 
     def __neg__(self):

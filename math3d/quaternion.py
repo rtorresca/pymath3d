@@ -88,7 +88,8 @@ class Quaternion(object):
         elif name == 'z':
             return self._v.z
         else:
-            raise AttributeError('Attribute "%s" not found in Quaternion class' % name)
+            raise AttributeError('Attribute "{}" not found in Quaternion '
+                                 + 'class'.format(name))
 
     @property
     def vector_part(self):
@@ -102,7 +103,8 @@ class Quaternion(object):
 
     def __setattr__(self, name, val):
         if name in ['s', 'x', 'y', 'z']:
-            raise AttributeError('Not allowed to set attribute "%s" in Quaternion' % name)
+            raise AttributeError('Not allowed to set attribute "{}" in '
+                                 + 'Quaternion'.format(name))
         else:
             object.__setattr__(self, name, val)
         
@@ -113,7 +115,8 @@ class Quaternion(object):
             return self._v[index-1]
 
     def __repr__(self):
-        return '[ %.5f , ( %.5f , %.5f , %.5f ) ]' % (self._s, self._v.x, self._v.y, self._v.z)
+        return '<Quaternion: [{:.5f}, ({:.5f}, {:.5f}, {:.5f})]>'.format(
+            self._s, *self._v._data)
 
     def __copy__(self):
         """Copy method for creating a copy of this Quaternion."""
@@ -145,6 +148,8 @@ class Quaternion(object):
                               self._s * other._v + other._s * self._v)
         elif isNumType(other):
             return Quaternion(other * self._s, other * self._v)
+        else:
+            return NotImplemented
 
     def __rmul__(self, rother):
         """Right-multiply by number. """
@@ -156,6 +161,8 @@ class Quaternion(object):
         if isNumType(other):
             self._s *= other
             self._v *= other
+        else:
+            return NotImplemented
         return self
             
     def __ipow__(self, x):
@@ -212,16 +219,7 @@ class Quaternion(object):
         """Compute the usual quaternion metric distance to the
         'other' quaternion."""
         return np.sqrt(self.dist2(other))
-
-    def fromAxisAngle(self, axis, angle):
-        """Set this quaternion to the equivalent of the given 'axis'
-        and 'angle'."""
-        sa = np.sin(0.5 * angle)
-        ca = np.cos(0.5 * angle)
-        axis.normalize()
-        self._s = ca
-        self._v = sa * axis
-
+    
     @property
     def axis_angle(self):
         """Return an '(axis, angle)' pair representing the orientation
@@ -238,20 +236,22 @@ class Quaternion(object):
         _deprecation_warning('toAxisAngle() -> [prop] axis_angle')
         return self.axis_angle
 
-    def from_rotation_vector(self, rot_vec):
-        """Set this quaternion to the equivalent of the given
-        rotation vector 'w'."""
-        angle = rot_vec.length()
-        if angle > _eps:
-            axis = rot_vec.normalized()
-        else:
-            ## Select arbitrary x-direction as axis and set angle to zero
-            axis = Vector.e1
-            angle = 0.0
-        self.fromAxisAngle(axis, angle)
-    def fromRotationVector(self, rot_vec):
-        _deprecation_warning('fromRotationVector() -> from_rotation_vector()')
-        self.from_rotation_vector(rot_vec)
+    @axis_angle.setter
+    def axis_angle(self, axisangle):
+        """Set this quaternion to the equivalent of the given axis
+        and angle given in the ordered pair 'axisangle'."""
+        axis, angel = axisangle
+        if type(axis) != Vector:
+            axis = Vector(axis)
+        sa = np.sin(0.5 * angle)
+        ca = np.cos(0.5 * angle)
+        axis.normalize()
+        self._s = ca
+        self._v._data[:] = (sa * axis)._data
+    def fromAxisAngle(self, axis, angle):
+        _deprecation_warning('q.fromAxisAngle(axis, angle) '
+                             + '-> [prop] q.axis_angle = (axis, angle)')
+        self.axis_angle = (axis, angle)
 
     @property
     def rotation_vector(self):
@@ -268,6 +268,27 @@ class Quaternion(object):
         _deprecation_warning('toRotationVector -> rotation_vector')
         return self.rotation_vector
     
+    @rotation_vector.setter
+    def rotation_vector(self, rot_vec):
+        """Set this quaternion to the equivalent of the given
+        rotation vector 'w'."""
+        if type(rot_vec) != Vector:
+            rot_vec = Vector(rot_vec)
+        angle = rot_vec.length()
+        if angle > _eps:
+            axis = rot_vec.normalized()
+        else:
+            ## Select arbitrary x-direction as axis and set angle to zero
+            axis = Vector.e1
+            angle = 0.0
+        self.fromAxisAngle(axis, angle)
+    def from_rotation_vector(self, rot_vec):
+        _deprecation_warning('q.from_rotation_vector(rv) -> q.rotation_vector = rv')
+        self.rotation_vector = rot_vec
+    def fromRotationVector(self, rot_vec):
+        _deprecation_warning('q.fromRotationVector(rv) -> q.rotation_vector = rv')
+        self.rotation_vector = rot_vec
+
     def fromOrientation(self, orient, positive=True):
         """Set this quaternion to represent the given
         orientation. The used method should be robust;

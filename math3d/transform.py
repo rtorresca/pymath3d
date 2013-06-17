@@ -51,31 +51,45 @@ class Transform(object):
             self._o = Orientation(arg[:3,:3])
             self._v = Vector(arg[:3,3])
         elif type(arg) == np.ndarray and arg.shape==(6,):
-                # # Assume a pose vector of 3 position vector and 3 rotation vector components
-                self._v = Vector(arg[:3])
-                self._o = Orientation(arg[3:])
+            # Assume a pose vector of 3 position vector and 3 rotation
+            # vector components
+            self._v = Vector(arg[:3])
+            self._o = Orientation(arg[3:])
         else:
             raise self.Error(
                 'Could not create Transform on arguments : "' + str(arg) + '"')
         
     def __init__(self, *args):
         """A Transform is a homogeneous transform on SE(3), internally
-        represented by an Orientation and a Vector. A Transform can be constructed on:
+        represented by an Orientation and a Vector. A Transform can be
+        constructed on:
+
         * A Transform.
-        * A numpy array, list or tuple of shape (4,4) or (3,4) giving direct data; as [orient | pos].
-        * A --''-- of shape (6,) giving a pose vector; concatenated position and rotation vector.
-        * Two --''--; the first for orientation and the second for position.
-        * Four --''--; the first three for orientation and the fourth for position.
-        * Twelve numbers, the first nine used for orientation and the last three for position.
+        
+        * A numpy array, list or tuple of shape (4,4) or (3,4) giving
+          direct data; as [orient | pos].
+        
+        * A --''-- of shape (6,) giving a pose vector; concatenated
+          position and rotation vector.
+        
+        * Two --''--; the first for orientation and the second for
+          position.
+        
+        * Four --''--; the first three for orientation and the fourth
+          for position.
+        
+        * Twelve numbers, the first nine used for orientation and the
+          last three for position.
+        
         * An ordered pair of Orientation and Vector.
         """
-        if len(args) == 0: # or (len(args) == 1 and type(args[0]) == type(None)):
+        if len(args) == 0:
             self._v = Vector()
             self._o = Orientation()
         elif len(args) == 1:
             arg = args[0]
             if type(arg) == Transform or \
-                   hasattr(arg,'pos') and hasattr(arg,'orient'): # and Orientation.canCreateOn(arg.orient) and Vector.canCreateOn(arg.pos):
+                   hasattr(arg,'pos') and hasattr(arg,'orient'):
                 self._v = Vector(arg.pos)
                 self._o = Orientation(arg.orient)
             else:
@@ -87,13 +101,14 @@ class Transform(object):
             self._o = Orientation(args[:3])
             self._v = Vector(args[3])
         elif len(args) == 12:
-            # // 12 numbers are required
             args = np.array(args, dtype=float64)
             self._o = Orientation(args[:9])
             self._v = Vector(args[9:])
         else:
             raise self.Error(
-                'Could not create Transform on arguments : "' + str(args) + '"')
+                'Could not create Transform on arguments : '
+                + '"{}"'.format(str(args)))
+        # Guard against reference to data.
         self._from_ov(self._o, self._v)
         
     def _from_ov(self, o, v):
@@ -117,7 +132,7 @@ class Transform(object):
             self._data[:3,3] = new_pos._data
         else:
             raise self.Error('Trying to set "pos" by an object of '
-                             + 'type "%s". '  % str(type(new_pos))
+                             + 'type "{}". '.format(str(type(new_pos)))
                              + 'Needs tuple, list, ndarray, or Vector.')
 
     @property
@@ -132,7 +147,7 @@ class Transform(object):
             self._data[:3,:3] = new_orient._data
         else:
             raise self.Error('Trying to set "orient" by an object of '
-                             + 'type "%s". '  % str(type(new_pos))
+                             + 'type "{}". '.format(str(type(new_pos)))
                              + 'Needs tuple, list, ndarray, or Orientation.')
 
     @property
@@ -209,7 +224,8 @@ class Transform(object):
         if type(other) == Transform:
             return np.sum((self._data-other._data)**2) < _eps
         else:
-            raise self.Error('Could not compare to non-Transform!')
+            return NotImplemented
+            # raise self.Error('Could not compare to non-Transform!')
 
     def from_xyp(self, vec_x, vec_y, origo):
         """Make this transform correspond to the orientation given by
@@ -224,7 +240,8 @@ class Transform(object):
         
     def from_xzp(self, vec_x, vec_z, origo):
         """Make this transform correspond to the orientation given by
-        the given 'vec_x' and 'vec_z' directions and translation given by 'p'."""
+        the given 'vec_x' and 'vec_z' directions and translation given
+        by 'p'."""
         self._o.from_xz(vec_x, vec_z)
         self._v = origo
         self._from_ov(self._o, self._v)
@@ -277,8 +294,9 @@ class Transform(object):
         elif isSequence(other):
             return list(map(self.__mul__,other))
         else:
-            raise self.Error('Inadequate data type for multiplication '
-                             + 'in "other" : %s' % str(type(other)))
+            return NotImplemented
+            # raise self.Error('Inadequate data type for multiplication '
+            #                  + 'in "other" : %s' % str(type(other)))
 
     @property
     def pose_vector(self):

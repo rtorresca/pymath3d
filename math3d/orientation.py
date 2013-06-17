@@ -26,8 +26,9 @@ def isOrientation(o):
 
 
 class Orientation(object):
-    """An Orientation is a member of SO(3) which can be used either to perform
-    a rotational transformation, or for keeping an orientation in 3D.
+    """An Orientation is a member of SO(3) which can be used either to
+    perform a rotational transformation, or for keeping an orientation
+    in 3D.
     """
     
     class Error(Exception):
@@ -42,7 +43,8 @@ class Orientation(object):
         if type(seq) in (list, tuple):
             seq = np.array(seq)
         if type(seq) != np.ndarray:
-            raise self.Error('Creating on a sequence requires numpy array, list or tuple')
+            raise self.Error('Creating on a sequence requires numpy array, '
+                             + 'list or tuple')
         if seq.shape in ((9,), (3,3)):
             self._data = seq.copy()
             # // Ensure the right shape.
@@ -51,15 +53,24 @@ class Orientation(object):
             self._data = np.identity(3)
             self.from_rotation_vector(seq)
         else:
-            raise self.Error('Creating on a numpy array requires shape (3,), (9,) or (3,3)!')
+            raise self.Error('Creating on a numpy array requires shape '
+                             + '(3,), (9,) or (3,3)!')
 
     def __init__(self, *args):
         """Create an orientation on either of the following arguments:
+
         * An Orientation.
+
         * A Quaternion.
-        * Three Vectors or numpy arrays of shape (3,) interpreted as columns of the matrix.
-        * One Vector, numpy array, list, or tuple of shape (3,) interpreted as a rotation vector.
-        * A numpy array, list, or tuple of shape (3,3) or (9,) for giving direct matrix data; using row major order.
+
+        * Three Vectors or numpy arrays of shape (3,) interpreted as
+          columns of the matrix.
+
+        * One Vector, numpy array, list, or tuple of shape (3,)
+          interpreted as a rotation vector.
+
+        * A numpy array, list, or tuple of shape (3,3) or (9,) for
+          giving direct matrix data; using row major order.
         """
         if len(args) == 1:
             arg=args[0]
@@ -161,23 +172,25 @@ class Orientation(object):
                 a = Vector(a)
             return a
         else:
-            raise AttributeError('Attribute "%s" not found in Orientation'%name)
+            raise AttributeError(
+                'Attribute "{}" not found in Orientation'.format(name))
             #raise self.Error, 'Orientation does not have attribute "%s"' % name
 
     def __getitem__(self, indices):
         return self._data.__getitem__(indices)
 
-    def __coerce__(self, other):
-        if type(other) == Orientation:
-            return (self, other)
-        else:
-            return None
+    # def __coerce__(self, other):
+    #     if type(other) == Orientation:
+    #         return (self, other)
+    #     else:
+    #         return None
 
     def __eq__(self,other):
         if type(other) == Orientation:
             return np.sum((self._data-other._data)**2) < _eps
         else:
-            raise self.Error('Could not compare to non-Orientation!')
+            return NotImplemented
+            # raise self.Error('Could not compare to non-Orientation!')
 
     def __setattr__(self, name, val):
         if name == '_data':
@@ -449,9 +462,10 @@ class Orientation(object):
         elif isSequence(other):
             return [self * o for o in other]
         else:
-            raise self.Error('Multiplication by something other than'
-                             + 'Orientation, Vector, or a sequence '
-                             + 'of these, is not allowed!')
+            return NotImplemented
+            # raise self.Error('Multiplication by something other than'
+            #                  + 'Orientation, Vector, or a sequence '
+            #                  + 'of these, is not allowed!')
 
     @property
     def matrix(self):
