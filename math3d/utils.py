@@ -5,7 +5,7 @@ Utility function and definitions library for PyMath3D.
 __author__ = "Morten Lind"
 __copyright__ = "Morten Lind 2009-2012"
 __credits__ = ["Morten Lind"]
-__license__ = "GPL"
+__license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
 __email__ = "morten@lind.no-ip.org"
 __status__ = "Production"
