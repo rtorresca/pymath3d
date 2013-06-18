@@ -52,7 +52,7 @@ class Vector(object):
         as a free vector."""
         if len(args) == 0:
             self._data = np.array([0 ,0, 0], dtype=np.float64)
-        if len(args) == 3 and utils.is_num_types(args):
+        elif len(args) == 3 and utils.is_num_types(args):
             self._data=np.array(args, dtype=np.float64)
         elif len(args) == 2 and utils.is_num_types(args):
             self._data = np.array((args[0], args[1], 0), dtype=np.float64)

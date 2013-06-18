@@ -50,7 +50,7 @@ class Quaternion(object):
             ## Try with orientation or quaternion
             if type(args[0]) == m3d.Orientation:
                 self._v = Vector()
-                self.fromOrientation(args[0])
+                self.orientation = args[0]
             ## Try with rotation vector
             if type(args[0]) == Vector:
                 self.from_rotation_vector(args[0])
