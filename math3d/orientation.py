@@ -558,7 +558,7 @@ class Orientation(object):
             if z_angle > 1e-3 and z_angle < np.pi - 1.0e-3:
                 return Orientation(angle * 
                                    Vector.ez.cross(from_vec).normalized())
-
+    @classmethod
     def new_euler(cls, angles, encoding):
         """Factory for generating a new orientation from Euler or
         Tait-Bryan angles. 'angles' must be a sequence of three real
