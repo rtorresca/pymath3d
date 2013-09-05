@@ -51,7 +51,7 @@ class Orientation(object):
             self._data.shape = (3,3)
         elif seq.shape == (3,):
             self._data = np.identity(3)
-            self.from_rotation_vector(seq)
+            self.rotation_vector = seq
         else:
             raise self.Error('Creating on a numpy array requires shape '
                              + '(3,), (9,) or (3,3)!')
@@ -81,7 +81,7 @@ class Orientation(object):
             elif type(arg) == Vector:
                 # Interpret as a rotation vector
                 self._data = np.identity(3)
-                self.from_rotation_vector(arg)
+                self.rotation_vector = arg
             elif utils.is_sequence(arg):
                 self.__create_on_sequence(arg)
             else:
@@ -256,17 +256,17 @@ class Orientation(object):
         self.from_xz(x_vec, z_vec)
 
     @property
+    def quaternion(self):
+        """Return a quaternion representing this orientation."""
+        return m3d.Quaternion(self)
+
+
+    @property
     def rotation_vector(self):
         """Return a rotation vector representing this
         orientation. This is essentially the logarithm of the rotation
         matrix. """
         return self.quaternion.rotation_vector
-
-    @property
-    def quaternion(self):
-        """Return a quaternion representing this orientation."""
-        return m3d.Quaternion(self)
-
     def toRotationVector(self):
         """Return a rotation vector representing this
         orientation. This is essentially the logarithm of the rotation
@@ -274,11 +274,11 @@ class Orientation(object):
         utils._deprecation_warning('toRotationVector() -> [prop] rotation_vector')
         return self.rotation_vector
 
-    def from_rotation_vector(self, rot_vec):
+    @rotation_vector.setter
+    def rotation_vector(self, rot_vec):
         """Set this Orientation to represent the one given in a
         rotation vector in 'rot_vec'. 'rot_vec' must be a Vector or an
-        numpy array of shape (3,)
-        """
+        numpy array of shape (3,)."""
         if type(rot_vec) == Vector:
             rot_vec = rot_vec.data
         angle = np.linalg.norm(rot_vec)
@@ -286,10 +286,13 @@ class Orientation(object):
             self._data = np.identity(3)
         else:
             axis = rot_vec / angle
-            self.from_axis_angle(axis, angle)
+            self.axis_angle = (axis, angle)
+    def from_rotation_vector(self, rot_vec):
+        utils._deprecation_warning('from_rotation_vector() -> [prop] rotation_vector')
+        self.rotation_vector = rot_vec
     def fromRotationVector(self, rot_vec):
-        utils._deprecation_warning('fromRotationVector() -> from_rotation_vector()')
-        self.from_rotation_vector(rot_vec)
+        utils._deprecation_warning('fromRotationVector() -> [prop] rotation_vector')
+        self.rotation_vector = rot_vec
         
     @property 
     def axis_angle(self):
@@ -302,10 +305,12 @@ class Orientation(object):
         utils._deprecation_warning('toAxisAngle() -> [prop] axis_angle')
         return self.axis_angle
 
-    def from_axis_angle(self, axis, angle):
+    @axis_angle.setter
+    def axis_angle(self, ax_ang):
         """Set this orientation to the equivalent to rotation of
         'angle' around 'axis'.
         """
+        axis, angle = ax_ang
         if type(axis) == Vector:
             axis = axis.data
         ## Force normalization
@@ -325,9 +330,13 @@ class Orientation(object):
             [(1 - ct) * x * z - st * y,
              (1 - ct) * y * z + st * x,
              ct + (1 - ct) * z**2]])
+    def from_axis_angle(self, axis, angle):
+        utils._deprecation_warning('from_axis_angle() -> [prop] axis_angle')
+        self.axis_angle = (axis, angle)
     def fromAxisAngle(self, axis, angle):
-        utils._deprecation_warning('fromAxisAngle() -> from_axis_angle()')
-        
+        utils._deprecation_warning('fromAxisAngle() -> [prop] axis_angle')
+        self.axis_angle = (axis, angle)
+
     def set_to_x_rotation(self, angle):
         """Replace this orientation by that of a rotation around x."""
         ca = np.cos(angle)
@@ -360,7 +369,7 @@ class Orientation(object):
         perceived in the transformed reference system.
         """
         o = Orientation()
-        o.from_axis_angle(axis, angle)
+        o.axis_angle = (axis, angle)
         self.copy(self * o)
     rotate = rotateT = rotate_t
     
@@ -371,7 +380,7 @@ class Orientation(object):
         angle -- the angle in radians to rotate about the axis.
         """
         o = Orientation()
-        o.from_axis_angle(axis, angle)
+        o.axis_angle = (axis, angle)
         self.copy(o * self)
     rotateB = rotate_b
     
