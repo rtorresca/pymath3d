@@ -1,3 +1,19 @@
+math3d (2.1.0) unstable; urgency=low
+
+  * Explicited GPL version 3.
+  * Better reference system.
+  * Much PEP8 update.
+  * Fully converted to np.float64 as basic type.
+  * More properties. Still missing some due to backward compatibility.
+  * Removed some Python-deprecated operators, __coerce__ and __cmp__.
+  * Return of NotImplemented in arithmetic operators allow for third party operators to be defined; e.g. __radd__. Previously an exception was raised.
+  * More deprecation warnings.
+  * Full support for all Euler and Tait-Bryan angle representations in Orientation.
+  * New factory for generating uniformly distributed S3 elements (unit vectors) in the vector module. 
+  * Future: Move factory methods on classes to functions in the pertinent class modules.
+
+ -- Morten Lind <morten@lind.dyndns.dk>  Thu, 23 Jun 2013 00:14:00 +0200
+
 math3d (2.0.0) unstable; urgency=low
 
   * Major upgrade.
