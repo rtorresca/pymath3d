@@ -202,21 +202,11 @@ class Transform(object):
             self._data[:,:] = other._data
         
     def __repr__(self):
-        return '<Transform:\n' + repr(self.orient) + '\n' + repr(self.pos) + '>'
+        return ('<Transform:\n{}\n{}\n>'
+                .format(repr(self.orient), repr(self.pos)))
 
     def __str__(self):
         return self.__repr__()
-    
-    def __coerce__(self, other):
-        print('!!!! Warning !!!!  : Coercion called on Transform!!!')
-        if type(other) == Transform:
-            return (self, other)
-        elif type(other) == Vector:
-            return (self.pos, other)
-        elif type(other) == Orientation:
-            return (self.orient, other)
-        else:
-            return None
         
     def __eq__(self,other):
         if type(other) == Transform:

@@ -30,20 +30,12 @@ class Orientation(object):
     perform a rotational transformation, or for keeping an orientation
     in 3D.
     """
-    
-    class Error(Exception):
-        """Exception class."""
-        def __init__(self, message):
-            self.message = message
-            Exception.__init__(self, self.message)
-        def __repr__(self):
-            return self.message
 
     def __create_on_sequence(self, seq):
         if type(seq) in (list, tuple):
             seq = np.array(seq)
         if type(seq) != np.ndarray:
-            raise self.Error('Creating on a sequence requires numpy array, '
+            raise utils.Error('Creating on a sequence requires numpy array, '
                              + 'list or tuple')
         if seq.shape in ((9,), (3,3)):
             self._data = seq.copy()
@@ -53,7 +45,7 @@ class Orientation(object):
             self._data = np.identity(3)
             self.from_rotation_vector(seq)
         else:
-            raise self.Error('Creating on a numpy array requires shape '
+            raise utils.Error('Creating on a numpy array requires shape '
                              + '(3,), (9,) or (3,3)!')
 
     def __init__(self, *args):
@@ -85,7 +77,7 @@ class Orientation(object):
             elif utils.is_sequence(arg):
                 self.__create_on_sequence(arg)
             else:
-                raise self.Error(
+                raise utils.Error(
                     'Creating on type {} is not supported'
                     .format(str(type(arg))))
         elif len(args) == 3:
@@ -94,7 +86,7 @@ class Orientation(object):
             elif np.all(np.array([type(a)==np.ndarray for a in args])):
                 array_args = args
             else:
-                raise self.Error(
+                raise utils.Error(
                     'Creating on three arguments requires three vectors '
                     + 'or three numpy arrays of shape (3,)!')
             # Stack the vector data vertically and transpose to get
@@ -174,23 +166,17 @@ class Orientation(object):
         else:
             raise AttributeError(
                 'Attribute "{}" not found in Orientation'.format(name))
-            #raise self.Error, 'Orientation does not have attribute "%s"' % name
+            #raise utils.Error, 'Orientation does not have attribute "%s"' % name
 
     def __getitem__(self, indices):
         return self._data.__getitem__(indices)
-
-    # def __coerce__(self, other):
-    #     if type(other) == Orientation:
-    #         return (self, other)
-    #     else:
-    #         return None
 
     def __eq__(self,other):
         if type(other) == Orientation:
             return np.sum((self._data-other._data)**2) < utils._eps
         else:
             return NotImplemented
-            # raise self.Error('Could not compare to non-Orientation!')
+            # raise utils.Error('Could not compare to non-Orientation!')
 
     def __setattr__(self, name, val):
         if name == '_data':
@@ -462,7 +448,7 @@ class Orientation(object):
             return [self * o for o in other]
         else:
             return NotImplemented
-            # raise self.Error('Multiplication by something other than'
+            # raise utils.Error('Multiplication by something other than'
             #                  + 'Orientation, Vector, or a sequence '
             #                  + 'of these, is not allowed!')
 
@@ -596,7 +582,7 @@ class Orientation(object):
         elif enc.lower() == enc:
             intrinsic = False
         else:
-            raise self.Error(
+            raise utils.Error(
                 'Rotation encoding must either be all intrinsic or extrinsic!')
         o = Orientation()
         for r,a in zip(encoding, angles):
@@ -616,7 +602,7 @@ class Orientation(object):
         elif enc.lower() == enc:
             intrinsic = False
         else:
-            raise self.Error(
+            raise utils.Error(
                 'Rotation encoding must either be all intrinsic or extrinsic!')
         lenc = enc.lower()
         repetition = lenc[0] == lenc[2]

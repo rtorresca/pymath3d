@@ -22,14 +22,6 @@ def isVector(v):
 class Vector(object):
     """A Vector is a 3D vector (member of R3) with standard Euclidian
     operations."""
-    
-    class Error(Exception):
-        """Exception class."""
-        def __init__(self, message):
-            self.message =  message
-            Exception.__init__(self, self.message)
-        def __repr__(self):
-            return self.message
 
     @classmethod
     def canCreateOn(cls, *arg):
@@ -65,11 +57,11 @@ class Vector(object):
             elif type(arg) == Vector:
                 self._data = arg.data
             else:
-                raise self.Error(
+                raise utils.Error(
                     ('__init__ : could not create vector on argument : "{}"'
                     + ' of type "{}"').format(str(args[0]), str(type(args[0]))))
         else:
-            raise self.Error('__init__ : could not create vector on '
+            raise utils.Error('__init__ : could not create vector on '
                              + 'argument : "{}" of type "{}"'
                              .format(str(args[0]), str(type(args[0]))))
         self._is_position = kwargs.get('position', 1)
@@ -126,17 +118,12 @@ class Vector(object):
     def __setitem__(self,n,val):
         self._data[n] = val
 
-    # def __cmp__(self, other):
-        
-    #     if self.x == other.x and self.y == other.y and self.z == other.z: return 0
-    #     else: return cmp(self.x,other.x)
-
     def __eq__(self,other):
         if type(other) == Vector:
             return np.sum((self._data-other._data)**2) < utils._eps
         else:
             return NotImplemented
-            # raise self.Error('Could not compare to non-Vector!')
+            # raise utils.Error('Could not compare to non-Vector!')
 
     def __repr__(self):
         return '<Vector: ({:.5f}, {:.5f}, {:.5f})>'.format(*self._data) #self.x,self.y,self.z)
@@ -253,12 +240,21 @@ class Vector(object):
         return self._data.reshape((3,1))
 
     def __sub__(self, other):
+        """Subtract another vector from this. The semantics regarding
+        free and position vectors should be: If this is free, and
+        other is a position, or opposite, the new should be
+        position. If both are free or both are positions, the new
+        should be free."""
         if type(other) == Vector:
             return Vector(np.subtract(self._data, other._data))
+        else:
+            return NotImplemented
 
     def __isub__(self, other):
         if type(other) == Vector:
             self._data -= other._data
+        else:
+            return NotImplemented
         return self
     
     def __mul__(self, other):
@@ -268,13 +264,16 @@ class Vector(object):
             return np.dot(self._data, other._data)
         elif utils.is_num_type(other):
             return Vector(np.dot(self._data, other))
+        else:
+            return NotImplemented
 
     def __imul__(self, other):
         """In-place multiplication with a scalar, 'other'. """
         if utils.is_num_type(other):
             self._data *= other
         else:
-            raise self.Error('__imul__ : Could not multiply by non-number')
+            return NotImplemented
+            # raise utils.Error('__imul__ : Could not multiply by non-number')
         return self
     
     def __rmul__(self, other):
@@ -282,14 +281,14 @@ class Vector(object):
         if utils.is_num_type(other):
             return Vector(other * self._data)
         else:
-            raise self.Error('__rmul__ : Could not multiply by non-number')
+            raise utils.Error('__rmul__ : Could not multiply by non-number')
         
     def __truediv__(self, other):
         """Division with a scalar, 'other'. """
         if utils.is_num_type(other):
             return Vector(1.0 / other * self._data)
         else:
-            raise self.Error('__rdiv__ : Could not divide by non-number')
+            raise utils.Error('__rdiv__ : Could not divide by non-number')
     __div__ = __truediv__
     
     def __add__(self, other):
@@ -298,7 +297,7 @@ class Vector(object):
             return Vector(self._data + other._data)
         else:
             return NotImplemented
-            # raise self.Error('__add__ : Could not add non-vector')
+            # raise utils.Error('__add__ : Could not add non-vector')
 
     def __iadd__(self, other):
         """In-place add the 'other' vector to this vector."""
@@ -306,7 +305,7 @@ class Vector(object):
             self._data += other._data
         else:
             return NotImplemented
-            # raise self.Error('__iadd__ : Could not add non-vector')
+            # raise utils.Error('__iadd__ : Could not add non-vector')
         return self
 
     def __neg__(self):
@@ -332,3 +331,20 @@ def random_unit_vector():
 def _test():
     print((Vector.canCreateOn(1,2,3), Vector.canCreateOn((1,2,3)), Vector.canCreateOn(1,2)))
 
+def _test_rops():
+    """Test that rop on other is called when NotImplemented is
+    returned from the Vector object."""
+    class A(object):
+        def __rmul__(self, other):
+            print('rmul from A')
+            return other * 2.0
+    v = Vector(1,2,3)
+    v_origin = v.copy()
+    a = A()
+    if v*a != 2*v:
+        return False
+    v *= a
+    if v != 2 * v_origin:
+        return False
+    return True
+        

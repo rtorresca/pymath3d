@@ -59,3 +59,14 @@ def isNumTypes(lst):
     return is_num_types(lst)
 def is_num_types(lst):
     return np.all([lambda li: isinstance(li, numbers.Number) for li in lst])
+
+
+    
+class Error(Exception):
+    """Exception class."""
+    def __init__(self, message):
+        self.message = message
+        Exception.__init__(self, self.message)
+    def __repr__(self):
+        return self.message
+
