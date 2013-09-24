@@ -228,7 +228,8 @@ class Orientation(object):
         
     def from_xz(self, x_vec, z_vec):
         """Reset this orientation to the one that conforms with the
-        given x and z directions."""
+        given x and z directions.
+        """
         if x_vec * z_vec > utils._eps:
             print('warning ... orthogonalizing!')
         self.vec_x = x_vec.normalized()
@@ -241,27 +242,22 @@ class Orientation(object):
         utils._deprecation_warning('fromXZ -> from_xz')
         self.from_xz(x_vec, z_vec)
 
-    @property
-    def quaternion(self):
+    def get_quaternion(self):
         """Return a quaternion representing this orientation."""
         return m3d.Quaternion(self)
+    def set_quaternion(self, quat):
+        """Set the orientation to that of the quaternion given in
+        'quat'.
+        """
+        self._data[:,:] = quat.orientation._data
+    quaternion = property(get_quaternion)
 
-
-    @property
-    def rotation_vector(self):
+    def get_rotation_vector(self):
         """Return a rotation vector representing this
         orientation. This is essentially the logarithm of the rotation
         matrix. """
         return self.quaternion.rotation_vector
-    def toRotationVector(self):
-        """Return a rotation vector representing this
-        orientation. This is essentially the logarithm of the rotation
-        matrix."""
-        utils._deprecation_warning('toRotationVector() -> [prop] rotation_vector')
-        return self.rotation_vector
-
-    @rotation_vector.setter
-    def rotation_vector(self, rot_vec):
+    def set_rotation_vector(self, rot_vec):
         """Set this Orientation to represent the one given in a
         rotation vector in 'rot_vec'. 'rot_vec' must be a Vector or an
         numpy array of shape (3,)."""
@@ -273,26 +269,13 @@ class Orientation(object):
         else:
             axis = rot_vec / angle
             self.axis_angle = (axis, angle)
-    def from_rotation_vector(self, rot_vec):
-        utils._deprecation_warning('from_rotation_vector() -> [prop] rotation_vector')
-        self.rotation_vector = rot_vec
-    def fromRotationVector(self, rot_vec):
-        utils._deprecation_warning('fromRotationVector() -> [prop] rotation_vector')
-        self.rotation_vector = rot_vec
-        
-    @property 
-    def axis_angle(self):
+    rotation_vector = property(get_rotation_vector, set_rotation_vector)
+
+    def get_axis_angle(self):
         """Return an (axis,angle) pair representing the equivalent
         orientation."""
         return m3d.Quaternion(self).axis_angle
-    def toAxisAngle(self):
-        """Return an (axis,angle) pair representing the equivalent
-        orientation."""
-        utils._deprecation_warning('toAxisAngle() -> [prop] axis_angle')
-        return self.axis_angle
-
-    @axis_angle.setter
-    def axis_angle(self, ax_ang):
+    def set_axis_angle(self, ax_ang):
         """Set this orientation to the equivalent to rotation of
         'angle' around 'axis'.
         """
@@ -316,12 +299,7 @@ class Orientation(object):
             [(1 - ct) * x * z - st * y,
              (1 - ct) * y * z + st * x,
              ct + (1 - ct) * z**2]])
-    def from_axis_angle(self, axis, angle):
-        utils._deprecation_warning('from_axis_angle() -> [prop] axis_angle')
-        self.axis_angle = (axis, angle)
-    def fromAxisAngle(self, axis, angle):
-        utils._deprecation_warning('fromAxisAngle() -> [prop] axis_angle')
-        self.axis_angle = (axis, angle)
+    axis_angle = property(get_axis_angle, set_axis_angle)
 
     def set_to_x_rotation(self, angle):
         """Replace this orientation by that of a rotation around x."""
@@ -453,6 +431,12 @@ class Orientation(object):
             return Vector(np.dot(self._data, other._data))
         elif type(other) == np.ndarray and other.shape == (3,):
             return np.dot(self._data, other)
+        elif type(other) == np.ndarray and other.shape == (6,):
+            # Individually transfor two appended free vectors,
+            # e.g. twists or wrenches
+            return self._data.dot(
+                other.reshape((3,2), order='F')
+                ).reshape(6, order='F')
         elif utils.is_sequence(other):
             return [self * o for o in other]
         else:
@@ -461,28 +445,32 @@ class Orientation(object):
             #                  + 'Orientation, Vector, or a sequence '
             #                  + 'of these, is not allowed!')
 
-    @property
-    def matrix(self):
+    def get_np_matrix(self):
         """Property for getting a np-matrix with the data from the
-        orientation."""
+        orientation.
+        """
         return np.matrix(self._data)
+    matrix = property(get_np_matrix)
 
-    @property
-    def array(self):
+    def get_np_array(self):
         """Return a copy of the ndarray which is the fundamental data
-        of the Orientation."""
+        of the Orientation.
+        """
         return self._data.copy()
+    array = property(get_np_array)
 
-    @property
-    def list(self):
+    def get_list(self):
         """Return the fundamental data of the Orientation as a
-        list."""
+        list.
+        """
         return self._data.tolist()
+    list = property(get_list)
 
     @classmethod
     def new_from_xy(cls, x_vector, y_vector):
         """Factory for a new orientation with given x- and
-        y-direction."""
+        y-direction.
+        """
         o = Orientation()
         o.from_xy(x_vector, y_vector)
         return o
@@ -490,7 +478,8 @@ class Orientation(object):
     @classmethod
     def new_from_xz(cls, x_vector, z_vector):
         """Factory for a new orientation with given x- and
-        z-direction."""
+        z-direction.
+        """
         o = Orientation()
         o.from_xz(x_vector, z_vector)
         return o
