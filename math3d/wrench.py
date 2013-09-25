@@ -28,12 +28,27 @@ class OrigoWrench(object):
         """Args may contain 1) one iterable of two iterables of three
         floats. 2) six floats. 3) two iterables of three floats.
         """
-        self._force = m3d.Vector(args[:3])
-        self._torque = m3d.Vector(args[3:])
+        self._force = m3d.Vector(args[0][:3])
+        self._torque = m3d.Vector(args[0][3:])
 
     def __rmul__(self, left):
+        """Mainly support transformation to another coordinate system,
+        where the equivalent wrench is returned as acting at the
+        target coordinate system origo. In case of a transform, the 
+        """
         if type(left) == m3d.Transform:
-            ...
+            # The new force is the same as the old, but
+            # reoriented. The new torque is the old one reoriented
+            # plus the action of the force acting at the old origo
+            t = left.orient * self._torque
+            f_n = left.orient * self._force 
+            t_n = t + left.pos.cross(f_n)
+            return OrigoWrench(np.append(f_n.data, t_n.data))
+            
+
+    def __repr__(self):
+        return '<{} f=[{:.4f}, {:.4f}, {:.4f}] t=[{:.4f}, {:.4f}, {:.4f}]>'.format(
+            *([self.__class__.__name__] + self._force.list + self._torque.list))
 
 class FootedWrench(object):
     """A FootedWrench is a wrench that contains, in addition to the
