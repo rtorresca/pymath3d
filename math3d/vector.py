@@ -112,6 +112,12 @@ class Vector(object):
         else:
             object.__setattr__(self, name, val)
 
+    def __len__(self):
+        return 3
+
+    def __iter__(self):
+        return iter(self._data)
+    
     def __getitem__(self, n):
         return self._data[n]
 

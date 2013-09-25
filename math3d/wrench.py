@@ -25,10 +25,29 @@ class OrigoWrench(object):
     """
 
     def __init__(self, *args, **kwargs):
-        """Args may contain 1) one iterable of two iterables of three
-        floats. 2) six floats. 3) two iterables of three floats.
+        """Construct an OrigoWrench from arguments. 'kwargs' take
+        precedence over given 'args'.
+
+        'kwargs' may contain:
+
+        * 'f' and 'm', either are optional, each an iterable of three
+          floats.
+
+        'args' may contain: 
+        
+        * One iterable of six floats. The first three are taken as the
+          force, and the last three as the moment.
+
+        * Two iterables of three floats. The first gives the force and
+          the second the moment.
+
+        * One OrigoTwist instance (copy constructor).
         """
-        if 'f' in kwargs or 'm' in kwargs:
+        if len(args) == 0 and len(kwargs) == 0:
+            # Default constructor
+            self._force = m3d.Vector()
+            self._moment = m3d.Vector()            
+        elif 'f' in kwargs or 'm' in kwargs:
             self._force = m3d.Vector(kwargs.get('f', m3d.Vector()))
             self._moment = m3d.Vector(kwargs.get('m', m3d.Vector()))
         elif len(args) == 1 and len(args[0]) == 6:
@@ -71,13 +90,9 @@ class OrigoWrench(object):
             f_n = ref.orient * self._force 
             m_n = ref.orient * self._moment + ref.pos.cross(f_n)
             return OrigoWrench(f=f_n, m=m_n)
-        
-
+    
     def __rmul__(self, left):
-        """Mainly support transformation to another coordinate system,
-        where the equivalent wrench is returned as acting at the
-        target coordinate system origo.
-        """
+        """Handle left operator."""
         if type(left) in [m3d.Transform, m3d.Vector]:
             return self.equivalent(left)
         if type(left) == m3d.Orientation:
@@ -88,7 +103,7 @@ class OrigoWrench(object):
             m_n = left * self._moment
             return OrigoWrench(f=f_n, m=m_n)
 
-
+    # Moment property
     def get_moment(self):
         """Get the moment part."""
         return self._moment.copy()
@@ -97,6 +112,7 @@ class OrigoWrench(object):
         self._moment = m3d.Vector(new_moment)
     moment = property(get_moment, set_moment)
 
+    # Force property
     def get_force(self):
         """Get the force part."""
         return self._force.copy()
@@ -113,8 +129,8 @@ class OrigoWrench(object):
                            m=self._moment+w_add._moment)
 
     def __sub__(self, w_sub):
-        """Subtract two wrenches. Note that they are percieved as belonging
-        to the same origo in the same coordinate system!.
+        """Subtract two wrenches. Note that they are percieved as
+        belonging to the same origo in the same coordinate system!.
         """
         return OrigoWrench(f=self._force-w_sub._force,
                            m=self._moment-w_sub._moment)
@@ -129,11 +145,12 @@ class OrigoWrench(object):
                 .format(*([self.__class__.__name__] + 
                           self._force.list + self._moment.list)))
 
+
 class FootedWrench(object):
     """A FootedWrench is a wrench that contains, in addition to the
     force-moment vectors, a position vector, the 'foot point', for
     holding the position of action of the wrench. Under coordinate
     changes, the force and moment vectors then transforms as free
     vectors and the foot point transforms as a position vector."""
-    def __init__(self, *args, *kwargs):
+    def __init__(self, *args, **kwargs):
         pass
