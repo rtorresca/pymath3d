@@ -69,7 +69,10 @@ class OrigoTwist(object):
         coordinate system.  The new v_ang is the same as the old, but
         possibly reoriented. The new v_lin is the old one, possibly
         reoriented, plus the action of the v_ang acting at the old
-        origo.
+        origo. Beware that the constant velocity motion obtained by
+        the transformed twist is, at the new origo, only
+        instantaneously in accord with the current twist, since it
+        introduces a translation of the line of rotation.
         """
         if type(ref) == m3d.Vector:
             # 'ref' is given in current coordinates, and represents
@@ -88,13 +91,12 @@ class OrigoTwist(object):
             return OrigoTwist(v_lin=vl_n, v_ang=va_n)
     
     def __rmul__(self, left):
-        """Handle left operator."""
+        """Handle a left-operator."""
         if type(left) in [m3d.Transform, m3d.Vector]:
             return self.equivalent(left)
         if type(left) == m3d.Orientation:
-            # Perform a reorientation of the twist, as observed from
-            # a coordinate system with the orientation transform given
-            # in 'left'
+            # Perform a reorientation of the twist, as observed from a
+            # coordinate system with the orientation given in 'left'
             vl_n = left * self._v_lin 
             va_n = left * self._v_ang
             return OrigoTwist(v_lin=vl_n, v_ang=va_n)
