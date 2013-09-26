@@ -256,7 +256,7 @@ class Orientation(object):
         """Return a rotation vector representing this
         orientation. This is essentially the logarithm of the rotation
         matrix. """
-        return self.quaternion.rotation_vector
+        return self.quaternion.rotation_vector._data
     def set_rotation_vector(self, rot_vec):
         """Set this Orientation to represent the one given in a
         rotation vector in 'rot_vec'. 'rot_vec' must be a Vector or an
@@ -400,7 +400,8 @@ class Orientation(object):
         """Return the square of the orientation distance (the angle of
         rotation) to the 'other' orientation.
         """
-        return (self.inverse()*other).rotation_vector.length_sq
+        rv = (self.inverse()*other).rotation_vector
+        return np.dot(rv, rv)
     def angDist2(self, other):
         utils._deprecation_warning('angDist2 -> ang_dist_sq')
         return self.ang_dist_sq(other)

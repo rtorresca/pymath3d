@@ -46,12 +46,12 @@ class OrigoTwist(object):
         elif 'v_lin' in kwargs or 'v_ang' in kwargs:
             self._v_lin = m3d.Vector(kwargs.get('v_lin', m3d.Vector()))
             self._v_ang = m3d.Vector(kwargs.get('v_ang', m3d.Vector()))
+        elif len(args) == 1 and type(args[0]) == OrigoTwist:
+            self._v_lin = args[0].linear
+            self._v_ang = args[0].angular
         elif len(args) == 1 and len(args[0]) == 6:
             self._v_lin = m3d.Vector(args[0][:3])
             self._v_ang = m3d.Vector(args[0][3:])
-        elif len(args) == 1 and type(args[0]) == OrigoTwist:
-            self._v_lin = args[0].v_lin
-            self._v_ang = args[0].v_ang
         elif len(args) == 2 and len(args[0]) == 3 and len(args[1]) == 3:
             self._v_lin = m3d.Vector(args[0])
             self._v_ang = m3d.Vector(args[1])
@@ -90,16 +90,26 @@ class OrigoTwist(object):
             vl_n = ref.orient * self._v_lin + ref.pos.cross(va_n)
             return OrigoTwist(v_lin=vl_n, v_ang=va_n)
     
+    def displacement(self, delta_t):
+        """Compute the displacement resulting from applying the twist
+        for time 'delta_t'. The returned transform will be given in the current
+        coordinates and represent the moved coordinate system."""
+        return m3d.Transform(delta_t * self.array)
+    
     def __rmul__(self, left):
         """Handle a left-operator."""
-        if type(left) in [m3d.Transform, m3d.Vector]:
+        if np.isreal(left):
+            return OrigoTwist(left * self.array)
+        elif type(left) in [m3d.Transform, m3d.Vector]:
             return self.equivalent(left)
-        if type(left) == m3d.Orientation:
+        elif type(left) == m3d.Orientation:
             # Perform a reorientation of the twist, as observed from a
             # coordinate system with the orientation given in 'left'
             vl_n = left * self._v_lin 
             va_n = left * self._v_ang
             return OrigoTwist(v_lin=vl_n, v_ang=va_n)
+        else:
+            return NotImplemented
 
     # Angular property
     def get_angular(self):
@@ -110,6 +120,11 @@ class OrigoTwist(object):
         self._v_ang = m3d.Vector(new_v_ang)
     angular = property(get_angular, set_angular)
 
+    # Raw array data access
+    def get_array(self):
+        return np.append(self._v_lin._data, self._v_ang._data)
+    array = property(get_array)
+
     # Linear property
     def get_linear(self):
         """Get the linear part."""
@@ -118,6 +133,13 @@ class OrigoTwist(object):
         """Set the linear part."""
         self._v_lin = m3d.Vector(new_v_lin)
     linear = property(get_linear, set_linear)
+
+    def __mul__(self, right):
+        """Handle right operation."""
+        if np.isreal(right):
+            return OrigoTwist(right * self.array)
+        else:
+            return NotImplemented
 
     def __add__(self, v_add):
         """Add two twists. Note that they are percieved as belonging

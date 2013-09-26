@@ -76,8 +76,13 @@ class Quaternion(object):
             ## Assume numbers for s, x, y, and z
             self._s = args[0]
             self._v = Vector(args[1:])
+        else:
+            raise utils.Error(
+                    'Creating on type {} is not supported'
+                    .format(str(type(arg))))
         if np.abs(self.norm - 1.0) > utils._eps:
-            print('Quaternion.__init__ : Warning : Arguments did not constitute a unit quaternion. Normalizing.')
+            print('Quaternion.__init__ : Warning : Arguments did not '
+                  + 'constitute a unit quaternion. Normalizing.')
             self.normalize()
 
     def __getattr__(self, name):
@@ -90,8 +95,8 @@ class Quaternion(object):
         elif name == 'z':
             return self._v.z
         else:
-            raise AttributeError('Attribute "{}" not found in Quaternion '
-                                 + 'class'.format(name))
+            raise AttributeError(('Attribute "{}" not found in Quaternion '
+                                 + 'class').format(name))
 
     @property
     def vector_part(self):
@@ -146,7 +151,7 @@ class Quaternion(object):
         elif type(other) == Quaternion:
             ## Ordinary quaternion multiplication
             return Quaternion(self._s * other._s - self._v * other._v,
-                               self._v.cross(other._v) +
+                              self._v.cross(other._v) +
                               self._s * other._v + other._s * self._v)
         elif utils.is_num_type(other):
             return Quaternion(other * self._s, other * self._v)

@@ -18,7 +18,8 @@ import numpy as np
 def _deprecation_warning(msg):
     f = inspect.stack()[2]
     # print(f)
-    print('math3d: {} @ {} in {}:\n\tA deprecated method was invoked. '.format(f[1], f[2], f[3])
+    print(('math3d: {} @ {} in {}:\n\tA deprecated method was invoked. ')
+          .format(f[1], f[2], f[3])
           + 'Suggestion for replacement: "%s"' % msg)
     
 ## Limit for accuracy of consistencies and comparison.
@@ -52,6 +53,7 @@ def isNumType(val):
     _deprecation_warning('is_num_type')
     return is_num_type(val)
 def is_num_type(val):
+    # return np.isreal(val)
     return type(val) in _num_types
 
 def isNumTypes(lst):

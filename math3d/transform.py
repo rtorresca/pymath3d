@@ -289,7 +289,7 @@ class Transform(object):
     @property
     def pose_vector(self):
         """Get the transform in pose vector representation "(x, y, z, rx, ry, rz)"."""
-        return np.append(self._v._data, self._o.rotation_vector._data)
+        return np.append(self._v._data, self._o.rotation_vector)
 
     @property
     def structured_array(self):
