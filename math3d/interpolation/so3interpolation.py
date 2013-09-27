@@ -36,8 +36,8 @@ class SO3Interpolation(object):
         self._qend.normalize()
         if shortest and self._qstart.dist(self._qend) > self._qstart.dist(-self._qend):
             self._qend = -self._qend
-        self._qstartconj = self._qstart.conjugated().normalized()
-        self._qstartconjqend = (self._qstartconj * self._qend).normalized()
+        self._qstartconj = self._qstart.conjugated.normalized
+        self._qstartconjqend = (self._qstartconj * self._qend).normalized
 
     def __call__(self,t):
         return self.quat(t)

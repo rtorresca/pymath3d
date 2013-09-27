@@ -55,7 +55,7 @@ class Vector(object):
             elif utils.is_sequence(arg) and len(arg)  == 2:
                 self._data = np.array((arg[0], arg[1], 0), dtype=np.float64)
             elif type(arg) == Vector:
-                self._data = arg.data
+                self._data = arg.array
             else:
                 raise utils.Error(
                     ('__init__ : could not create vector on argument : "{}"'
@@ -83,6 +83,7 @@ class Vector(object):
 
     def __getattr__(self,name):
         if name == 'data':
+            utils._deprecation_warning('[prop] data -> [prop] array')
             return self._data.copy()
         elif name == 'x':
             return self._data[0]
@@ -106,12 +107,13 @@ class Vector(object):
         #     self.__dict__[name] = val
         elif name == 'pos':
             if type(val) == Vector:
-                self._data[:] = val.data
+                self._data[:] = val.array
             elif utils.is_three_sequence(val):
                 self._data[:] = np.array(val)
         else:
             object.__setattr__(self, name, val)
 
+    # These pose some semantic problems with numpy array multiplication.
     # def __len__(self):
     #     return 3
 
@@ -137,19 +139,19 @@ class Vector(object):
     def __str__(self):
         return self.__repr__()
     
-    @property
-    def is_position(self):
+    
+    def get_is_position(self):
         """If the vector is a position vector, the default, then it
-        transforms differently than a real vector."""
+        transforms differently than a real vector.
+        """
         return self._is_position
-    def isPos(self):
-        _deprecation_warning('isPos() -> [prop] is_position')
-        return self._is_position
+    is_position = property(get_is_position)
 
     def angle(self, other):
         """Return the angle (radians) to the 'other' vector. This is the
-        absolute, positive angle."""
-        costheta = (self * other) / (self.length() * other.length())
+        absolute, positive angle.
+        """
+        costheta = (self * other) / (self.length * other.length)
         if costheta > 1:
             costheta = 1
         elif costheta < -1:
@@ -157,9 +159,13 @@ class Vector(object):
         return np.arccos(costheta)
 
     def sangle(self, other, refVec=None):
+        utils._deprecation_warning('sangle -> signed_angle')
+
+    def signed_angle(self, other, refVec=None):
         """With default reference rotation vector as Z-axis (if
         'refVec' == None), compute the signed angle of rotation from
-        self to 'other'."""
+        self to 'other'.
+        """
         theta = self.angle(other)
         xprod = self.cross(other)
         if not refVec is None:
@@ -170,43 +176,42 @@ class Vector(object):
                 theta = -theta
         return theta
     
-    def length(self):
-        """Standard Euclidean length."""
-        return np.sqrt(self.length_sq)
+    def get_length(self):
+        """Return the Euclidean length."""
+        return np.sqrt(self.length_squared)
+    length = property(get_length)
 
-    @property
-    def length_sq(self):
-        """Square of the standard Euclidean length."""
+    def get_length_squared(self):
+        """Return the square of the standard Euclidean length."""
         return np.dot(self._data, self._data)
-    def length2(self):
-        utils._deprecation_warning('lenght2() -> [prop] length_sq')
-        return self.length_sq
+    length_squared = property(get_length_squared)
     
     def normalize(self):
         """In-place normalization of this Vector."""
-        l = self.length()
+        l = self.length
         if l != 1.0:
             self._data = self._data / l
 
-    def normalized(self):
-        """Returns a normalized Vector with same direction as this
-        one."""
+    def get_normalized(self):
+        """Return a normalized Vector with same direction as this
+        one.
+        """
         nv = Vector(self)
         nv.normalize()
         return nv
+    normalized = property(get_normalized)
 
     def dist(self, other):
         """Compute euclidean distance between points given by self
         and 'other'."""
-        return np.sqrt(self.dist2(other))
+        return np.sqrt(self.dist_squared(other))
     
-    def dist2(self, other):
+    def dist_squared(self, other):
         """Compute euclidean distance between points given by self
         and 'other'."""
-        return (self - other).length_sq
+        return (self - other).length_squared
 
-    @property
-    def cross_operator(self):
+    def get_cross_operator(self):
         """Return the cross product operator for this Vector. I.e. the
         skew-symmetric operator cross_op, such that cross_op * u == v
         x u, for any vector u."""
@@ -218,32 +223,34 @@ class Vector(object):
         cross_op[2,0] = -self._data[1]
         cross_op[2,1] = self._data[0]
         return cross_op
-    
+    cross_operator = property(get_cross_operator)
+
     def cross(self, other):
+        """Return the cross product with 'other'."""
         return Vector(np.cross(self._data, other._data))
 
-    @property
-    def array(self):
+    def get_array(self):
         """Return a copy of the ndarray which is the fundamental data
         of the Vector."""
         return self._data.copy()
+    array = property(get_array)
 
-    @property
-    def list(self):
+    def get_list(self):
         """Return the fundamental data of the Vector as a list."""
         return self._data.tolist()
-        
-    @property
-    def matrix(self):
+    list = property(get_list)
+
+    def get_matrix(self):
         """Property for getting a single-column np-matrix with the data
         from the vector."""
         return np.matrix(self._data).T
+    matrix = property(get_matrix)
 
-    @property
-    def column(self):
+    def get_column(self):
         """Property for getting a single-column array with the data
         from the vector."""
         return self._data.reshape((3,1))
+    column = property(get_column)
 
     def __sub__(self, other):
         """Subtract another vector from this. The semantics regarding

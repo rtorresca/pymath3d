@@ -121,7 +121,7 @@ class ReferenceSystem(object):
         crpm, crpb = self._get_common_root_paths(frame_target, frame_base)
         crpm.reverse()
         crpb.reverse()
-        return self._chain_transform(crpb).inverse() * self._chain_transform(crpm)
+        return self._chain_transform(crpb).inverse * self._chain_transform(crpm)
 
     __call__=transform
 

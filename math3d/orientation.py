@@ -20,10 +20,6 @@ import math3d as m3d
 from . import utils
 from .vector import Vector
 
-def isOrientation(o):
-    utils._deprecation_warning('type(o) == math3d.Orientation')
-    return type(o) == Orientation
-
 
 class Orientation(object):
     """An Orientation is a member of SO(3) which can be used either to
@@ -67,7 +63,7 @@ class Orientation(object):
         if len(args) == 1:
             arg=args[0]
             if type(arg) == Orientation:
-                self._data = arg.data
+                self._data = arg.array
             elif type(arg) == m3d.Quaternion:
                 self._data = arg.orientation._data
             elif type(arg) == Vector:
@@ -113,60 +109,66 @@ class Orientation(object):
         else:
             self._data[:,:] = other._data
 
-    @property
-    def vec_x(self):
+    def get_vec_x(self):
         """Return the x-direction of the moving coordinate system in
         base reference as a Vector.
         """
         return Vector(self._data[:,0])
+    vec_x = property(get_vec_x)
 
-    @property
-    def col_x(self):
+    def get_col_x(self):
         """Return the x-direction of the moving coordinate system in
         base reference as an array."""
         return self._data[:,0]
-    
-    @property
-    def vec_y(self):
+    col_x = property(get_col_x)
+
+    def get_vec_y(self):
         """Return the y-direction of the moving coordinate system in
         base reference as a Vector.
         """
         return Vector(self._data[:,1])
+    vec_y = property(get_vec_y)
 
-    @property
-    def col_y(self):
+    def get_col_y(self):
         """Return the y-direction of the moving coordinate system in
         base reference as an array.
         """
         return self._data[:,1]
-    
-    @property
-    def vec_z(self):
+    col_y = property(get_col_y)
+
+    def get_vec_z(self):
         """Return the z-direction of the moving coordinate system in
         base reference as a Vector.
         """
         return Vector(self._data[:,2])
+    vec_z = property(get_vec_z)
 
-    @property
-    def col_z(self):
+    def get_col_z(self):
         """Return the z-direction of the moving coordinate system in
         base reference as an array.
         """
         return self._data[:,2]
+    col_z = property(get_col_z)
 
-    def __getattr__(self, name):
-        if name == 'data':
-            return self._data.copy()
-        elif name[:3] in ['vec', 'col'] and name[-1].lower() in 'xyz':
-            idx = 'xyz'.find(name[-1].lower())
-            a = self._data[:,idx]
-            if name[:3] == 'vec':
-                a = Vector(a)
-            return a
-        else:
-            raise AttributeError(
-                'Attribute "{}" not found in Orientation'.format(name))
-            #raise utils.Error, 'Orientation does not have attribute "%s"' % name
+    def get_data(self):
+        """Return a copy of the raw array data."""
+        utils._deprecation_warning('get_data -> get_array')
+        return self._data.copy()
+    data = property(get_data)
+
+    # def __setattr__(self, name, val):
+    #     if name == '_data':
+    #         ## This is dangerous, since there is no consistency check.
+    #         self.__dict__['_data']=val
+    #     elif name[:3] in ['vec', 'col'] and name[-1].lower() in 'xyz':
+    #         ## This is dangerous since there is no automatic
+    #         ## re-normalization
+    #         idx = 'xyz'.find(name[-1].lower())
+    #         if type(val) == Vector:
+    #             val = val.array
+    #         self._data[:3,idx] = val
+    #     else:
+    #         object.__setattr__(self, name, val)
 
     def __getitem__(self, indices):
         return self._data.__getitem__(indices)
@@ -178,22 +180,7 @@ class Orientation(object):
             return NotImplemented
             # raise utils.Error('Could not compare to non-Orientation!')
 
-    def __setattr__(self, name, val):
-        if name == '_data':
-            ## This is dangerous, since there is no consistency check.
-            self.__dict__['_data']=val
-        elif name[:3] in ['vec', 'col'] and name[-1].lower() in 'xyz':
-            ## This is dangerous since there is no automatic
-            ## re-normalization
-            idx = 'xyz'.find(name[-1].lower())
-            if type(val) == Vector:
-                val = val.data
-            self._data[:3,idx] = val
-        else:
-            object.__setattr__(self, name, val)
-
-    @property
-    def error(self):
+    def get_repr_error(self):
         """Compute and return the square root of the sum of squared
         dot products of the axis vectors, as a representation of the
         error of the orientation matrix.
@@ -201,27 +188,29 @@ class Orientation(object):
         vec_x = self.vec_x
         vec_y = self.vec_y
         vec_z = self.vec_z
-        sq_sum = (vec_x*vec_y)**2
-        sq_sum += (vec_y*vec_z)**2
-        sq_sum += (vec_z*vec_x)**2
+        sq_sum = (vec_x * vec_y)**2
+        sq_sum += (vec_y * vec_z)**2
+        sq_sum += (vec_z * vec_x)**2
         return np.sqrt(sq_sum)
-    
+    repr_error = property(get_repr_error)
+
     # def renormalize(self):
     #     """Correct the axis vectors by a Gram-Schmidt procedure."""
     #     colx = self._data[:,0]
     #     coly = self._data
-        
 
     def from_xy(self, x_vec, y_vec):
         """Reset this orientation to the one that conforms with the
         given x and y directions.
         """
-        self.vec_x = x_vec.normalized()
-        self.vec_y = y_vec.normalized()
-        self.vec_z = x_vec.cross(y_vec).normalized()
+        vec_x = x_vec.normalized
+        vec_y = y_vec.normalized
+        vec_z = x_vec.cross(y_vec).normalized
         ## A last normalization check!
         #if self.vec_x.dist(self.vec_y.cross(self.vec_z)) > utils._eps:
-        self.vec_x=self.vec_y.cross(self.vec_z).normalized()
+        vec_x=vec_y.cross(vec_z).normalized
+        self._data[:,:] = np.vstack((vec_x._data, vec_y._data, vec_z._data)).T
+
     def fromXY(self, x_vec, y_vec):
         utils._deprecation_warning('fromXY -> from_xy')
         self.from_xy(x_vec, y_vec)
@@ -232,9 +221,9 @@ class Orientation(object):
         """
         if x_vec * z_vec > utils._eps:
             print('warning ... orthogonalizing!')
-        self.vec_x = x_vec.normalized()
-        self.vec_z = z_vec.normalized()
-        self.vec_y = z_vec.cross(x_vec).normalized()
+        self.vec_x = x_vec.normalized
+        self.vec_z = z_vec.normalized
+        self.vec_y = z_vec.cross(x_vec).normalized
         ## A last normalization check!
         #if self.vec_x.dist(self.vec_y.cross(self.vec_z)) > utils._eps:
         self.vec_x = self.vec_y.cross(self.vec_z)
@@ -256,13 +245,13 @@ class Orientation(object):
         """Return a rotation vector representing this
         orientation. This is essentially the logarithm of the rotation
         matrix. """
-        return self.quaternion.rotation_vector._data
+        return self.quaternion.rotation_vector
     def set_rotation_vector(self, rot_vec):
         """Set this Orientation to represent the one given in a
         rotation vector in 'rot_vec'. 'rot_vec' must be a Vector or an
         numpy array of shape (3,)."""
         if type(rot_vec) == Vector:
-            rot_vec = rot_vec.data
+            rot_vec = rot_vec.array
         angle = np.linalg.norm(rot_vec)
         if np.abs(angle) < utils._eps:
             self._data = np.identity(3)
@@ -281,7 +270,7 @@ class Orientation(object):
         """
         axis, angle = ax_ang
         if type(axis) == Vector:
-            axis = axis.data
+            axis = axis.array
         ## Force normalization
         axis /= np.linalg.norm(axis)
         x = axis[0]
@@ -400,7 +389,7 @@ class Orientation(object):
         """Return the square of the orientation distance (the angle of
         rotation) to the 'other' orientation.
         """
-        rv = (self.inverse()*other).rotation_vector
+        rv = (self.inverse * other).rotation_vector
         return np.dot(rv, rv)
     def angDist2(self, other):
         utils._deprecation_warning('angDist2 -> ang_dist_sq')
@@ -411,19 +400,17 @@ class Orientation(object):
         the 'other' orientation.
         """
         return np.sqrt(self.ang_dist_sq(other))
-    def angDist(self, other):
-        utils._deprecation_warning('angDist -> ang_dist')
-        return self.ang_dist(other)
 
     def invert(self):
         """In-place inversion of this orientation."""
         self._data[:,:] = self._data.transpose().copy()
 
-    def inverse(self):
+    def get_inverse(self):
         """Return an inverse of this orientation as a rotation."""
         o = Orientation(self._data)
         o.invert()
         return o
+    inverse = property(get_inverse)
 
     def __mul__(self, other):
         if type(other) == Orientation:
@@ -446,19 +433,18 @@ class Orientation(object):
             #                  + 'Orientation, Vector, or a sequence '
             #                  + 'of these, is not allowed!')
 
-    def get_np_matrix(self):
-        """Property for getting a np-matrix with the data from the
-        orientation.
+    def get_matrix(self):
+        """Return an np-matrix with the data from the orientation.
         """
         return np.matrix(self._data)
-    matrix = property(get_np_matrix)
+    matrix = property(get_matrix)
 
-    def get_np_array(self):
+    def get_array(self):
         """Return a copy of the ndarray which is the fundamental data
         of the Orientation.
         """
         return self._data.copy()
-    array = property(get_np_array)
+    array = property(get_array)
 
     def get_list(self):
         """Return the fundamental data of the Orientation as a
@@ -528,21 +514,21 @@ class Orientation(object):
             return Orientation()
         elif angle < np.pi-1.0e-8:
             # // Regular, minimal rotation
-            return Orientation(angle * from_vec.cross(to_vec).normalized())
+            return Orientation(angle * from_vec.cross(to_vec).normalized)
         else:
             # // Find a suitable rotation axis
             x_angle = Vector.ex.angle(from_vec)
             if x_angle > 1e-3 and x_angle < np.pi - 1.0e-3:
                 return Orientation(angle * 
-                                   Vector.ex.cross(from_vec).normalized())
+                                   Vector.ex.cross(from_vec).normalized)
             y_angle = Vector.ey.angle(from_vec)
             if y_angle > 1e-3 and y_angle < np.pi - 1.0e-3:
                 return Orientation(angle * 
-                                   Vector.ey.cross(from_vec).normalized())
+                                   Vector.ey.cross(from_vec).normalized)
             z_angle = Vector.ez.angle(from_vec)
             if z_angle > 1e-3 and z_angle < np.pi - 1.0e-3:
                 return Orientation(angle * 
-                                   Vector.ez.cross(from_vec).normalized())
+                                   Vector.ez.cross(from_vec).normalized)
     @classmethod
     def new_euler(cls, angles, encoding):
         """Factory for generating a new orientation from Euler or
@@ -641,45 +627,6 @@ class Orientation(object):
             ax, az = az, ax
         return np.array([ax, ay, az])
                 
-def newOrientFromXY(x_vec, y_vec):
-    """Create an orientation conforming with the given 'x' and 'y'
-    directions."""
-    utils._deprecation_warning('newOrientFromXY -> Orientation.new_from_xy')
-    o = Orientation()
-    o.from_xy(x_vec, y_vec)
-    return o
-
-def newOrientFromXZ(x_vec, z_vec):
-    """Create an orientation conforming with the given 'x' and 'z'
-    directions."""
-    utils._deprecation_warning('newOrientFromXZ -> Orientation.new_from_xz')
-    o = Orientation()
-    o.from_xz(x_vec, z_vec)
-    return o
-
-def newOrientRotZ(angle):
-    """Create an orientation corresponding to a rotation for 'angle'
-    around the z direction."""
-    utils._deprecation_warning('newOrientRotZ -> Orientation.new_rot_z')
-    o = Orientation()
-    o.set_to_z_rotation(angle)
-    return o
-
-def newOrientRotX(angle):
-    """Create an orientation corresponding to a rotation for 'angle'
-    around the x direction."""
-    utils._deprecation_warning('newOrientRotX -> Orientation.new_rot_x')
-    o = Orientation()
-    o.set_to_x_rotation(angle)
-    return o
-
-def newOrientRotY(angle):
-    """Create an orientation corresponding to a rotation for 'angle'
-    around the y direction."""
-    utils._deprecation_warning('newOrientRotY -> Orientation.new_rot_y')
-    o = Orientation()
-    o.set_to_y_rotation(angle)
-    return o
 
 def _test():
     o = Orientation()

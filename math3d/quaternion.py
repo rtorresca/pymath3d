@@ -53,7 +53,7 @@ class Quaternion(object):
                 self.orientation = args[0]
             ## Try with rotation vector
             if type(args[0]) == Vector:
-                self.from_rotation_vector(args[0])
+                self.rotation_vector = args[0]
             ## Copy constructor
             elif type(args[0]) == Quaternion:
                 self._s = args[0]._s
@@ -68,10 +68,10 @@ class Quaternion(object):
                 ## Interpret as axis-angle
                 axis = args[0].copy()
                 ang = args[1]
-                self.fromAxisAngle(axis, ang)
+                self.axis_angle = (axis, ang)
         elif len(args) == 3 and np.all(np.isreal(args)):
             ## Assume three components of a rotation vector
-            self.from_rotation_vector(Vector(args))
+            self.rotation_vector = Vector(args)
         elif len(args) == 4 and np.all(np.isreal(args)):
             ## Assume numbers for s, x, y, and z
             self._s = args[0]
@@ -98,15 +98,15 @@ class Quaternion(object):
             raise AttributeError(('Attribute "{}" not found in Quaternion '
                                  + 'class').format(name))
 
-    @property
-    def vector_part(self):
+    def get_vector_part(self):
         """Return a copy of the vector part of the quaternion."""
         return self._v.copy()
+    vector_part = property(get_vector_part)
 
-    @property
-    def scalar_part(self):
+    def get_scalar_part(self):
         """Return the scalar part of the quaternion."""
         return self._s
+    scalar_part = property(get_scalar_part)
 
     def __setattr__(self, name, val):
         if name in ['s', 'x', 'y', 'z']:
@@ -147,7 +147,7 @@ class Quaternion(object):
         multiplication by scalar."""
         if type(other) == Vector:
             ## Do a rotation of the vector
-            return (self * Quaternion(0, other) * self.inverse())._v
+            return (self * Quaternion(0, other) * self.inverse)._v
         elif type(other) == Quaternion:
             ## Ordinary quaternion multiplication
             return Quaternion(self._s * other._s - self._v * other._v,
@@ -182,8 +182,8 @@ class Quaternion(object):
             theta = np.arccos(self._s)
             sintheta = np.sin(theta)
             logv = theta / sintheta * self._v
-            alpha = x * logv.length()
-            v = logv.normalized()
+            alpha = x * logv.length
+            v = logv.normalized
             self._s = np.cos(alpha)
             self._v = np.sin(alpha) * v
         return self
@@ -200,53 +200,44 @@ class Quaternion(object):
         q *= -1.0
         return q
 
-    @property
-    def ang_norm(self):
+    def get_ang_norm(self):
         """Return the angular norm, i.e. the angular rotation, of
         this quaternion."""
         return 2*np.arccos(self._s)
-    def angNorm(self):
-        utils._deprecation_warning('angNorm() -> [prop] ang_norm')
-        return self.ang_norm
+    ang_norm = property(get_ang_norm)
 
     def ang_dist(self, other):
         """Compute the rotation angle distance to the 'other'
-        quaternion."""
-        return (self.conjugated()*other).ang_norm()
-    def angDist(self, other):
-        utils._deprecation_warning('angDist() -> ang_dist()')
-        return self.ang_dist(other)
+        quaternion.
+        """
+        return (self.conjugated * other).ang_norm()
 
-    def dist2(self, other):
+    def dist_squared(self, other):
         """Compute the square of the usual quaternion metric distance to the
-        'other' quaternion."""
-        return (self._s - other._s)**2 + (self._v - other._v).length_sq
+        'other' quaternion.
+        """
+        return (self._s - other._s)**2 + (self._v - other._v).length_squared
 
     def dist(self, other):
         """Compute the usual quaternion metric distance to the
         'other' quaternion."""
-        return np.sqrt(self.dist2(other))
+        return np.sqrt(self.dist_squared(other))
     
-    @property
-    def axis_angle(self):
+    
+    def get_axis_angle(self):
         """Return an '(axis, angle)' pair representing the orientation
-        of this quaternion."""
+        of this quaternion.
+        """
         alpha = 2 * np.arccos(self._s)
         if alpha != 0:
             n = self._v / np.sin(alpha / 2)
         else:
             n = Vector()
         return (n, alpha)
-    def toAxisAngle(self):
-        """Return an '(axis, angle)' pair representing the orientation
-        of this quaternion."""
-        utils._deprecation_warning('toAxisAngle() -> [prop] axis_angle')
-        return self.axis_angle
-
-    @axis_angle.setter
-    def axis_angle(self, axisangle):
+    def set_axis_angle(self, axisangle):
         """Set this quaternion to the equivalent of the given axis
-        and angle given in the ordered pair 'axisangle'."""
+        and angle given in the ordered pair 'axisangle'.
+        """
         axis, angel = axisangle
         if type(axis) != Vector:
             axis = Vector(axis)
@@ -255,67 +246,35 @@ class Quaternion(object):
         axis.normalize()
         self._s = ca
         self._v._data[:] = (sa * axis)._data
-    def fromAxisAngle(self, axis, angle):
-        _deprecation_warning('q.fromAxisAngle(axis, angle) '
-                             + '-> [prop] q.axis_angle = (axis, angle)')
-        self.axis_angle = (axis, angle)
+    axis_angle = property(get_axis_angle, set_axis_angle)
 
-    @property
-    def rotation_vector(self):
+    def get_rotation_vector(self):
         """Return a rotation vector representing the rotation of this
         quaternion."""
         n, alpha = self.axis_angle
         if alpha != 0.0:
-            return alpha * n
+            return (alpha * n)._data
         else:
-            return n
-    def toRotationVector(self):
-        """Return a rotation vector representing the rotation of this
-        quaternion."""
-        _deprecation_warning('toRotationVector -> rotation_vector')
-        return self.rotation_vector
-    
-    @property
-    def rotation_vector(self):
-        """Return a rotation vector representing the rotation of this
-        quaternion."""
-        n, alpha = self.axis_angle
-        if alpha != 0.0:
-            return alpha * n
-        else:
-            return n
-    def toRotationVector(self):
-        """Return a rotation vector representing the rotation of this
-        quaternion."""
-        utils._deprecation_warning('toRotationVector -> rotation_vector')
-        return self.rotation_vector
-
-    @rotation_vector.setter
-    def rotation_vector(self, rot_vec):
+            return n._data    
+    def set_rotation_vector(self, rot_vec):
         """Set this quaternion to the equivalent of the given
         rotation vector 'w'."""
         if type(rot_vec) != Vector:
             rot_vec = Vector(rot_vec)
-        angle = rot_vec.length()
+        angle = rot_vec.length
         if angle > utils._eps:
-            axis = rot_vec.normalized()
+            axis = rot_vec.normalized
         else:
             ## Select arbitrary x-direction as axis and set angle to zero
             axis = Vector.e1
             angle = 0.0
-        self.fromAxisAngle(axis, angle)
-    def from_rotation_vector(self, rot_vec):
-        _deprecation_warning('q.from_rotation_vector(rv) -> q.rotation_vector = rv')
-        self.rotation_vector = rot_vec
-    def fromRotationVector(self, rot_vec):
-        utils._deprecation_warning('q.fromRotationVector(rv) -> q.rotation_vector = rv')
-        self.rotation_vector = rot_vec
+        self.axis_angle = (axis, angle)
+    rotation_vector = property(get_rotation_vector, set_rotation_vector)
 
-        
-    @property
-    def orientation(self):
-        """Return an orientation object representing the same
-        rotation as this quaternion."""
+    def get_orientation(self):
+        """Return an orientation object representing the same rotation
+        as this quaternion. The method is taken from
+        http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation."""
         ## Return an Orientation representing this quaternion
         self.normalize()
         s = self._s
@@ -331,24 +290,15 @@ class Quaternion(object):
             [2 * x * y + 2 * s * z, 1 - 2 * (x2 + z2), -2 * s * x + 2 * y * z],
             [-2 * s * y + 2 * x * z, 2 * s * x + 2 * y * z, 1 - 2 * (x2 + y2)]
             ]))
-    def toOrientation(self):
-        utils._deprecation_warning('toOrientation -> [prop] orientation')
-        return self.orientation
-
-    @orientation.setter
-    def orientation(self, orient):
-        """Set the assigned orientation in 'orient' to this Quaternion."""
-        self.from_orientation(orient)
-
-    def from_orientation(self, orient, positive=True):
-        """Set this quaternion to represent the given
-        orientation. The used method should be robust;
+    def set_orientation(self, orient, positive=True):
+        """Set this quaternion to represent the given orientation matrix in 'orient'. The
+        used method should be robust;
         cf. http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation.
         The mentioned method from wikipedia has problems with certain
         orientations, like the identity. Therfore another robust
         method from
         http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/index.htm
-        is used; the one from 'Angel'
+        is used; the one from 'Angel'.
         """
         M = orient._data
         tr = M.trace() + 1.0
@@ -378,35 +328,31 @@ class Quaternion(object):
         if positive and self._s < 0:
             self *= -1.0
         self.normalize()
-    def fromOrientation(self, orient, positive=True):
-        utils._deprecation_warning('q.fromOrientation(orient, positive) '
-                                   + '-> q.from_orientation(orient, positive)'
-                                   + 'or q.orientation = orient (if positive==True)')
-        self.from_orientation(orient, positive)
+    orientation = property(get_orientation, set_orientation)
 
-    @property
-    def norm(self):
+    def get_norm(self):
         """Return the norm of this quaternion."""
-        return np.sqrt(self.norm_sq)
+        return np.sqrt(self.norm_squared)
+    norm = property(get_norm)
 
-    @property
-    def norm_sq(self):
+    def get_norm_squared(self):
         """Return the square of the norm of this quaternion."""
-        return self._s**2 + self._v.length_sq
-    def norm2(self):
-        utils._deprecation_warning('norm2() -> [prop] norm_sq')
-        return self.norm_sq
-    
+        return self._s**2 + self._v.length_squared
+    norm_squared = property(get_norm_squared)
+
     def conjugate(self):
         """In-place conjugation of this quaternion."""
         self._v = -self._v
 
-    def conjugated(self):
-        """Return a quaternion which is the conjugated of this quaternion."""
+    def get_conjugated(self):
+        """Return a quaternion which is the conjugated of this
+        quaternion.
+        """
         qc = self.copy()
         qc.conjugate()
         return qc
-        
+    conjugated = property(get_conjugated)
+
     def normalize(self):
         """Normalize this quaternion. """
         n = self.norm
@@ -418,36 +364,39 @@ class Quaternion(object):
             self._s *= ninv
             self._v *= ninv
          
-    def normalized(self):
+    def get_normalized(self):
         """Return a normalised version of this quaternion. """
         q = Quaternion(self)
         q.normalize()
         return q
+    normalized = property(get_normalized)
 
     def invert(self):
         """In-place inversion of this quaternion. """
-        n2 = self.norm_sq
+        n2 = self.norm_squared
         self.conjugate()
         self *= 1 / n2
         
-    def inverse(self):
+    def get_inverse(self):
         """Return an inverse of this quaternion."""
         qi = self.copy()
         qi.invert()
         return qi  
+    inverse = property(get_inverse)
 
-    @property
-    def array(self):
+    def get_array(self):
         """Return an ndarray with the fundamental data
         of the Quaternion.  The layout is as described by the
-        Quaternion.list property"""
+        Quaternion.list property.
+        """
         return np.array(self.list)
+    array = property(get_array)
 
-    @property
-    def list(self):
+    def get_list(self):
         """Return the fundamental data of the Quaternion as a
         list. The scalar part is placed in the first element, at index
-        0, and the vector data at the remainder, slice [1:]."""
+        0, and the vector data at the remainder, slice [1:].
+        """
         return [self._s]+self._v.list
-        
+    list = property(get_list)
     

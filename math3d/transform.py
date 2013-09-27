@@ -118,12 +118,11 @@ class Transform(object):
         self._o._data = self._data[:3,:3]
         self._v._data = self._data[:3,3]
 
-    @property
-    def pos(self):
+    def get_pos(self):
+        """Return a reference (Beware!) to the position object."""
         return self._v
-
-    @pos.setter
-    def pos(self, new_pos):
+    def set_pos(self, new_pos):
+        """Set the position."""
         if type(new_pos) in self.__value_types:
             self._data[:3,3] = new_pos
         elif type(new_pos) == Vector:
@@ -132,13 +131,13 @@ class Transform(object):
             raise self.Error('Trying to set "pos" by an object of '
                              + 'type "{}". '.format(str(type(new_pos)))
                              + 'Needs tuple, list, ndarray, or Vector.')
+    pos = property(get_pos, set_pos)
 
-    @property
-    def orient(self):
+    def get_orient(self):
+        """Return a reference (Beware!) to the orientation object."""
         return  self._o
-    
-    @orient.setter
-    def orient(self, new_orient):
+    def set_orient(self, new_orient):
+        """Set the orientation."""
         if type(new_orient) in self.__value_types:
             self._data[:3,:3] = new_pos
         elif type(new_orient) == Orientation:
@@ -147,47 +146,18 @@ class Transform(object):
             raise self.Error('Trying to set "orient" by an object of '
                              + 'type "{}". '.format(str(type(new_pos)))
                              + 'Needs tuple, list, ndarray, or Orientation.')
+    orient = property(get_orient, set_orient)
 
-    @property
-    def data(self):
+    def get_data(self):
+        """Return a copy of the raw data."""
+        utils._deprecation_warning('get_data -> get_array')
         return self._data.copy()
-
-    # def __getattr__(self, name):
-    #     if name == 'data':
-    #         return self._data.copy()
-    #     elif name == 'orient':
-    #         return self._o
-    #     elif name == 'pos':
-    #         return self._v
-    #     else:
-    #         raise AttributeError('Attribute "%s" not found in Transform'%name)
-        
-    # def __setattr__(self, name, value):
-    #     if name == 'orient':
-    #         if type(value) == :
-    #             self._data[:3,:3] = value
-    #         elif type(value) == Orientation:
-    #             self._data[:3,:3] = value._data
-    #         elif type(value) in [np.ndarray, list, tuple]:
-    #             self._data[:3,:3] = value
-    #         else:
-    #             raise self.Error('Trying to set "orient" by an object of '
-    #                              + 'type "%s". ' % str(type(value))
-    #                              + 'Needs list, tuple, ndarray, or Orientation.')
-    #     elif name == 'pos':
-    #         if type(value) == Vector:
-    #             self._data[:3,3] = value._data
-    #         elif type(value) in [list, tuple, np.ndarray]:
-    #             self._data[:3,3] = value
-    #         else:
-    #             raise self.Error('Trying to set "pos" by an object of '
-    #                              + 'type "%s". '  % str(type(value))
-    #                              + 'Needs tuple, list, ndarray, or Vector.')
-    #     else:
-    #         object.__setattr__(self, name, value)
-            
+    data = property(get_data)
+                
     def __copy__(self):
-        """Copy method for creating a (deep) copy of this Transform."""
+        """Copy method for creating a (deep) copy of this
+        Transform.
+        """
         return Transform(self)
     
     def __deepcopy__(self, memo):
@@ -195,7 +165,8 @@ class Transform(object):
 
     def copy(self, other=None):
         """Copy data from 'other' to self. If no argument given,
-        i.e. 'other==None', return a copy of this Transform."""
+        i.e. 'other==None', return a copy of this Transform.
+        """
         if other is None:
             return Transform(self)
         else:
@@ -233,31 +204,26 @@ class Transform(object):
         self._o.from_xz(vec_x, vec_z)
         self._v = origo
         self._from_ov(self._o, self._v)
-    def fromXZP(self, vec_x, vec_z, p):
-        utils._deprecation_warning('fromXZP -> from_xzp')
-        self.from_xzp(vec_x, vec_z, p)
 
-    def dist2(self, other):
-        """Return the square of the metric distance, as unweighted
-        combined linear and angular distance, to the 'other'
+    def dist_squared(self, other):
+        """Return the square of the metric distance, as the unweighted
+        sum of linear and angular distance, to the 'other'
         transform. Note that the units and scale among linear and
         angular representations matters heavily."""
-        return self._v.dist2(other._v) + self._o.angDist2(other._o)
+        return self._v.dist_squared(other._v) + self._o.ang_dist_squared(other._o)
     
     def dist(self, other):
         """Return the metric distance, as unweighted combined linear
         and angular distance, to the 'other' transform. Note that the
         units and scale among linear and angular representations
         matters heavily."""
-        return np.sqrt(self.dist2(other))
+        return np.sqrt(self.dist_squared(other))
 
-    def inverse(self):
+    def get_inverse(self):
         """Return an inverse of this Transform."""
-        #io = self._o.inverse()
-        #iv = io * (-self._v)
-        #return Transform(io, iv)
         return Transform(np.linalg.inv(self._data))
-    
+    inverse = property(get_inverse)
+
     def invert(self):
         """In-place invert this Transform."""
         #self._o.invert()
@@ -286,47 +252,41 @@ class Transform(object):
             # raise self.Error('Inadequate data type for multiplication '
             #                  + 'in "other" : %s' % str(type(other)))
 
-    @property
-    def pose_vector(self):
+    def get_pose_vector(self):
         """Get the transform in pose vector representation "(x, y, z, rx, ry, rz)"."""
         return np.append(self._v._data, self._o.rotation_vector)
-
-    @property
-    def structured_array(self):
+    pose_vector = property(get_pose_vector)
+    
+    def get_structured_array(self):
         """Return a tuple pair of an 3x3 orientation array and
         position as 3-array."""
         #return (self._o._data.copy(),self._v._data.copy())
         return (self._data[:3,:3], self._data[:3,3])
-    def toArray(self):
-        utils._deprecation_warning('toArray() -> [prop] array')
-        return self.array
+    structured_array = property(get_structured_array)
 
-    @property
-    def structued_list(self):
+    def get_structued_list(self):
         """Return a list with separate orientation and position in list form."""
         #return [self._o._data.tolist(),self._v._data.tolist()]
         return [self._data[:3,:3].tolist(), self._data[:3,3].tolist()]
-    def toList(self):
-        utils._deprecation_warning('toList() -> [prop] list')
-        return self.list
+    structued_list = property(get_structued_list)
 
-    @property
-    def matrix(self):
+    def get_matrix(self):
         """Property for getting a (4,4) np-matrix with the data
         from the transform."""
         return np.matrix(self._data)
+    matrix = property(get_matrix)
 
-    @property
-    def array(self):
+    def get_array(self):
         """Return a copy of the (4,4) ndarray which is the fundamental data
         of the Transform."""
         return self._data.copy()
+    array = property(get_array)
 
-    @property
-    def list(self):
+    def get_list(self):
         """Return the fundamental data of the Transform as a list."""
         return self._data.tolist()
-        
+    list = property(get_list)
+
     @classmethod
     def new_from_xyp(self, vec_x, vec_y, origo):
         """Create a transform corresponding to the orientation given
@@ -368,5 +328,5 @@ def _test():
     p = Vector(1, 2, 3)
     t = Transform.new_from_xzp(cx, cz, p)
     print(t*cx)
-    it = t.inverse()
+    it = t.inverse
     print(t*it)
