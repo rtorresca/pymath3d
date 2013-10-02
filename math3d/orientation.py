@@ -387,21 +387,26 @@ class Orientation(object):
     def __str__(self):
         return self.__repr__()
 
-    def ang_dist_sq(self, other):
-        """Return the square of the orientation distance (the angle of
-        rotation) to the 'other' orientation.
-        """
-        rv = (self.inverse * other).rotation_vector
-        return np.dot(rv, rv)
-    def angDist2(self, other):
-        utils._deprecation_warning('angDist2 -> ang_dist_sq')
-        return self.ang_dist_sq(other)
+    def get_ang_norm(self):
+        """Return the angular norm, i.e. the angular rotation, of
+        this orientation."""
+        return 2*np.arccos(self._s)
+    ang_norm = property(get_ang_norm)
+
+    # def ang_dist_squared(self, other):
+    #     """Return the square of the orientation distance (the angle of
+    #     rotation) to the 'other' orientation.
+    #     """
+    #     return (self.inverse * other).quaternion.ang_norm ** 2
+    # def angDist2(self, other):
+    #     utils._deprecation_warning('angDist2 -> ang_dist_squared')
+    #     return self.ang_dist_squared(other)
 
     def ang_dist(self, other):
         """Return the orientation distance (the angle of rotation) to
         the 'other' orientation.
         """
-        return np.sqrt(self.ang_dist_sq(other))
+        return (self.inverse * other).quaternion.ang_norm
 
     def invert(self):
         """In-place inversion of this orientation."""

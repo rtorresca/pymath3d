@@ -212,7 +212,7 @@ class Transform(object):
         sum of linear and angular distance, to the 'other'
         transform. Note that the units and scale among linear and
         angular representations matters heavily."""
-        return self._v.dist_squared(other._v) + self._o.ang_dist_squared(other._o)
+        return self._v.dist_squared(other._v) + self._o.ang_dist(other._o) ** 2
     
     def dist(self, other):
         """Return the metric distance, as unweighted combined linear

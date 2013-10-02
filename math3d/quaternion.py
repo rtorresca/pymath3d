@@ -210,7 +210,7 @@ class Quaternion(object):
         """Compute the rotation angle distance to the 'other'
         quaternion.
         """
-        return (self.conjugated * other).ang_norm()
+        return (self.conjugated * other).ang_norm
 
     def dist_squared(self, other):
         """Compute the square of the usual quaternion metric distance to the
