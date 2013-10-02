@@ -1,3 +1,5 @@
+# coding=utf-8
+
 """
 Module implementing the Vector class.
 """
@@ -234,6 +236,16 @@ class Vector(object):
         of the Vector."""
         return self._data.copy()
     array = property(get_array)
+
+
+    def get_array_ref(self):
+        """Return a reference to the (3,) ndarray, which is the
+        fundamental data of the Orientation. Caution: Use this method
+        only for optimization, since it eliminates copying, and be
+        sure not to compromize the data.
+        """
+        return self._data
+    array_ref = property(get_array_ref)
 
     def get_list(self):
         """Return the fundamental data of the Vector as a list."""

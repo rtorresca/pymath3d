@@ -1,3 +1,5 @@
+# coding=utf-8
+
 """
 Module implementing the Orientation class. The orientation is
 represented internally by an orthogonal 3x3 matrix.
@@ -445,6 +447,15 @@ class Orientation(object):
         """
         return self._data.copy()
     array = property(get_array)
+
+    def get_array_ref(self):
+        """Return a reference to the (3,3) ndarray, which is the
+        fundamental data of the Orientation.  Caution: Use this method
+        only for optimization, since it eliminates copying, and be
+        sure not to compromize the data.
+        """
+        return self._data
+    array_ref = property(get_array_ref)
 
     def get_list(self):
         """Return the fundamental data of the Orientation as a

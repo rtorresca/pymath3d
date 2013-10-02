@@ -1,3 +1,5 @@
+# coding=utf-8
+
 """
 Module implementing a 3D homogenous Transform class. The transform is
 represented internally by associated orientation and a vector objects.
@@ -277,10 +279,20 @@ class Transform(object):
     matrix = property(get_matrix)
 
     def get_array(self):
-        """Return a copy of the (4,4) ndarray which is the fundamental data
-        of the Transform."""
+        """Return a copy of the (4,4) ndarray which is the fundamental
+        data of the Transform. Caution: Use this method only for
+        optimization, since it eliminates copying, and be sure not to
+        compromize the data.
+        """
         return self._data.copy()
     array = property(get_array)
+
+    def get_array_ref(self):
+        """Return a reference to the (4,4) ndarray, which is the
+        fundamental data of the transform.
+        """
+        return self._data
+    array_ref = property(get_array_ref)
 
     def get_list(self):
         """Return the fundamental data of the Transform as a list."""
