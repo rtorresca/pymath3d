@@ -577,12 +577,11 @@ class Orientation(object):
         different axes, the same (intrinsic) axis is used for the
         first and third rotation. Tait-Bryan angles address three
         different axes and classical examples are roll-pitch-yaw,
-        which are encoded as 'ZYX', or yaw-pitch-roll, encoded
-        by'XYZ'. Any sequence of intrinsic rotations may be converted
-        to a corresponding sequence of extrinsic rotations by
-        reversing the angle sequence; e.g. arguments
-        ((alpha,beta,gamma), 'ZYX') gives the same rotation as
-        ((gamma,beta,alpha), 'zyx').
+        which are encoded as 'ZYX', or yaw-pitch-roll, encoded by
+        'XYZ'. Any sequence of intrinsic rotations may be converted to
+        a corresponding sequence of extrinsic rotations by reversing
+        the angle sequence; e.g. arguments ((alpha,beta,gamma), 'ZYX')
+        gives the same rotation as ((gamma,beta,alpha), 'xyz').
         """
         enc = encoding
         # All rotations must either be intrinsic or extrinsic
