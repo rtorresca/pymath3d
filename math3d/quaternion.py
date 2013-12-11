@@ -242,7 +242,7 @@ class Quaternion(object):
     def axis_angle(self, axisangle):
         """Set this quaternion to the equivalent of the given axis
         and angle given in the ordered pair 'axisangle'."""
-        axis, angel = axisangle
+        axis, angle = axisangle
         if type(axis) != Vector:
             axis = Vector(axis)
         sa = np.sin(0.5 * angle)
