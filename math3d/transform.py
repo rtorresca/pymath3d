@@ -255,7 +255,8 @@ class Transform(object):
             #                  + 'in "other" : %s' % str(type(other)))
 
     def get_pose_vector(self):
-        """Get the transform in pose vector representation "(x, y, z, rx, ry, rz)"."""
+        """Get the transform in pose vector representation '(x, y, z,
+        rx, ry, rz)'."""
         return np.append(self._v._data, self._o.rotation_vector)
     pose_vector = property(get_pose_vector)
     

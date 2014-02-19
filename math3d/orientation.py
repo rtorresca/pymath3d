@@ -205,14 +205,12 @@ class Orientation(object):
         """Reset this orientation to the one that conforms with the
         given x and y directions.
         """
-        vec_x = x_vec.normalized
-        vec_y = y_vec.normalized
-        vec_z = x_vec.cross(y_vec).normalized
-        ## A last normalization check!
-        #if self.vec_x.dist(self.vec_y.cross(self.vec_z)) > utils._eps:
-        vec_x=vec_y.cross(vec_z).normalized
-        self._data[:,:] = np.vstack((vec_x._data, vec_y._data, vec_z._data)).T
-
+        if x_vec * y_vec > utils._eps:
+            print('warning ... orthogonalizing x_vec and z_vec!')
+            x_vec -= (z_vec * x_vec) * z_vec
+        self._data[:,0] = x_vec.normalized._data
+        self._data[:,1] = y_vec.normalized._data
+        self._data[:,2] = x_vec.cross(y_vec).normalized._data
     def fromXY(self, x_vec, y_vec):
         utils._deprecation_warning('fromXY -> from_xy')
         self.from_xy(x_vec, y_vec)
@@ -222,13 +220,11 @@ class Orientation(object):
         given x and z directions.
         """
         if x_vec * z_vec > utils._eps:
-            print('warning ... orthogonalizing!')
-        self.vec_x = x_vec.normalized
-        self.vec_z = z_vec.normalized
-        self.vec_y = z_vec.cross(x_vec).normalized
-        ## A last normalization check!
-        #if self.vec_x.dist(self.vec_y.cross(self.vec_z)) > utils._eps:
-        self.vec_x = self.vec_y.cross(self.vec_z)
+            print('warning ... orthogonalizing x_vec and z_vec!')
+            x_vec -= (z_vec * x_vec) * z_vec
+        self._data[:,0] = x_vec.normalized._data
+        self._data[:,2] = z_vec.normalized._data
+        self._data[:,1] = z_vec.cross(x_vec).normalized._data
     def fromXZ(self, x_vec, z_vec):
         utils._deprecation_warning('fromXZ -> from_xz')
         self.from_xz(x_vec, z_vec)

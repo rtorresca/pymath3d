@@ -1,3 +1,5 @@
+# coding=utf-8
+
 """
 Module implementing the Quaternion class.
 """
@@ -34,14 +36,18 @@ class Quaternion(object):
         def __repr__(self):
             return self.message
 
-    def __init__(self, *args):
+    def __init__(self, *args, **kwargs):
         """Create a quaternion. Args may be () for default
         constructor; (Orientation) for createing a quaternion
         representing the given orientation; (Quaternion) for a copy
         constructor, (s,x,y,z) or (s,Vector) for the direct quaternion
         data; (Vector) for creating the equivalent to a rotation
         vector; or (Vector, angle) for creating the equivalent of axis
-        angle."""
+        angle. A named option 'norm_warn' is supported as a kwargs and
+        defaults to True. If set to false, nomalization is performed
+        tacitly.
+        """
+        norm_warn = kwargs.get('norm_warn', True)
         if len(args) == 0:
             ## Default constructor
             self._s = 1.0
@@ -81,8 +87,11 @@ class Quaternion(object):
                     'Creating on type {} is not supported'
                     .format(str(type(arg))))
         if np.abs(self.norm - 1.0) > utils._eps:
-            print('Quaternion.__init__ : Warning : Arguments did not '
-                  + 'constitute a unit quaternion. Normalizing.')
+            if norm_warn:
+                print(('Quaternion.__init__ : Warning : Arguments did not '
+                      + 'constitute a unit quaternion (error={:.2e}). '
+                      + 'Normalizing.')
+                      .format(self.norm-1))
             self.normalize()
 
     def __getattr__(self, name):
@@ -399,3 +408,8 @@ class Quaternion(object):
         return [self._s]+self._v.list
     list = property(get_list)
     
+
+
+def _test():
+    q = Quaternion(1,2,3,4,norm_warn=True)
+    q1 = Quaternion(1,2,3,4,norm_warn=False)
