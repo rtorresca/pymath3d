@@ -1,3 +1,5 @@
+# coding=utf-8
+
 """
 Module implementing the Vector class.
 """
@@ -150,14 +152,15 @@ class Vector(object):
             costheta = -1
         return np.arccos(costheta)
 
-    def sangle(self, other, refVec=None):
+    def signed_angle(self, other, ref_vec=None):
         """With default reference rotation vector as Z-axis (if
-        'refVec' == None), compute the signed angle of rotation from
-        self to 'other'."""
+        'ref_vec' == None), compute the signed angle of rotation from
+        self to 'other'.
+        """
         theta = self.angle(other)
         xprod = self.cross(other)
-        if not refVec is None:
-            if xprod*refVec < 0:
+        if not ref_vec is None:
+            if xprod * ref_vec < 0:
                 theta = -theta
         else:
             if xprod.z < 0:
@@ -330,6 +333,10 @@ def random_unit_vector():
     
 def _test():
     print((Vector.canCreateOn(1,2,3), Vector.canCreateOn((1,2,3)), Vector.canCreateOn(1,2)))
+    v= Vector(1, 2, 3)
+    u = Vector(3, 1, 2)
+    print(v.signed_angle(u))
+    return True
 
 def _test_rops():
     """Test that rop on other is called when NotImplemented is
@@ -346,5 +353,7 @@ def _test_rops():
     v *= a
     if v != 2 * v_origin:
         return False
+    u = Vector(3,1,2)
+    print(v.signed_angle(u))
     return True
         
