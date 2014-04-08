@@ -57,7 +57,7 @@ class Plane(object):
 
     def __repr__(self):
         return '<Plane: [{:.5f}, {:.5f}, {:.5f}]>'.format(
-            *tuple(self.plane_vector.data))
+            *tuple(self.plane_vector.array))
 
     def __rmul__(self, transf):
         """Support transformation of this plane to another coordinate
