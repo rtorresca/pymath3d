@@ -27,7 +27,7 @@ def isQuaternion(q):
 
 class Quaternion(object):
     """Quaternion class."""
-    
+
     class Error(Exception):
         """Exception class."""
         def __init__(self, message):
@@ -48,10 +48,11 @@ class Quaternion(object):
         tacitly.
         """
         norm_warn = kwargs.get('norm_warn', True)
+        self._s = 1.0
+        self._v = Vector()
         if len(args) == 0:
             ## Default constructor
-            self._s = 1.0
-            self._v = Vector()
+            pass
         elif len(args) == 1:
             ## Try with orientation or quaternion
             if type(args[0]) == m3d.Orientation:
@@ -64,6 +65,14 @@ class Quaternion(object):
             elif type(args[0]) == Quaternion:
                 self._s = args[0]._s
                 self._v = args[0]._v.copy()
+            elif type(args[0]) in (list, tuple, np.ndarray):
+                raise utils.Error(
+                    'A Quaternion can not be constructed on a list, ' +
+                    'a tuple, or an np.ndarray. Was given "{}".'.format(args[0]))
+            else:
+                raise utils.Error(
+                    'Unknown argument given for Quaternion constructor: "{}".'
+                    .format(args[0]))
         elif len(args) == 2:
             ## Test for (axis, angle) and (s, v) determined by order
             if utils.is_num_type(args[0]) and type(args[1]) == Vector:
@@ -75,6 +84,10 @@ class Quaternion(object):
                 axis = args[0].copy()
                 ang = args[1]
                 self.axis_angle = (axis, ang)
+            else:
+                raise utils.Error(
+                    'Unknown arguments given for Quaternion constructor: "{}".'
+                    .format(args[0]))
         elif len(args) == 3 and np.all(np.isreal(args)):
             ## Assume three components of a rotation vector
             self.rotation_vector = Vector(args)
@@ -123,7 +136,7 @@ class Quaternion(object):
                                  + 'Quaternion'.format(name))
         else:
             object.__setattr__(self, name, val)
-        
+
     def __getitem__(self, index):
         if index == 0:
             return self._s
@@ -137,10 +150,10 @@ class Quaternion(object):
     def __copy__(self):
         """Copy method for creating a copy of this Quaternion."""
         return Quaternion(self)
-    
+
     def __deepcopy__(self, memo):
         return self.__copy__()
-    
+
     def copy(self, other=None):
         """Copy data from 'other' to self. If no argument given,
         i.e. 'other==None', return a copy of this Quaternion."""
@@ -149,7 +162,7 @@ class Quaternion(object):
         else:
             self._s = other._s
             self._v = other._v.copy()
-            
+
     def __mul__(self, other):
         """Multiplication is interpreted by either transforming
         (rotating) a Vector, ordinary Quaternion multiplication, or
@@ -180,7 +193,7 @@ class Quaternion(object):
         else:
             return NotImplemented
         return self
-            
+
     def __ipow__(self, x):
         """In-place exponentiation of this quaternion to the power of
         'x'."""
@@ -231,8 +244,8 @@ class Quaternion(object):
         """Compute the usual quaternion metric distance to the
         'other' quaternion."""
         return np.sqrt(self.dist_squared(other))
-    
-    
+
+
     def get_axis_angle(self):
         """Return an '(axis, angle)' pair representing the orientation
         of this quaternion.
@@ -263,7 +276,7 @@ class Quaternion(object):
         if alpha != 0.0:
             return (alpha * n)._data
         else:
-            return n._data    
+            return n._data
     def set_rotation_vector(self, rot_vec):
         """Set this quaternion to the equivalent of the given
         rotation vector 'w'."""
@@ -371,7 +384,7 @@ class Quaternion(object):
             ninv = 1.0 / n
             self._s *= ninv
             self._v *= ninv
-         
+
     def get_normalized(self):
         """Return a normalised version of this quaternion. """
         q = Quaternion(self)
@@ -384,12 +397,12 @@ class Quaternion(object):
         n2 = self.norm_squared
         self.conjugate()
         self *= 1 / n2
-        
+
     def get_inverse(self):
         """Return an inverse of this quaternion."""
         qi = self.copy()
         qi.invert()
-        return qi  
+        return qi
     inverse = property(get_inverse)
 
     def get_array(self):
@@ -407,9 +420,19 @@ class Quaternion(object):
         """
         return [self._s]+self._v.list
     list = property(get_list)
+
+
+    def get_matrix(self):
+        """Return a 4x4 matrix representation of the Quaternion. See
+        http://en.wikipedia.org/wiki/Quaternion#Matrix_representations.
+        """
+        a,b,c,d = self._s, self._v.x, self._v.y, self._v.z
+        return np.array([[ a, b, c, d],
+                         [-b, a,-d, c],
+                         [-c, d, a,-b],
+                         [-d,-c, b, a]])
+    matrix = property(get_matrix)
     
-
-
 def _test():
     q = Quaternion(1,2,3,4,norm_warn=True)
     q1 = Quaternion(1,2,3,4,norm_warn=False)
