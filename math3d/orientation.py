@@ -156,7 +156,7 @@ class Orientation(object):
         """Return a copy of the raw array data."""
         utils._deprecation_warning('get_data -> get_array')
         return self._data.copy()
-    data = property(get_data)
+    # data = property(get_data)
 
     # def __setattr__(self, name, val):
     #     if name == '_data':
@@ -542,7 +542,7 @@ class Orientation(object):
                 return Orientation(angle * 
                                    Vector.ez.cross(from_vec).normalized)
     @classmethod
-    def new_euler(cls, angles, encoding):
+    def new_euler(cls, angles, encoding='ZYX'):
         """Factory for generating a new orientation from Euler or
         Tait-Bryan angles. 'angles' must be a sequence of three real
         numbers giving the Euler or Tait-Bryan angles. 'encoding' must

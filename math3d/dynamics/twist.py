@@ -37,7 +37,7 @@ class OrigoTwist(object):
         * Two iterables of three floats. The first is linear and the
           second angular velocities.
 
-        * One OrigoTwist instance (copy constructor).
+        * An OrigoTwist instance (copy constructor).
         """
         if len(args) == 0 and len(kwargs) == 0:
             # Default constructor
@@ -159,6 +159,14 @@ class OrigoTwist(object):
         """Return the negative twist."""
         return OrigoTwist(v_lin=-self._v_lin, v_ang=-self._v_ang.data)
 
+    # def __copy__(self):
+    #     """Copy method for creating a copy of this Vector."""
+    #     return (self)
+    
+    # def __deepcopy__(self, memo):
+    #     return self.__copy__()
+        
+    
     def __repr__(self):
         """String represenstation of the twist."""
         return ('<{} lin=[{:.3f}, {:.3f}, {:.3f}] ang=[{:.3f}, {:.3f}, {:.3f}]>'

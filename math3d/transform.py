@@ -154,7 +154,7 @@ class Transform(object):
         """Return a copy of the raw data."""
         utils._deprecation_warning('get_data -> get_array')
         return self._data.copy()
-    data = property(get_data)
+    #data = property(get_data)
                 
     def __copy__(self):
         """Copy method for creating a (deep) copy of this
