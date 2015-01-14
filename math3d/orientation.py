@@ -206,8 +206,8 @@ class Orientation(object):
         given x and y directions.
         """
         if x_vec * y_vec > utils._eps:
-            print('warning ... orthogonalizing x_vec and z_vec!')
-            x_vec -= (z_vec * x_vec) * z_vec
+            print('warning ... orthogonalizing x_vec and y_vec!')
+            x_vec -= (y_vec * x_vec) * y_vec
         self._data[:,0] = x_vec.normalized._data
         self._data[:,1] = y_vec.normalized._data
         self._data[:,2] = x_vec.cross(y_vec).normalized._data
