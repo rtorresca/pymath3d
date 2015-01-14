@@ -56,10 +56,9 @@ class Quaternion(object):
         elif len(args) == 1:
             ## Try with orientation or quaternion
             if type(args[0]) == m3d.Orientation:
-                self._v = Vector()
                 self.orientation = args[0]
             ## Try with rotation vector
-            if type(args[0]) == Vector:
+            elif type(args[0]) == Vector:
                 self.rotation_vector = args[0]
             ## Copy constructor
             elif type(args[0]) == Quaternion:
