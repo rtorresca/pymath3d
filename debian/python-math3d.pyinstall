@@ -1,3 +1,5 @@
 math3d/*.py
 math3d/interpolation/*.py
 math3d/reference_system/*.py
+math3d/dynamics/*.py
+math3d/geometry/*.py
