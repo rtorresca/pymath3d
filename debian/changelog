@@ -1,4 +1,12 @@
-math3d (2.1.0) unstable; urgency=low
+math3d (3.0.1) unstable; urgency=high
+
+	* Severe bug fixed in Quaternion constructor on Orientation.
+	* Matrix methods on Orientation and Quaternion classes, requested by Thorstein Myhre.
+	* Weeded out some deprecated code.
+
+ -- Morten Lind <morten@lind.dyndns.dk>  Wed, 15 Jan 2015 11:00:00 +0200
+
+math3d (3.0.0) unstable; urgency=low
 
   * Explicited GPL version 3.
   * Better reference system.
@@ -9,7 +17,7 @@ math3d (2.1.0) unstable; urgency=low
   * Return of NotImplemented in arithmetic operators allow for third party operators to be defined; e.g. __radd__. Previously an exception was raised.
   * More deprecation warnings.
   * Full support for all Euler and Tait-Bryan angle representations in Orientation.
-  * New factory for generating uniformly distributed S3 elements (unit vectors) in the vector module. 
+  * New factory for generating uniformly distributed S3 elements (unit vectors) in the vector module.
   * Future: Move factory methods on classes to functions in the pertinent class modules.
 
  -- Morten Lind <morten@lind.dyndns.dk>  Thu, 23 Jun 2013 00:14:00 +0200
