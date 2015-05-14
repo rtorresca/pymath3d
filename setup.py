@@ -3,7 +3,7 @@ from distutils.command.install_data import install_data
 
 setup (
     name = 'math3d', 
-    version = '3.0.1',
+    version = '3.0.2',
     description = '3D Special Euclidean mathematics package for Python.',
     author = 'Morten Lind',
     author_email = 'morten@lind.dyndns.dk',

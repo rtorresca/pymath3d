@@ -1,3 +1,9 @@
+math3d (3.0.2) unstable; urgency=high
+
+	* Preparing renaming of Quaternion to  UnitQuaternion.
+
+ -- Morten Lind <morten@lind.dyndns.dk>  Wed, 14 May 2015 19:19:00 +0200
+
 math3d (3.0.1) unstable; urgency=high
 
 	* Severe bug fixed in Quaternion constructor on Orientation.
