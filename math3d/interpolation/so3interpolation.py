@@ -13,7 +13,7 @@ __status__ = "Production"
 import numpy as np
 
 from ..orientation import Orientation
-from ..quaternion import Quaternion
+from ..quaternion import UnitQuaternion
 
 class SO3Interpolation(object):
     """A SLERP interpolator class in SO(3)."""
@@ -30,8 +30,8 @@ class SO3Interpolation(object):
         """Initialise an SO(3) interpolation from orientation 'start'
         to orientation 'end'. If 'shortest' is true, the shortest
         rotation path is chosen, if false, it is indeterminate."""
-        self._qstart = Quaternion(start) if type(start) == Orientation else start
-        self._qend = Quaternion(end) if type(end) == Orientation else end
+        self._qstart = UnitQuaternion(start) if type(start) == Orientation else start
+        self._qend = UnitQuaternion(end) if type(end) == Orientation else end
         self._qstart.normalize()
         self._qend.normalize()
         if shortest and self._qstart.dist(self._qend) > self._qstart.dist(-self._qend):
@@ -65,8 +65,8 @@ def _test():
     o.set_to_x_rotation(pi / 2)
     o1 = Orientation()
     o1.set_to_z_rotation(pi / 2)
-    q = Quaternion(o)
-    q1 = Quaternion(o1)
+    q = UnitQuaternion(o)
+    q1 = UnitQuaternion(o1)
     qsl = SO3Interpolation(q,q1)
     osl = SO3Interpolation(o,o1)
 

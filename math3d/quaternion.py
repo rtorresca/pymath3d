@@ -21,12 +21,8 @@ import math3d as m3d
 from . import utils
 from .vector import Vector
 
-def isQuaternion(q):
-    utils._deprecation_warning('type(q) == math3d.Quaternion')
-    return type(q) == Quaternion
-
-class Quaternion(object):
-    """Quaternion class."""
+class UnitQuaternion(object):
+    """UnitQuaternion class."""
 
     class Error(Exception):
         """Exception class."""
@@ -39,7 +35,7 @@ class Quaternion(object):
     def __init__(self, *args, **kwargs):
         """Create a quaternion. Args may be () for default
         constructor; (Orientation) for createing a quaternion
-        representing the given orientation; (Quaternion) for a copy
+        representing the given orientation; (UnitQuaternion) for a copy
         constructor, (s,x,y,z) or (s,Vector) for the direct quaternion
         data; (Vector) for creating the equivalent to a rotation
         vector; or (Vector, angle) for creating the equivalent of axis
@@ -61,16 +57,16 @@ class Quaternion(object):
             elif type(args[0]) == Vector:
                 self.rotation_vector = args[0]
             ## Copy constructor
-            elif type(args[0]) == Quaternion:
+            elif type(args[0]) in [UnitQuaternion, Quaternion]:
                 self._s = args[0]._s
                 self._v = args[0]._v.copy()
             elif type(args[0]) in (list, tuple, np.ndarray):
                 raise utils.Error(
-                    'A Quaternion can not be constructed on a list, ' +
+                    'A UnitQuaternion can not be constructed on a list, ' +
                     'a tuple, or an np.ndarray. Was given "{}".'.format(args[0]))
             else:
                 raise utils.Error(
-                    'Unknown argument given for Quaternion constructor: "{}".'
+                    'Unknown argument given for UnitQuaternion constructor: "{}".'
                     .format(args[0]))
         elif len(args) == 2:
             ## Test for (axis, angle) and (s, v) determined by order
@@ -85,7 +81,7 @@ class Quaternion(object):
                 self.axis_angle = (axis, ang)
             else:
                 raise utils.Error(
-                    'Unknown arguments given for Quaternion constructor: "{}".'
+                    'Unknown arguments given for UnitQuaternion constructor: "{}".'
                     .format(args[0]))
         elif len(args) == 3 and np.all(np.isreal(args)):
             ## Assume three components of a rotation vector
@@ -100,7 +96,7 @@ class Quaternion(object):
                     .format(str(type(arg))))
         if np.abs(self.norm - 1.0) > utils._eps:
             if norm_warn:
-                print(('Quaternion.__init__ : Warning : Arguments did not '
+                print(('UnitQuaternion.__init__ : Warning : Arguments did not '
                       + 'constitute a unit quaternion (error={:.2e}). '
                       + 'Normalizing.')
                       .format(self.norm-1))
@@ -116,7 +112,7 @@ class Quaternion(object):
         elif name == 'z':
             return self._v.z
         else:
-            raise AttributeError(('Attribute "{}" not found in Quaternion '
+            raise AttributeError(('Attribute "{}" not found in UnitQuaternion '
                                  + 'class').format(name))
 
     def get_vector_part(self):
@@ -132,7 +128,7 @@ class Quaternion(object):
     def __setattr__(self, name, val):
         if name in ['s', 'x', 'y', 'z']:
             raise AttributeError('Not allowed to set attribute "{}" in '
-                                 + 'Quaternion'.format(name))
+                                 + 'UnitQuaternion'.format(name))
         else:
             object.__setattr__(self, name, val)
 
@@ -143,46 +139,46 @@ class Quaternion(object):
             return self._v[index-1]
 
     def __repr__(self):
-        return '<Quaternion: [{:.5f}, ({:.5f}, {:.5f}, {:.5f})]>'.format(
+        return '<UnitQuaternion: [{:.5f}, ({:.5f}, {:.5f}, {:.5f})]>'.format(
             self._s, *self._v._data)
 
     def __copy__(self):
-        """Copy method for creating a copy of this Quaternion."""
-        return Quaternion(self)
+        """Copy method for creating a copy of this UnitQuaternion."""
+        return UnitQuaternion(self)
 
     def __deepcopy__(self, memo):
         return self.__copy__()
 
     def copy(self, other=None):
         """Copy data from 'other' to self. If no argument given,
-        i.e. 'other==None', return a copy of this Quaternion."""
+        i.e. 'other==None', return a copy of this UnitQuaternion."""
         if other is None:
-            return Quaternion(self)
+            return UnitQuaternion(self)
         else:
             self._s = other._s
             self._v = other._v.copy()
 
     def __mul__(self, other):
         """Multiplication is interpreted by either transforming
-        (rotating) a Vector, ordinary Quaternion multiplication, or
+        (rotating) a Vector, ordinary UnitQuaternion multiplication, or
         multiplication by scalar."""
         if type(other) == Vector:
             ## Do a rotation of the vector
-            return (self * Quaternion(0, other) * self.inverse)._v
-        elif type(other) == Quaternion:
+            return (self * UnitQuaternion(0, other) * self.inverse)._v
+        elif type(other) in [UnitQuaternion, Quaternion]:
             ## Ordinary quaternion multiplication
-            return Quaternion(self._s * other._s - self._v * other._v,
+            return UnitQuaternion(self._s * other._s - self._v * other._v,
                               self._v.cross(other._v) +
                               self._s * other._v + other._s * self._v)
         elif utils.is_num_type(other):
-            return Quaternion(other * self._s, other * self._v)
+            return UnitQuaternion(other * self._s, other * self._v)
         else:
             return NotImplemented
 
     def __rmul__(self, rother):
         """Right-multiply by number. """
         if utils.is_num_type(rother):
-            return Quaternion(rother * self._s, rother * self._v)
+            return UnitQuaternion(rother * self._s, rother * self._v)
 
     def __imul__(self, other):
         """In-place multiply."""
@@ -211,13 +207,13 @@ class Quaternion(object):
 
     def __pow__(self, x):
         """Return this quaternion to the power of 'x'."""
-        q = Quaternion(self)
+        q = UnitQuaternion(self)
         q **= x
         return q
 
     def __neg__(self):
         """Return the negative quaternion to self."""
-        q = Quaternion(self)
+        q = UnitQuaternion(self)
         q *= -1.0
         return q
 
@@ -386,7 +382,7 @@ class Quaternion(object):
 
     def get_normalized(self):
         """Return a normalised version of this quaternion. """
-        q = Quaternion(self)
+        q = UnitQuaternion(self)
         q.normalize()
         return q
     normalized = property(get_normalized)
@@ -406,14 +402,14 @@ class Quaternion(object):
 
     def get_array(self):
         """Return an ndarray with the fundamental data
-        of the Quaternion.  The layout is as described by the
-        Quaternion.list property.
+        of the UnitQuaternion.  The layout is as described by the
+        UnitQuaternion.list property.
         """
         return np.array(self.list)
     array = property(get_array)
 
     def get_list(self):
-        """Return the fundamental data of the Quaternion as a
+        """Return the fundamental data of the UnitQuaternion as a
         list. The scalar part is placed in the first element, at index
         0, and the vector data at the remainder, slice [1:].
         """
@@ -422,7 +418,7 @@ class Quaternion(object):
 
 
     def get_matrix(self):
-        """Return a 4x4 matrix representation of the Quaternion. See
+        """Return a 4x4 matrix representation of the UnitQuaternion. See
         http://en.wikipedia.org/wiki/Quaternion#Matrix_representations.
         """
         a,b,c,d = self._s, self._v.x, self._v.y, self._v.z
@@ -431,7 +427,12 @@ class Quaternion(object):
                          [-c, d, a,-b],
                          [-d,-c, b, a]])
     matrix = property(get_matrix)
-    
+
+class Quaternion(UnitQuaternion):
+    def __init__(self, *args, **kwargs):
+        utils._deprecation_warning('The class currently called "Quaternion" is in fact a unit quaternion, and will in the future be called "UnitQuaternion", also found in the current code base. Please update your code.')
+        UnitQuaternion.__init__(self, *args, **kwargs)
+        
 def _test():
     q = Quaternion(1,2,3,4,norm_warn=True)
     q1 = Quaternion(1,2,3,4,norm_warn=False)

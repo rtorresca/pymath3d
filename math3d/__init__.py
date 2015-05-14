@@ -10,7 +10,7 @@ __maintainer__ = "Morten Lind"
 __email__ = "morten@lind.dyndns.dk"
 __status__ = "Production"
 
-from .quaternion import Quaternion
+from .quaternion import UnitQuaternion, Quaternion
 from .orientation import Orientation
 from .vector import Vector
 from .transform import Transform

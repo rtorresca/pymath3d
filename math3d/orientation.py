@@ -51,7 +51,7 @@ class Orientation(object):
 
         * An Orientation.
 
-        * A Quaternion.
+        * A UnitQuaternion.
 
         * Three Vectors or numpy arrays of shape (3,) interpreted as
           columns of the matrix.
@@ -66,7 +66,7 @@ class Orientation(object):
             arg=args[0]
             if type(arg) == Orientation:
                 self._data = arg.array
-            elif type(arg) == m3d.Quaternion:
+            elif type(arg) == m3d.UnitQuaternion:
                 self._data = arg.orientation._data
             elif type(arg) == Vector:
                 # Interpret as a rotation vector
@@ -231,7 +231,7 @@ class Orientation(object):
 
     def get_quaternion(self):
         """Return a quaternion representing this orientation."""
-        return m3d.Quaternion(self)
+        return m3d.UnitQuaternion(self)
     def set_quaternion(self, quat):
         """Set the orientation to that of the quaternion given in
         'quat'.
@@ -261,7 +261,7 @@ class Orientation(object):
     def get_axis_angle(self):
         """Return an (axis,angle) pair representing the equivalent
         orientation."""
-        return m3d.Quaternion(self).axis_angle
+        return m3d.UnitQuaternion(self).axis_angle
     def set_axis_angle(self, ax_ang):
         """Set this orientation to the equivalent to rotation of
         'angle' around 'axis'.
