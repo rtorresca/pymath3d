@@ -217,17 +217,25 @@ class UnitQuaternion(object):
         q *= -1.0
         return q
 
-    def get_ang_norm(self):
-        """Return the angular norm, i.e. the angular rotation, of
-        this quaternion."""
-        return 2*np.arccos(self._s)
+    def get_ang_norm(self, shortest=True):
+        """Return the angular norm, i.e. the angular rotation, of this
+        quaternion. If 'shortest' is True, the default, the shortest
+        distance is returned, i.e. the minimal geodesic path length
+        from the unit element to this unit quaternion.
+        """
+        if shortest:
+            return 2*min(np.arccos(-self._s), np.arccos(self._s))
+        else:
+            return 2*np.arccos(self._s)
     ang_norm = property(get_ang_norm)
 
-    def ang_dist(self, other):
-        """Compute the rotation angle distance to the 'other'
-        quaternion.
+    def ang_dist(self, other, shortest=True):
+        """Compute the rotation angle distance to the 'other' quaternion. If
+        'shortest' is True, the default, the shortest distance is
+        returned, i.e. the minimal geodesic path length from the
+        'other' unit quaternion to this unit quaternion.
         """
-        return (self.conjugated * other).ang_norm
+        return (self.conjugated * other).get_ang_norm(shortest)            
 
     def dist_squared(self, other):
         """Compute the square of the usual quaternion metric distance to the
