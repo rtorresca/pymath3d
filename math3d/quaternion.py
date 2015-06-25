@@ -249,11 +249,11 @@ class UnitQuaternion(object):
         return np.sqrt(self.dist_squared(other))
 
 
-    def get_axis_angle(self):
+    def get_axis_angle(self, shortest=True):
         """Return an '(axis, angle)' pair representing the orientation
         of this quaternion.
         """
-        alpha = 2 * np.arccos(self._s)
+        alpha = self.get_ang_norm(shortest)
         if alpha != 0:
             n = self._v / np.sin(alpha / 2)
         else:
@@ -272,10 +272,10 @@ class UnitQuaternion(object):
         self._v._data[:] = (sa * axis)._data
     axis_angle = property(get_axis_angle, set_axis_angle)
 
-    def get_rotation_vector(self):
+    def get_rotation_vector(self, shortest=True):
         """Return a rotation vector representing the rotation of this
         quaternion."""
-        n, alpha = self.axis_angle
+        n, alpha = self.get_axis_angle(shortest)
         if alpha != 0.0:
             return (alpha * n)._data
         else:
