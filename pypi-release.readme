@@ -1,0 +1,4 @@
+Make sure setup.py has the right version info.
+
+Then run
+ python3 setup.py sdist upload
