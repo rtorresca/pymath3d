@@ -149,6 +149,19 @@ class Vector(object):
         return self._is_position
     is_position = property(get_is_position)
 
+    def projection(self, v, normalize=True):
+        """Get the projection vector of this vector onto a direction given by
+        another vector, 'v'. If 'normalize' is True, the default, 'v'
+        is first normalized. For performance reasons, normalization of
+        'v' can be avoided if the caller assures that it is of unit
+        length, and this can be flagged by setting normalize to False.
+        """
+        if normalize:
+            v_hat = v.normalized
+        else:
+            v_hat = v
+        return (self * v_hat) * v_hat
+    
     def angle(self, other):
         """Return the angle (radians) to the 'other' vector. This is the
         absolute, positive angle.
@@ -378,3 +391,13 @@ def _test_rops():
     print(v.signed_angle(u))
     return True
         
+def _test_projection():
+    v0=Vector([1,1,3])
+    v1=Vector([1,1,0])
+    v0prj = v0.projection(v1)
+    if (v0prj - v1).length > utils._eps64:
+        return False
+    v0prj = v0.projection(v1.normalized, normalize=False) 
+    if (v0prj - v1).length > utils._eps64:
+        return False
+    return True
