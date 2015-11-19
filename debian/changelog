@@ -1,5 +1,15 @@
 math3d (3.0.3) unstable; urgency=high
 
+	* 'projection' method on Vector class.
+	* New factory classmethod on Orientation: new_axis_angle.
+	* Option on Quaternion to control getting the shortest angle in axis-angle and rotation vector methods. In some rare cases, it is desirable to not get the shortest angle.
+	* Bugfix in 'utils.is_num_types'.
+	* Use of collections module in utils.
+
+ -- Morten Lind <morten@lind.dyndns.dk>  Wed, 19 Nov 2015 20:00:00 +0200
+
+math3d (3.0.3) unstable; urgency=high
+
 	* Added shortest geodesics options for unit quaternion metric methods.
 
  -- Morten Lind <morten@lind.dyndns.dk>  Wed, 24 Jun 2015 23:14:00 +0200
