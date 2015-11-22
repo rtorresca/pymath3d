@@ -1,10 +1,11 @@
-#coding=utf-8
+# coding=utf-8
+
 """
 Module for Plane class.
 """
 
 __author__ = "Morten Lind"
-__copyright__ = "Morten Lind 2013"
+__copyright__ = "Morten Lind 2013-2015"
 __credits__ = ["Morten Lind"]
 __license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
@@ -13,6 +14,7 @@ __status__ = "Development"
 
 import math3d as m3d
 import numpy as np
+
 
 class Plane(object):
     def __init__(self, **kwargs):
@@ -23,7 +25,7 @@ class Plane(object):
           be pointing away from the origo. If kw-argument
           'origo_inside' is given, this will determine the direction
           of the plane normal; otherwise origo will be set inside.
-        
+
         * 'pn_pair': An ordered sequence for creating a reference
         point and a normal vector. The normal
 
@@ -49,9 +51,11 @@ class Plane(object):
         elif 'points' in kwargs:
             self.fit_plane(kwargs['points'])
         else:
-            raise Exception('Plane.__init__ : Must have either of constructor '
-                            + 'kw-arguments: "plane_vector", "pn_pair", or ' +
-                            '"points". Neither given!')
+            raise Exception(
+                'Plane.__init__ : Must have either of constructor ' +
+                'kw-arguments: "plane_vector", "pn_pair", or ' +
+                '"points". Neither given!')
+
     def copy(self):
         return Plane(pn_pair=(self._p, self._n))
 
@@ -67,7 +71,7 @@ class Plane(object):
         tnormal = transf.orient * self._n
         tpoint = transf * self._p
         return Plane(pn_pair=(tpoint, tnormal))
-    
+
     def dist(self, p):
         """Signed distance to a point, measured positive along the
         normal vector direction."""
@@ -76,10 +80,11 @@ class Plane(object):
     @property
     def plane_vector(self):
         return self.pn_to_pv(self._p, self._n)
+
     @plane_vector.setter
     def plane_vector(self, pv):
         (self._p, self._n) = self.pv_to_pn(pv)
-        
+
     @property
     def point_normal(self):
         return (self._p, self._n)
@@ -95,13 +100,12 @@ class Plane(object):
     def fit_plane(self, points):
         """Compute the plane vector from a set of points. 'points'
         must be an array of row position vectors, such that
-        points.T[i] is a position vector array."""
+        points[i] is a position vector."""
         centre = np.sum(points, axis=0)/len(points)
         eigen = np.linalg.eig(np.cov(points.T))
         min_ev_i = np.where(eigen[0] == min(eigen[0]))[0][0]
         normal = eigen[1].T[min_ev_i]
         (self._p, self._n) = (m3d.Vector(centre), m3d.Vector(normal))
-        
 
     def pn_to_pv(self, p, n):
         """Compute the plane vector of a plane represented by a point
@@ -122,9 +126,9 @@ class Plane(object):
         described by the given plane vector."""
         if type(pv) != m3d.Vector:
             pv = m3d.Vector(pv)
-        d= pv.length
+        d = pv.length
         n = pv / pv.length
         p = n / d
         if not self._origo_inside:
             n = -n
-        return (p,n)
+        return (p, n)

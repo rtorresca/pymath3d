@@ -9,7 +9,7 @@ __copyright__ = "Morten Lind 2009-2015"
 __credits__ = ["Morten Lind"]
 __license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
-__email__ = "morten@lind.no-ip.org"
+__email__ = "morten@lind.dyndns.dk"
 __status__ = "Production"
 
 import numbers
