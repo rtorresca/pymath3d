@@ -5,7 +5,7 @@ Module implementing the Vector class.
 """
 
 __author__ = "Morten Lind"
-__copyright__ = "Morten Lind 2012"
+__copyright__ = "Morten Lind 2012-2015"
 __credits__ = ["Morten Lind"]
 __license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
@@ -17,9 +17,11 @@ import numpy as np
 
 from . import utils
 
+
 def isVector(v):
     utils._deprecation_warning('return type(v) == Vector')
     return type(v) == Vector
+
 
 class Vector(object):
     """A Vector is a 3D vector (member of R3) with standard Euclidian
@@ -45,36 +47,37 @@ class Vector(object):
         represented as a position vector. Otherwise it is represented
         as a free vector."""
         if len(args) == 0:
-            self._data = np.array([0 ,0, 0], dtype=np.float64)
+            self._data = np.array([0, 0, 0], dtype=np.float64)
         elif len(args) == 3 and utils.is_num_types(args):
-            self._data=np.array(args, dtype=np.float64)
+            self._data = np.array(args, dtype=np.float64)
         elif len(args) == 2 and utils.is_num_types(args):
             self._data = np.array((args[0], args[1], 0), dtype=np.float64)
         elif len(args) == 1:
             arg = args[0]
             if utils.is_three_sequence(arg):
                 self._data = np.array(arg, dtype=np.float64)
-            elif utils.is_sequence(arg) and len(arg)  == 2:
+            elif utils.is_sequence(arg) and len(arg) == 2:
                 self._data = np.array((arg[0], arg[1], 0), dtype=np.float64)
             elif type(arg) == Vector:
                 self._data = arg.array
             else:
                 raise utils.Error(
-                    ('__init__ : could not create vector on argument : "{}"'
-                    + ' of type "{}"').format(str(args[0]), str(type(args[0]))))
+                    ('__init__ : could not create vector on argument ' +
+                     ': "{}" of type "{}"')
+                    .format(str(args[0]), str(type(args[0]))))
         else:
-            raise utils.Error('__init__ : could not create vector on '
-                             + 'argument : "{}" of type "{}"'
-                             .format(str(args[0]), str(type(args[0]))))
+            raise utils.Error('__init__ : could not create vector on ' +
+                              'argument : "{}" of type "{}"'
+                              .format(str(args[0]), str(type(args[0]))))
         self._is_position = kwargs.get('position', 1)
-    
+
     def __copy__(self):
         """Copy method for creating a copy of this Vector."""
         return Vector(self)
-    
+
     def __deepcopy__(self, memo):
         return self.__copy__()
-    
+
     def copy(self, other=None):
         """Copy data from 'other' to self. If no argument given,
         i.e. 'other==None', return a copy of this Vector."""
@@ -83,7 +86,7 @@ class Vector(object):
         else:
             self._data[:] = other._data
 
-    def __getattr__(self,name):
+    def __getattr__(self, name):
         if name == 'data':
             utils._deprecation_warning('[prop] data -> [prop] array')
             return self._data.copy()
@@ -94,9 +97,10 @@ class Vector(object):
         elif name == 'z':
             return self._data[2]
         else:
-            raise AttributeError('Attribute "%s" not found in Vector'%name)
-        
-    def __setattr__(self,name,val):
+            raise AttributeError('Attribute "{}" not found in Vector'
+                                 .format(name))
+
+    def __setattr__(self, name, val):
         if name == 'x':
             self._data[0] = val
         elif name == 'y':
@@ -121,32 +125,32 @@ class Vector(object):
 
     # def __iter__(self):
     #     return iter(self._data)
-    
+
     def __getitem__(self, n):
         return self._data[n]
 
-    def __setitem__(self,n,val):
+    def __setitem__(self, n, val):
         self._data[n] = val
 
-    def __eq__(self,other):
+    def __eq__(self, other):
         if type(other) == Vector:
             return np.sum((self._data-other._data)**2) < utils._eps
         else:
             return NotImplemented
-            # raise utils.Error('Could not compare to non-Vector!')
 
     def __repr__(self):
-        return '<Vector: ({:.5f}, {:.5f}, {:.5f})>'.format(*self._data) #self.x,self.y,self.z)
+        return ('<Vector: ({:.5f}, {:.5f}, {:.5f})>'
+                .format(*self._data))
 
     def __str__(self):
         return self.__repr__()
-    
-    
+
     def get_is_position(self):
         """If the vector is a position vector, the default, then it
         transforms differently than a real vector.
         """
         return self._is_position
+
     is_position = property(get_is_position)
 
     def projection(self, v, normalize=True):
@@ -161,7 +165,7 @@ class Vector(object):
         else:
             v_hat = v
         return (self * v_hat) * v_hat
-    
+
     def angle(self, other):
         """Return the angle (radians) to the 'other' vector. This is the
         absolute, positive angle.
@@ -180,24 +184,26 @@ class Vector(object):
         """
         theta = self.angle(other)
         xprod = self.cross(other)
-        if not ref_vec is None:
+        if ref_vec is not None:
             if xprod * ref_vec < 0:
                 theta = -theta
         else:
             if xprod.z < 0:
                 theta = -theta
         return theta
-    
+
     def get_length(self):
         """Return the Euclidean length."""
         return np.sqrt(self.length_squared)
+
     length = property(get_length)
 
     def get_length_squared(self):
         """Return the square of the standard Euclidean length."""
         return np.dot(self._data, self._data)
+
     length_squared = property(get_length_squared)
-    
+
     def normalize(self):
         """In-place normalization of this Vector."""
         l = self.length
@@ -211,13 +217,14 @@ class Vector(object):
         nv = Vector(self)
         nv.normalize()
         return nv
+
     normalized = property(get_normalized)
 
     def dist(self, other):
         """Compute euclidean distance between points given by self
         and 'other'."""
         return np.sqrt(self.dist_squared(other))
-    
+
     def dist_squared(self, other):
         """Compute euclidean distance between points given by self
         and 'other'."""
@@ -227,15 +234,31 @@ class Vector(object):
         """Return the cross product operator for this Vector. I.e. the
         skew-symmetric operator cross_op, such that cross_op * u == v
         x u, for any vector u."""
-        cross_op = np.zeros((3,3))
-        cross_op[0,1] = -self._data[2]
-        cross_op[0,2] = self._data[1]
-        cross_op[1,0] = self._data[2]
-        cross_op[1,2] = -self._data[0]
-        cross_op[2,0] = -self._data[1]
-        cross_op[2,1] = self._data[0]
+        cross_op = np.zeros((3, 3))
+        cross_op[0, 1] = -self._data[2]
+        cross_op[0, 2] = self._data[1]
+        cross_op[1, 0] = self._data[2]
+        cross_op[1, 2] = -self._data[0]
+        cross_op[2, 0] = -self._data[1]
+        cross_op[2, 1] = self._data[0]
         return cross_op
+
     cross_operator = property(get_cross_operator)
+
+    def get_alt_cross_operator(self):
+        """Return the cross product operator for this Vector. I.e. the
+        skew-symmetric operator cross_op, such that cross_op * u == v
+        x u, for any vector u."""
+        cross_op = np.zeros((3, 3))
+        # cross_op[0, 1] = -self._data[2]
+        cross_op[0, 2] = self._data[1]
+        cross_op[1, 0] = self._data[2]
+        # cross_op[1, 2] = -self._data[0]
+        # cross_op[2, 0] = -self._data[1]
+        cross_op[2, 1] = self._data[0]
+        return cross_op - cross_op.T
+
+    alt_cross_operator = property(get_alt_cross_operator)
 
     def cross(self, other):
         """Return the cross product with 'other'."""
@@ -245,8 +268,8 @@ class Vector(object):
         """Return a copy of the ndarray which is the fundamental data
         of the Vector."""
         return self._data.copy()
-    array = property(get_array)
 
+    array = property(get_array)
 
     def get_array_ref(self):
         """Return a reference to the (3,) ndarray, which is the
@@ -255,6 +278,7 @@ class Vector(object):
         sure not to compromize the data.
         """
         return self._data
+
     array_ref = property(get_array_ref)
 
     def get_list(self):
@@ -266,12 +290,14 @@ class Vector(object):
         """Property for getting a single-column np-matrix with the data
         from the vector."""
         return np.matrix(self._data).T
+
     matrix = property(get_matrix)
 
     def get_column(self):
         """Property for getting a single-column array with the data
         from the vector."""
-        return self._data.reshape((3,1))
+        return self._data.reshape((3, 1))
+
     column = property(get_column)
 
     def __sub__(self, other):
@@ -291,7 +317,7 @@ class Vector(object):
         else:
             return NotImplemented
         return self
-    
+
     def __mul__(self, other):
         """Multiplication with an 'other' Vector (inner product) or
         with a scalar."""
@@ -310,14 +336,14 @@ class Vector(object):
             return NotImplemented
             # raise utils.Error('__imul__ : Could not multiply by non-number')
         return self
-    
+
     def __rmul__(self, other):
         """Right multiplication with a scalar, 'other'. """
         if utils.is_num_type(other):
             return Vector(other * self._data)
         else:
             raise utils.Error('__rmul__ : Could not multiply by non-number')
-        
+
     def __truediv__(self, other):
         """Division with a scalar, 'other'. """
         if utils.is_num_type(other):
@@ -325,7 +351,7 @@ class Vector(object):
         else:
             raise utils.Error('__rdiv__ : Could not divide by non-number')
     __div__ = __truediv__
-    
+
     def __add__(self, other):
         """Return the sum of this and the 'other' vector."""
         if type(other) == Vector:
@@ -346,11 +372,21 @@ class Vector(object):
     def __neg__(self):
         return Vector(-self._data)
 
+    @classmethod
+    def new_random_unit_vector(cls):
+        """Generator for random vectors uniformly sampled on S3. Use the
+        Muller's algorithm from "A note on a method for generating
+        points uniformly on n-dimensional spheres". Communications of
+        the ACM. Volume 2, Issue 4, April 1959, pp 19-20.
+        """
+        v = Vector(np.random.normal(size=3))
+        v.normalize()
+        return v
 
 # Unit Vectors
-Vector.ex = Vector.e0 = Vector(1,0,0)
-Vector.ey = Vector.e1 = Vector(0,1,0)
-Vector.ez = Vector.e2 = Vector(0,0,1)
+Vector.ex = Vector.e0 = Vector(1, 0, 0)
+Vector.ey = Vector.e1 = Vector(0, 1, 0)
+Vector.ez = Vector.e2 = Vector(0, 0, 1)
 
 
 def random_unit_vector():
@@ -362,15 +398,19 @@ def random_unit_vector():
     v.normalize()
     return v
 
-    
-def _test():
-    print((Vector.canCreateOn(1,2,3), 
-           Vector.canCreateOn((1,2,3)), 
-           Vector.canCreateOn(1,2)))
-    v= Vector(1, 2, 3)
+
+def _test_construction():
+    print((Vector.canCreateOn(1, 2, 3),
+           Vector.canCreateOn((1, 2, 3)),
+           Vector.canCreateOn(1, 2)))
+
+
+def _test_signed_angle():
+    v = Vector(1, 2, 3)
     u = Vector(3, 1, 2)
     print(v.signed_angle(u))
     return True
+
 
 def _test_rops():
     """Test that rop on other is called when NotImplemented is
@@ -379,7 +419,7 @@ def _test_rops():
         def __rmul__(self, other):
             print('rmul from A')
             return other * 2.0
-    v = Vector(1,2,3)
+    v = Vector(1, 2, 3)
     v_origin = v.copy()
     a = A()
     if v*a != 2*v:
@@ -387,17 +427,18 @@ def _test_rops():
     v *= a
     if v != 2 * v_origin:
         return False
-    u = Vector(3,1,2)
+    u = Vector(3, 1, 2)
     print(v.signed_angle(u))
     return True
-        
+
+
 def _test_projection():
-    v0=Vector([1,1,3])
-    v1=Vector([1,1,0])
+    v0 = Vector([1, 1, 3])
+    v1 = Vector([1, 1, 0])
     v0prj = v0.projection(v1)
     if (v0prj - v1).length > utils._eps64:
         return False
-    v0prj = v0.projection(v1.normalized, normalize=False) 
+    v0prj = v0.projection(v1.normalized, normalize=False)
     if (v0prj - v1).length > utils._eps64:
         return False
     return True

@@ -63,7 +63,7 @@ class Orientation(object):
           giving direct matrix data; using row major order.
         """
         if len(args) == 1:
-            arg=args[0]
+            arg = args[0]
             if type(arg) == Orientation:
                 self._data = arg.array
             elif type(arg) == m3d.UnitQuaternion:
@@ -116,12 +116,14 @@ class Orientation(object):
         base reference as a Vector.
         """
         return Vector(self._data[:, 0])
+
     vec_x = property(get_vec_x)
 
     def get_col_x(self):
         """Return the x-direction of the moving coordinate system in
         base reference as an array."""
         return self._data[:, 0]
+
     col_x = property(get_col_x)
 
     def get_vec_y(self):
@@ -129,6 +131,7 @@ class Orientation(object):
         base reference as a Vector.
         """
         return Vector(self._data[:, 1])
+
     vec_y = property(get_vec_y)
 
     def get_col_y(self):
@@ -136,6 +139,7 @@ class Orientation(object):
         base reference as an array.
         """
         return self._data[:, 1]
+
     col_y = property(get_col_y)
 
     def get_vec_z(self):
@@ -143,6 +147,7 @@ class Orientation(object):
         base reference as a Vector.
         """
         return Vector(self._data[:, 2])
+
     vec_z = property(get_vec_z)
 
     def get_col_z(self):
@@ -150,12 +155,14 @@ class Orientation(object):
         base reference as an array.
         """
         return self._data[:, 2]
+
     col_z = property(get_col_z)
 
     def get_data(self):
         """Return a copy of the raw array data."""
         utils._deprecation_warning('get_data -> get_array')
         return self._data.copy()
+
     # data = property(get_data)
 
     # def __setattr__(self, name, val):
@@ -194,6 +201,7 @@ class Orientation(object):
         sq_sum += (vec_y * vec_z)**2
         sq_sum += (vec_z * vec_x)**2
         return np.sqrt(sq_sum)
+
     repr_error = property(get_repr_error)
 
     # def renormalize(self):
@@ -281,18 +289,19 @@ class Orientation(object):
         x = axis[0]
         y = axis[1]
         z = axis[2]
-        ct = np.cos(angle)
-        st = np.sin(angle)
+        ca = np.cos(angle)
+        sa = np.sin(angle)
         self._data[:, :] = np.array([
-            [ct + (1 - ct) * x**2,
-             (1 - ct) * x * y - st * z,
-             (1 - ct) * x * z + st * y],
-            [(1 - ct) * x * y + st * z,
-             ct + (1 - ct) * y**2,
-             (1 - ct) * y * z - st * x],
-            [(1 - ct) * x * z - st * y,
-             (1 - ct) * y * z + st * x,
-             ct + (1 - ct) * z**2]])
+            [ca + (1 - ca) * x**2,
+             (1 - ca) * x * y - sa * z,
+             (1 - ca) * x * z + sa * y],
+            [(1 - ca) * x * y + sa * z,
+             ca + (1 - ca) * y**2,
+             (1 - ca) * y * z - sa * x],
+            [(1 - ca) * x * z - sa * y,
+             (1 - ca) * y * z + sa * x,
+             ca + (1 - ca) * z**2]])
+
     axis_angle = property(get_axis_angle, set_axis_angle)
 
     def set_to_x_rotation(self, angle):
@@ -379,11 +388,11 @@ class Orientation(object):
 
     rotate_x = rotateX = rotateXT = rotate_xt
 
-    def rotate_yt(self,angle):
+    def rotate_yt(self, angle):
         """In-place rotation of this oriantation by a rotation around
         y axis in the transformed reference system. (Inefficient!)
         """
-        self.rotate_t(Vector.e1,angle)
+        self.rotate_t(Vector.e1, angle)
 
     rotate_y = rotateY = rotateYT = rotate_yt
 

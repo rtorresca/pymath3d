@@ -5,12 +5,13 @@ Module for Plane class.
 """
 
 __author__ = "Morten Lind"
-__copyright__ = "Morten Lind 2013-2015"
+__copyright__ = "Morten Lind 2013-2016"
 __credits__ = ["Morten Lind"]
 __license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
 __email__ = "morten@lind.dyndns.dk"
 __status__ = "Development"
+
 
 import math3d as m3d
 import numpy as np
@@ -132,3 +133,12 @@ class Plane(object):
         if not self._origo_inside:
             n = -n
         return (p, n)
+
+    def line_intersection(self, line):
+        """Compute the intersection with the given line."""
+        if type(line) != m3d.geometry.Line:
+            raise Exception(
+                'Method only implemented for math3d.geometry.Line object')
+        (lp, ld) = line._p, line._d
+        dist = (self._p - lp) * self._n / self._n * ld
+        return dist * ld + lp
