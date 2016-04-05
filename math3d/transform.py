@@ -6,23 +6,19 @@ represented internally by associated orientation and a vector objects.
 """
 
 __author__ = "Morten Lind"
-__copyright__ = "Morten Lind 2012"
+__copyright__ = "Morten Lind 2012-2016"
 __credits__ = ["Morten Lind"]
 __license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
 __email__ = "morten@lind.dyndns.dk"
 __status__ = "Production"
 
+
 import numpy as np
 
 from . import utils
 from .vector import Vector
 from .orientation import Orientation
-
-
-def isTransform(t):
-    utils._deprecation_warning('type(t) == math3d.Transform')
-    return type(t) == Transform
 
 
 class Transform(object):
@@ -159,11 +155,6 @@ class Transform(object):
 
     orient = property(get_orient, set_orient)
 
-    def get_data(self):
-        """Return a copy of the raw data."""
-        utils._deprecation_warning('get_data -> get_array')
-        return self._data.copy()
-
     def __copy__(self):
         """Copy method for creating a (deep) copy of this
         Transform.
@@ -204,10 +195,6 @@ class Transform(object):
         self._v = origo
         self._from_ov(self._o, self._v)
 
-    def fromXYP(self, vec_x, vec_y, p):
-        utils._deprecation_warning('fromXYP -> from_xyp')
-        self.from_xyp(vec_x, vec_y, p)
-
     def from_xzp(self, vec_x, vec_z, origo):
         """Make this transform correspond to the orientation given by the
         given 'vec_x' and 'vec_z' directions and translation given by
@@ -241,7 +228,7 @@ class Transform(object):
 
     def invert(self):
         """In-place invert this Transform."""
-        self._data[:, :]=np.linalg.inv(self._data)
+        self._data[:, :] = np.linalg.inv(self._data)
 
     def __mul__(self, other):
         """Multiplication of self with another Transform or operate on a
@@ -334,26 +321,6 @@ class Transform(object):
         t = Transform()
         t.from_xzp(vec_x, vec_z, origo)
         return t
-
-
-def newTransFromXYP(cx, cy, p):
-    """Create a transform corresponding to the orientation given by the
-    given 'cx' and 'cy' directions and translation given by 'p'.
-    """
-    utils._deprecation_warning('newTransFromXYP -> Transform.new_from_xyp')
-    t = Transform()
-    t.from_xyp(cx, cy, p)
-    return t
-
-
-def newTransFromXZP(cx, cz, p):
-    """Create a transform corresponding to the orientation given by the
-    given 'cx' and 'cz' directions and translation given by 'p'.
-    """
-    utils._deprecation_warning('newTransFromXZP -> Transform.new_from_xzp')
-    t = Transform()
-    t.from_xzp(cx, cz, p)
-    return t
 
 
 def _test():

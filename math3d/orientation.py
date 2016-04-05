@@ -6,7 +6,7 @@ represented internally by an orthogonal 3x3 matrix.
 """
 
 __author__ = "Morten Lind"
-__copyright__ = "Morten Lind 2012-2015"
+__copyright__ = "Morten Lind 2012-2016"
 __credits__ = ["Morten Lind"]
 __license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
@@ -158,27 +158,6 @@ class Orientation(object):
 
     col_z = property(get_col_z)
 
-    def get_data(self):
-        """Return a copy of the raw array data."""
-        utils._deprecation_warning('get_data -> get_array')
-        return self._data.copy()
-
-    # data = property(get_data)
-
-    # def __setattr__(self, name, val):
-    #     if name == '_data':
-    #         ## This is dangerous, since there is no consistency check.
-    #         self.__dict__['_data']=val
-    #     elif name[:3] in ['vec', 'col'] and name[-1].lower() in 'xyz':
-    #         ## This is dangerous since there is no automatic
-    #         ## re-normalization
-    #         idx = 'xyz'.find(name[-1].lower())
-    #         if type(val) == Vector:
-    #             val = val.array
-    #         self._data[:3,idx] = val
-    #     else:
-    #         object.__setattr__(self, name, val)
-
     def __getitem__(self, indices):
         return self._data.__getitem__(indices)
 
@@ -213,31 +192,29 @@ class Orientation(object):
         """Reset this orientation to the one that conforms with the
         given x and y directions.
         """
+        x_vec = x_vec.normalized()
+        y_vec = y_vec.normalized()
         if x_vec * y_vec > utils._eps:
-            print('warning ... orthogonalizing x_vec and y_vec!')
-            x_vec -= (y_vec * x_vec) * y_vec
-        self._data[:, 0] = x_vec.normalized._data
-        self._data[:, 1] = y_vec.normalized._data
-        self._data[:, 2] = x_vec.cross(y_vec).normalized._data
-
-    def fromXY(self, x_vec, y_vec):
-        utils._deprecation_warning('fromXY -> from_xy')
-        self.from_xy(x_vec, y_vec)
+            print('Warning: Orthonormalizing y_vec on x_vec!')
+            y_vec -= (x_vec * y_vec) * x_vec
+            y_vec.normalize()
+        self._data[:, 0] = x_vec._data
+        self._data[:, 1] = y_vec._data
+        self._data[:, 2] = x_vec.cross(y_vec)._data
 
     def from_xz(self, x_vec, z_vec):
         """Reset this orientation to the one that conforms with the
         given x and z directions.
         """
+        x_vec = x_vec.normalized()
+        z_vec = z_vec.normalized()
         if x_vec * z_vec > utils._eps:
-            print('warning ... orthogonalizing x_vec and z_vec!')
-            x_vec -= (z_vec * x_vec) * z_vec
-        self._data[:, 0] = x_vec.normalized._data
-        self._data[:, 2] = z_vec.normalized._data
-        self._data[:, 1] = z_vec.cross(x_vec).normalized._data
-
-    def fromXZ(self, x_vec, z_vec):
-        utils._deprecation_warning('fromXZ -> from_xz')
-        self.from_xz(x_vec, z_vec)
+            print('Warning: Orthonormalizing z_vec on x_vec!')
+            z_vec -= (x_vec * z_vec) * x_vec
+            z_vec.normalize()
+        self._data[:, 0] = x_vec._data
+        self._data[:, 2] = z_vec._data
+        self._data[:, 1] = z_vec.cross(x_vec)._data
 
     def get_quaternion(self):
         """Return a quaternion representing this orientation."""
@@ -310,29 +287,17 @@ class Orientation(object):
         sa = np.sin(angle)
         self._data[:, :] = np.array([[1, 0, 0], [0, ca, -sa], [0, sa, ca]])
 
-    def rotX(self, angle):
-        utils._deprecation_warning('rotX() -> set_to_x_rotation()')
-        return self.set_to_x_rotation(angle)
-
     def set_to_y_rotation(self, angle):
         """Replace this orientation by that of a rotation around y."""
         ca = np.cos(angle)
         sa = np.sin(angle)
         self._data[:, :] = np.array([[ca, 0, sa], [0, 1, 0], [-sa, 0, ca]])
 
-    def rotY(self, angle):
-        utils._deprecation_warning('rotY() -> set_to_y_rotation()')
-        return self.set_to_y_rotation(angle)
-
     def set_to_z_rotation(self, angle):
         """Replace this orientation by that of a rotation around z."""
         ca = np.cos(angle)
         sa = np.sin(angle)
         self._data[:, :] = np.array([[ca, -sa, 0], [sa, ca, 0], [0, 0, 1]])
-
-    def rotZ(self, angle):
-        utils._deprecation_warning('rotZ() -> set_to_z_rotation()')
-        return self.set_to_z_rotation(angle)
 
     def rotate_t(self, axis, angle):
         """In-place rotation of this orientation angle radians in axis
@@ -416,15 +381,6 @@ class Orientation(object):
         return 2*np.arccos(self._s)
 
     ang_norm = property(get_ang_norm)
-
-    # def ang_dist_squared(self, other):
-    #     """Return the square of the orientation distance (the angle of
-    #     rotation) to the 'other' orientation.
-    #     """
-    #     return (self.inverse * other).quaternion.ang_norm ** 2
-    # def angDist2(self, other):
-    #     utils._deprecation_warning('angDist2 -> ang_dist_squared')
-    #     return self.ang_dist_squared(other)
 
     def ang_dist(self, other):
         """Return the orientation distance (the angle of rotation) to

@@ -5,7 +5,7 @@ Module implementing the Vector class.
 """
 
 __author__ = "Morten Lind"
-__copyright__ = "Morten Lind 2012-2015"
+__copyright__ = "Morten Lind 2012-2016"
 __credits__ = ["Morten Lind"]
 __license__ = "GPLv3"
 __maintainer__ = "Morten Lind"
@@ -16,11 +16,6 @@ __status__ = "Production"
 import numpy as np
 
 from . import utils
-
-
-def isVector(v):
-    utils._deprecation_warning('return type(v) == Vector')
-    return type(v) == Vector
 
 
 class Vector(object):
@@ -87,10 +82,7 @@ class Vector(object):
             self._data[:] = other._data
 
     def __getattr__(self, name):
-        if name == 'data':
-            utils._deprecation_warning('[prop] data -> [prop] array')
-            return self._data.copy()
-        elif name == 'x':
+        if name == 'x':
             return self._data[0]
         elif name == 'y':
             return self._data[1]
@@ -394,6 +386,7 @@ def random_unit_vector():
     Muller's algorithm from "A note on a method for generating points
     uniformly on n-dimensional spheres". Communications of the
     ACM. Volume 2, Issue 4, April 1959, pp 19-20."""
+    utils._deprecation_warning('Vector.new_random_unit_vector')
     v = Vector(np.random.normal(size=3))
     v.normalize()
     return v
