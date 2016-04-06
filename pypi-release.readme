@@ -1,4 +1,6 @@
-Make sure setup.py has the right version info.
+* Make sure setup.py has the right version info.
+
+* Ensure correct configuration of ~/.pypirc . It needs 'password'.
 
 Then run
- python3 setup.py sdist upload
+ $ python3 setup.py sdist upload

@@ -366,10 +366,10 @@ class Vector(object):
 
     @classmethod
     def new_random_unit_vector(cls):
-        """Generator for random vectors uniformly sampled on S3. Use the
+        """Generator for random vectors uniformly sampled on S2. Use the
         Muller's algorithm from "A note on a method for generating
-        points uniformly on n-dimensional spheres". Communications of
-        the ACM. Volume 2, Issue 4, April 1959, pp 19-20.
+        points uniformly on n-dimensional spheres", Communications of
+        the ACM, Volume 2, Issue 4, April 1959, pp 19-20.
         """
         v = Vector(np.random.normal(size=3))
         v.normalize()
@@ -382,7 +382,7 @@ Vector.ez = Vector.e2 = Vector(0, 0, 1)
 
 
 def random_unit_vector():
-    """Generator for random vectors uniformly sampled on S3. Use the
+    """Generator for random vectors uniformly sampled on S2. Use the
     Muller's algorithm from "A note on a method for generating points
     uniformly on n-dimensional spheres". Communications of the
     ACM. Volume 2, Issue 4, April 1959, pp 19-20."""
