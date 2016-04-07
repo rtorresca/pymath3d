@@ -192,8 +192,12 @@ class Orientation(object):
         """Reset this orientation to the one that conforms with the
         given x and y directions.
         """
-        x_vec = x_vec.normalized()
-        y_vec = y_vec.normalized()
+        if type(x_vec) != m3d.Vector:
+            x_vec = m3d.Vector(x_vec)
+        if type(y_vec) != m3d.Vector:
+            y_vec = m3d.Vector(y_vec)
+        x_vec = x_vec.normalized
+        y_vec = y_vec.normalized
         if x_vec * y_vec > utils._eps:
             print('Warning: Orthonormalizing y_vec on x_vec!')
             y_vec -= (x_vec * y_vec) * x_vec
@@ -206,15 +210,19 @@ class Orientation(object):
         """Reset this orientation to the one that conforms with the
         given x and z directions.
         """
-        x_vec = x_vec.normalized()
-        z_vec = z_vec.normalized()
+        if type(x_vec) != m3d.Vector:
+            x_vec = m3d.Vector(x_vec)
+        if type(z_vec) != m3d.Vector:
+            z_vec = m3d.Vector(z_vec)
+        x_vec = x_vec.normalized
+        z_vec = z_vec.normalized
         if x_vec * z_vec > utils._eps:
             print('Warning: Orthonormalizing z_vec on x_vec!')
             z_vec -= (x_vec * z_vec) * x_vec
             z_vec.normalize()
         self._data[:, 0] = x_vec._data
-        self._data[:, 2] = z_vec._data
         self._data[:, 1] = z_vec.cross(x_vec)._data
+        self._data[:, 2] = z_vec._data
 
     def get_quaternion(self):
         """Return a quaternion representing this orientation."""
@@ -647,7 +655,19 @@ def _test():
 
 
 def _test_to_euler():
-    ang = (0.5, 0.2, 0.1)
+    ang = (0.1, 0.5, 0.2)
     enc = 'ZYZ'
     o = Orientation.new_euler(ang, enc)
-    print(np.all(o.to_euler(enc) == np.array(ang)))
+    o_ang = o.to_euler(enc)
+    oo = Orientation.new_euler(o_ang, enc)
+    oo_ang = oo.to_euler(enc)
+    print(np.allclose(o_ang, oo_ang))
+
+
+def _test_from_nn():
+    o = Orientation.new_from_xy((1, 0, 0), (1, 1, 0))
+    if o.vec_y != m3d.Vector.ey or o.vec_x != m3d.Vector.ex:
+        print('Test-Error in new_from_xy')
+    o = Orientation.new_from_xz((1, 0, 0), (1, 0, 1))
+    if o.vec_z != m3d.Vector.ez or o.vec_x != m3d.Vector.ex:
+        print('Test-Error in new_from_xz')
